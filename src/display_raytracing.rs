@@ -1,9 +1,11 @@
 use sdl2::{pixels::Color, rect::Point, render::Canvas, video::Window};
 
-use crate::{line::Line, parameters::Parameters, position::Position, sphere::Sphere};
+use crate::{
+    line::Line, observer::Observer, parameters::Parameters, position::Position, sphere::Sphere,
+};
 
 pub fn display(
-    observer: &Sphere,
+    observer: &Observer,
     vector: &Vec<Sphere>,
     parameters: &Parameters,
     canvas: &mut Canvas<Window>,
@@ -11,36 +13,35 @@ pub fn display(
     canvas.set_draw_color(Color::RGB(0, 0, 0));
     canvas.clear();
 
-    for z in 0..parameters.h {
-        for y in 0..parameters.w {
+    for z in -parameters.half_h..parameters.half_h {
+        for y in -parameters.half_w..parameters.half_w {
             let line = Line {
-                p1: &observer.p,
+                p1: &observer.pos,
                 p2: &Position {
-                    x: observer.p.x,
-                    y: observer.p.y + (y - (parameters.w / 2)) as f64,
-                    z: observer.p.z + (z - (parameters.h / 2)) as f64,
+                    x: observer.direction.x,
+                    y: observer.direction.y + y as f64,
+                    z: observer.direction.z + z as f64,
                 },
             };
             for sphere in vector.iter() {
-                let dist = line.dist_point(&sphere.p);
-                if dist <= sphere.radius {
+                let dist = line.dist_point(&sphere.pos);
+                if dist > 0.0 && dist <= sphere.radius {
                     canvas.set_draw_color(sphere.color);
-                    let res = canvas.draw_point(Point::new(y as i32, z as i32));
+                    // println!(
+                    //     "x: {xv}\ny: {yv}",
+                    //     xv = y + parameters.half_w,
+                    //     yv = z + parameters.half_h,
+                    // );
+                    let res =
+                        canvas.draw_point(Point::new(y + parameters.half_w, z + parameters.half_h));
                     if res.is_err() {
                         println!("{}", res.unwrap_err());
                     }
                 }
             }
         }
+        // println!();
     }
-
-    // for s in vector.iter() {
-    //     canvas.set_draw_color(s.color);
-    //     let res = canvas.draw_point(Point::new((s.x - s.radius) as i32, (s.y - s.radius) as i32));
-    //     if res.is_err() {
-    //         println!("{}", res.unwrap_err());
-    //     }
-    // }
 
     canvas.present();
 }

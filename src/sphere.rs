@@ -7,28 +7,30 @@ fn float_to_color(f: f64) -> Color {
 }
 
 pub struct Sphere {
-    pub p: Position,
+    pub pos: Position,
     pub v_x: f64,
     pub v_y: f64,
+    pub v_z: f64,
     pub radius: f64,
     pub color: Color,
 }
 
 impl Sphere {
-    pub fn good_ol_vector(size: u32) -> Vec<Sphere> {
+    pub fn good_ol_vector(parameters: &Parameters) -> Vec<Sphere> {
         let mut v: Vec<Sphere> = vec![];
-        for i in 0..size {
-            let progress = i as f64 / size as f64;
+        for i in 0..parameters.sphere_count {
+            let progress = i as f64 / parameters.sphere_count as f64;
             v.push(Sphere {
-                p: Position {
-                    x: 25.0 + (i as f64 * 50.0),
-                    y: 25.0 + (i as f64 * 50.0),
-                    z: 25.0 + (i as f64 * 50.0),
+                pos: Position {
+                    x: 10.0,
+                    y: 0.0,
+                    z: 0.0,
                 },
-                v_x: progress * 0.5,
+                v_x: 0.0,
+                // v_y: progress * 0.5,
                 v_y: 0.0,
-                radius: progress * 15.0,
-                // radius: 0.0,
+                v_z: 0.0,
+                radius: 1.0,
                 color: float_to_color(progress),
             })
         }
@@ -37,30 +39,27 @@ impl Sphere {
 
     // TODO: Optimize... Method too slow because conversion to f64 is bad
     pub fn physics(&mut self, params: &Parameters) {
-        let mul = 1.0;
-        let div = 1.0;
+        self.v_z += params.g;
 
-        self.v_y += params.g;
+        self.pos.y += self.v_y;
+        self.pos.z += self.v_z;
 
-        self.p.x += self.v_x;
-        self.p.y += self.v_y;
-
-        let w = params.w as f64;
-        if self.p.x - self.radius < 0.0 {
-            self.v_x = self.v_x.abs();
-            self.p.x = self.p.x.abs();
-        } else if self.p.x + self.radius > w {
-            self.v_x = -self.v_x.abs();
-            self.p.x = w - (self.p.x - w).abs();
+        let w = params.half_w as f64;
+        if self.pos.y - self.radius < -w {
+            self.v_y = self.v_y.abs();
+            self.pos.y = w - (self.pos.y - w).abs();
+        } else if self.pos.y + self.radius > w {
+            self.v_y = -self.v_y.abs();
+            self.pos.y = w - (self.pos.y - w).abs();
         }
 
-        let h = params.h as f64;
-        if self.p.y - self.radius < 0.0 {
-            self.v_y = self.v_y.abs() / div;
-            self.p.y = self.p.y.abs();
-        } else if self.p.y + self.radius > h {
-            self.v_y = -self.v_y.abs() * mul;
-            self.p.y = h - (self.p.y - h).abs();
+        let h = params.half_h as f64;
+        if self.pos.z - self.radius < h {
+            self.v_z = self.v_z.abs();
+            self.pos.z = h - (self.pos.z - h).abs();
+        } else if self.pos.z + self.radius > h {
+            self.v_z = -self.v_z.abs();
+            self.pos.z = h - (self.pos.z - h).abs();
         }
     }
 }
