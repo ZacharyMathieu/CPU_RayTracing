@@ -23,10 +23,11 @@ impl Sphere {
             v.push(Sphere {
                 pos: Position {
                     x: 40.0,
-                    y: progress * 10.0,
+                    y: parameters.min_y + (progress * parameters.max_y),
                     z: 0.0,
                 },
-                v_x: -0.1 + (progress * 0.2),
+                // v_x: -0.1 + (progress * 0.2),
+                v_x: 0.0,
                 // v_y: progress * 0.5,
                 v_y: 0.0,
                 v_z: 0.0,
@@ -45,24 +46,28 @@ impl Sphere {
         self.pos.y += self.v_y;
         self.pos.z += self.v_z;
 
-        // let w = params.half_w as f64;
-        // if self.pos.y - self.radius < -w {
-        //     self.v_y = self.v_y.abs();
-        //     self.pos.y = w - (self.pos.y - w).abs();
-        // } else if self.pos.y + self.radius > w {
-        //     self.v_y = -self.v_y.abs();
-        //     self.pos.y = w - (self.pos.y - w).abs();
-        // }
+        if self.pos.x - self.radius < params.min_x {
+            self.v_x = self.v_x.abs();
+            self.pos.x = params.min_x - (self.pos.x - params.min_x).abs() + self.radius;
+        } else if self.pos.x + self.radius > params.max_x {
+            self.v_x = -self.v_x.abs();
+            self.pos.x = params.max_x - (self.pos.x - params.max_x).abs() - self.radius;
+        }
 
-        // let h = params.half_h as f64;
-        // if self.pos.z - self.radius < h {
-        //     // self.v_z = self.v_z.abs();
-        //     // self.pos.z = h - (self.pos.z - h).abs();
-        //     self.pos.z += h;
-        // } else if self.pos.z + self.radius > h {
-        //     // self.v_z = -self.v_z.abs();
-        //     // self.pos.z = h - (self.pos.z - h).abs();
-        //     self.pos.z -= h;
-        // }
+        if self.pos.y - self.radius < params.min_y {
+            self.v_y = self.v_y.abs();
+            self.pos.y = params.min_y - (self.pos.y - params.min_y).abs() + self.radius;
+        } else if self.pos.y + self.radius > params.max_y {
+            self.v_y = -self.v_y.abs();
+            self.pos.y = params.max_y - (self.pos.y - params.max_y).abs() - self.radius;
+        }
+
+        if self.pos.z - self.radius < params.min_z {
+            self.v_z = self.v_z.abs();
+            self.pos.z = params.min_z - (self.pos.z - params.min_z).abs() + self.radius;
+        } else if self.pos.z + self.radius > params.max_z {
+            self.v_z = -self.v_z.abs();
+            self.pos.z = params.max_z - (self.pos.z - params.max_z).abs() - self.radius;
+        }
     }
 }

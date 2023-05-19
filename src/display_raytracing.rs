@@ -45,11 +45,6 @@ pub fn display(
 
             if factor != -1.0 {
                 canvas.set_draw_color(color);
-                // println!(
-                //     "x: {xv}\ny: {yv}",
-                //     xv = y + parameters.half_w,
-                //     yv = z + parameters.half_h,
-                // );
                 let res = canvas.draw_point(Point::new(
                     y + (parameters.h_rays as i32 / 2),
                     z + (parameters.w_rays as i32 / 2),
@@ -59,7 +54,6 @@ pub fn display(
                 }
             }
         }
-        // println!();
     }
 
     canvas.present();
