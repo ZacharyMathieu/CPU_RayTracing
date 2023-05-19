@@ -26,7 +26,7 @@ fn main() {
     let mut sphere_vector = Sphere::good_ol_vector(&params);
 
     // init observer
-    let observer = Observer::default();
+    let observer = Observer::default(&params);
 
     // init video subsystem
     let sdl_context = sdl2::init().unwrap();
@@ -36,8 +36,8 @@ fn main() {
     let window = video_subsystem
         .window(
             "Example",
-            (params.w as f32 * params.display_scale) as u32,
-            (params.h as f32 * params.display_scale) as u32,
+            (params.w_rays as f32 * params.display_scale) as u32,
+            (params.h_rays as f32 * params.display_scale) as u32,
         )
         .build()
         .unwrap();

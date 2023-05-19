@@ -1,8 +1,7 @@
 pub struct Parameters {
-    pub w: u32,
-    pub h: u32,
-    pub half_w: i32,
-    pub half_h: i32,
+    pub w_rays: u32,
+    pub h_rays: u32,
+    pub observer_look_vector_distance: f64,
     pub sphere_count: u32,
     pub g: f64,
     pub display_scale: f32,
@@ -11,19 +10,17 @@ pub struct Parameters {
 }
 
 impl Parameters {
+    // Horrible way to make a factory
     pub fn default() -> Parameters {
-        let w: u32 = 25;
-        let h: u32 = 25;
         return Parameters {
-            w: w,
-            h: h,
-            half_w: w as i32 / 2,
-            half_h: h as i32 / 2,
-            sphere_count: 1,
+            w_rays: 200,
+            h_rays: 200,
+            observer_look_vector_distance: 20.0,
+            sphere_count: 10,
             g: 0.0,
-            display_scale: 20.0,
+            display_scale: 4.0,
             physics: true,
-            frame_period_ms: 10,
+            frame_period_ms: 0,
         };
     }
 }

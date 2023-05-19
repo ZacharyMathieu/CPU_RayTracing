@@ -6,18 +6,16 @@ pub struct Line<'a> {
 }
 
 impl<'a> Line<'a> {
-    pub fn dist_point(&self, p0: &Position) -> f64 {
-        let factor =
-            -((self.p1.x - p0.x) * (self.p2.x - self.p1.x)) / (self.p2.x - self.p1.x).powf(2.0);
+    pub fn dist_point(&self, p0: &Position) -> (f64, f64) {
+        // let factor =
+        //     -((self.p1.x - p0.x) * (self.p2.x - self.p1.x)) / (self.p2.x - self.p1.x).powf(2.0);
+        let factor = -(((self.p1 - p0).dot_product(&(self.p2 - self.p1)))
+            / (self.p2 - self.p1).len_squared());
         let closest_point = Position {
             x: self.p1.x + ((self.p2.x - self.p1.x) * factor),
             y: self.p1.y + ((self.p2.y - self.p1.y) * factor),
             z: self.p1.z + ((self.p2.z - self.p1.z) * factor),
         };
-        if factor < 0.0 {
-            return -closest_point.dist(p0);
-        } else {
-            return closest_point.dist(p0);
-        }
+        return (closest_point.dist(p0), factor);
     }
 }
