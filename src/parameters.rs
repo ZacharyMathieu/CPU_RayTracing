@@ -19,6 +19,7 @@ pub struct Parameters {
     pub max_y: f64,
     pub min_z: f64,
     pub max_z: f64,
+    pub min_pixel_factor: f64,
 }
 
 impl Parameters {
@@ -29,8 +30,8 @@ impl Parameters {
             max_hor_ray_value: 50,
             min_ver_ray_value: -50,
             max_ver_ray_value: 50,
-            observer_look_vector_distance: 100.0,
-            sphere_count: 5,
+            observer_look_vector_distance: 50.0,
+            sphere_count: 3,
             g: 0.0,
             display_scale: 5.0,
             physics: true,
@@ -45,6 +46,7 @@ impl Parameters {
             max_y: 100.0,
             min_z: -100.0,
             max_z: 100.0,
+            min_pixel_factor: 0.5,
         };
     }
 }

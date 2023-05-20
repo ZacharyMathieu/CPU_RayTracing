@@ -1,13 +1,17 @@
 use sdl2::{pixels::Color, rect::Point, render::Canvas, video::Window};
 
-use crate::{observer::Observer, ray::Ray, sphere::Sphere};
+use crate::{observer::Observer, parameters::Parameters, ray::Ray, sphere::Sphere};
 
 fn get_factor_from_point_to_sphere_edge(r: &Ray, s: &Sphere, d: f64) -> f64 {
     return (s.radius.powf(2.0) - d.powf(2.0)).sqrt() / r.l;
 }
 
-fn get_adjusted_sphere_color_from_distance(s: &Sphere, d: f64) -> Color {
-    let factor = (1.0 - (d / s.radius)).min(1.0).max(0.25);
+fn get_adjusted_sphere_color_from_distance(s: &Sphere, d: f64, min_factor: f64) -> Color {
+    fn f(x: f64) -> f64 {
+        return 1.0 - x;
+    }
+
+    let factor = ((1.0 - min_factor) / f(0.0)) * f(d / s.radius) + min_factor;
 
     return Color::RGB(
         (s.color.r as f64 * factor) as u8,
@@ -16,7 +20,12 @@ fn get_adjusted_sphere_color_from_distance(s: &Sphere, d: f64) -> Color {
     );
 }
 
-pub fn display(observer: &Observer, vector: &Vec<Sphere>, canvas: &mut Canvas<Window>) {
+pub fn display(
+    observer: &Observer,
+    vector: &Vec<Sphere>,
+    parameters: &Parameters,
+    canvas: &mut Canvas<Window>,
+) {
     let mut color: Color = Color::RGB(0, 0, 0);
 
     canvas.set_draw_color(color);
@@ -35,7 +44,11 @@ pub fn display(observer: &Observer, vector: &Vec<Sphere>, canvas: &mut Canvas<Wi
 
                 if factor == -1.0 || vector_factor > factor {
                     factor = adjusted_vector_factor;
-                    color = get_adjusted_sphere_color_from_distance(sphere, sphere_dist);
+                    color = get_adjusted_sphere_color_from_distance(
+                        sphere,
+                        sphere_dist,
+                        parameters.min_pixel_factor,
+                    );
                 }
             }
         }
