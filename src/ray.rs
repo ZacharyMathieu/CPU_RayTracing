@@ -68,12 +68,17 @@ impl Ray {
             - 2.0 * (s.pos.x * self.p1.x + s.pos.y * self.p1.y + s.pos.z * self.p1.z)
             - squared(s.radius);
 
+        // Guard clause :D
         let d = squared(b) - 4.0 * a * c;
         if d < 0.0 {
             return f64::NAN;
-        } else {
-            let ret = (b + f64::sqrt(d)) / (2.0 * a);
-            return ret;
         }
+
+        let ret = (b + f64::sqrt(d)) / (2.0 * a);
+        if ret > 0.0 {
+            return f64::NAN;
+        }
+
+        return ret;
     }
 }

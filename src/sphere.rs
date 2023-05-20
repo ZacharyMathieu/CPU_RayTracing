@@ -1,3 +1,4 @@
+use rand::Rng;
 use sdl2::pixels::Color;
 
 use crate::{parameters::Parameters, position::Position};
@@ -16,20 +17,23 @@ pub struct Sphere {
 }
 
 impl Sphere {
-    pub fn good_ol_vector(parameters: &Parameters) -> Vec<Sphere> {
+    pub fn good_ol_vector(
+        parameters: &Parameters,
+        rng: &mut rand::prelude::ThreadRng,
+    ) -> Vec<Sphere> {
         let mut v: Vec<Sphere> = vec![];
         for i in 0..parameters.sphere_count {
             let progress = i as f64 / (parameters.sphere_count - 1) as f64;
             v.push(Sphere {
                 pos: Position {
-                    x: 20.0,
-                    y: parameters.min_y + (progress * parameters.max_y),
-                    z: 0.0,
+                    x: parameters.observer_look_vector_distance,
+                    y: rng.gen_range(parameters.min_y, parameters.max_y),
+                    z: rng.gen_range(parameters.min_z, parameters.max_z),
                 },
-                v_x: -0.1 + (progress * 0.2),
-                v_y: -0.1 + (progress * 0.2),
-                v_z: 0.1 - (progress * 0.2),
-                radius: 1.0 + (progress * 4.0),
+                v_x: rng.gen_range(-0.1, 0.1),
+                v_y: rng.gen_range(-0.1, 0.1),
+                v_z: rng.gen_range(-0.1, 0.1),
+                radius: rng.gen_range(0.1, 10.0),
                 color: float_to_color(progress),
             })
         }

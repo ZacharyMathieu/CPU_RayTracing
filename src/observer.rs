@@ -54,4 +54,22 @@ impl Observer {
         self.ver_angle += angle;
         self.generate_rays(parameters);
     }
+
+    pub fn move_forward(&mut self, dist: f64, parameters: &Parameters) {
+        self.pos.x += self.hor_angle.cos() * self.ver_angle.cos() * dist;
+        self.pos.y += self.hor_angle.sin() * dist;
+        self.pos.z += self.ver_angle.sin() * dist;
+        self.generate_rays(parameters);
+    }
+
+    pub fn move_hor(&mut self, dist: f64, parameters: &Parameters) {
+        self.pos.x -= self.hor_angle.sin() * dist;
+        self.pos.y += self.hor_angle.cos() * dist;
+        self.generate_rays(parameters);
+    }
+
+    pub fn move_ver(&mut self, dist: f64, parameters: &Parameters) {
+        self.pos.z += dist;
+        self.generate_rays(parameters);
+    }
 }

@@ -1,4 +1,5 @@
 extern crate sdl2;
+use rand::rngs::ThreadRng;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use std::{thread, time};
@@ -22,8 +23,11 @@ fn main() {
     // init params
     let params: Parameters = Parameters::default();
 
+    // init RNG
+    let mut rng: ThreadRng = rand::thread_rng();
+
     // init sphere vector
-    let mut sphere_vector = Sphere::good_ol_vector(&params);
+    let mut sphere_vector = Sphere::good_ol_vector(&params, &mut rng);
 
     // init observer
     let mut observer = Observer::default(&params);
@@ -78,6 +82,34 @@ fn main() {
                     keycode: Some(Keycode::Right),
                     ..
                 } => observer.turn_hor(params.observer_look_right_angle, &params),
+                Event::KeyDown {
+                    keycode: Some(Keycode::W),
+                    ..
+                } => observer.move_forward(params.observer_move_forward_distance, &params),
+                Event::KeyDown {
+                    keycode: Some(Keycode::S),
+                    ..
+                } => observer.move_forward(params.observer_move_backward_distance, &params),
+                Event::KeyDown {
+                    keycode: Some(Keycode::A),
+                    ..
+                } => observer.move_hor(params.observer_move_left_distance, &params),
+                Event::KeyDown {
+                    keycode: Some(Keycode::D),
+                    ..
+                } => observer.move_hor(params.observer_move_right_distance, &params),
+                Event::KeyDown {
+                    keycode: Some(Keycode::Space),
+                    ..
+                } => observer.move_ver(params.observer_move_up_distance, &params),
+                Event::KeyDown {
+                    keycode: Some(Keycode::LShift),
+                    ..
+                } => observer.move_ver(params.observer_move_down_distance, &params),
+                Event::KeyDown {
+                    keycode: Some(Keycode::R),
+                    ..
+                } => observer = Observer::default(&params),
                 _ => {}
             }
         }

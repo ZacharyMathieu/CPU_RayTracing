@@ -13,12 +13,26 @@ pub struct Parameters {
     pub observer_look_down_angle: f64,
     pub observer_look_left_angle: f64,
     pub observer_look_right_angle: f64,
+    pub observer_move_forward_distance: f64,
+    pub observer_move_backward_distance: f64,
+    pub observer_move_right_distance: f64,
+    pub observer_move_left_distance: f64,
+    pub observer_move_up_distance: f64,
+    pub observer_move_down_distance: f64,
     pub min_x: f64,
     pub max_x: f64,
     pub min_y: f64,
     pub max_y: f64,
     pub min_z: f64,
     pub max_z: f64,
+    pub min_vx: f64,
+    pub max_vx: f64,
+    pub min_vy: f64,
+    pub max_vy: f64,
+    pub min_vz: f64,
+    pub max_vz: f64,
+    pub min_sphere_radius: f64,
+    pub max_sphere_radius: f64,
     pub min_pixel_factor: f64,
     pub fog_factor: f64,
 }
@@ -27,7 +41,10 @@ impl Parameters {
     pub fn default() -> Parameters {
         let half_width: i32 = 150;
         let half_height: i32 = 75;
-        let physics_bounds_value = 25.0;
+        let look_angle = 0.1;
+        let move_distance = 1.0;
+        let physics_bounds_value = 30.0;
+        let speed_bounds_value = 0.25;
 
         return Parameters {
             min_hor_ray_value: -half_width,
@@ -36,21 +53,35 @@ impl Parameters {
             max_ver_ray_value: half_height,
             observer_look_vector_distance: 150.0,
             sphere_count: 50,
-            g: 0.0,
+            g: 0.05,
             display_scale: 4.0,
             physics: true,
             frame_period_ms: 0,
-            observer_look_up_angle: -0.1,
-            observer_look_down_angle: 0.1,
-            observer_look_left_angle: -0.1,
-            observer_look_right_angle: 0.1,
-            min_x: 0.0,
+            observer_look_up_angle: -look_angle,
+            observer_look_down_angle: look_angle,
+            observer_look_left_angle: -look_angle,
+            observer_look_right_angle: look_angle,
+            observer_move_forward_distance: move_distance,
+            observer_move_backward_distance: -move_distance,
+            observer_move_right_distance: move_distance,
+            observer_move_left_distance: -move_distance,
+            observer_move_up_distance: -move_distance,
+            observer_move_down_distance: move_distance,
+            min_x: -physics_bounds_value,
             max_x: physics_bounds_value,
             min_y: -physics_bounds_value,
             max_y: physics_bounds_value,
             min_z: -physics_bounds_value,
             max_z: physics_bounds_value,
-            min_pixel_factor: 0.5,
+            min_vx: -speed_bounds_value,
+            max_vx: speed_bounds_value,
+            min_vy: -speed_bounds_value,
+            max_vy: speed_bounds_value,
+            min_vz: -speed_bounds_value,
+            max_vz: speed_bounds_value,
+            min_sphere_radius: 0.5,
+            max_sphere_radius: 5.0,
+            min_pixel_factor: 0.2,
             fog_factor: 5.0,
         };
     }

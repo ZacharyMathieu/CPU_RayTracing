@@ -8,7 +8,7 @@ fn get_adjusted_factor_from_sphere_radius(factor: f64) -> f64 {
 
 fn get_adjusted_sphere_color_from_factor(c: &Color, factor: f64, parameters: &Parameters) -> Color {
     fn f(x: f64, fog: f64) -> f64 {
-        return 1.0 - (x * fog);
+        return 1.0 - (x * fog).min(1.0);
     }
 
     let factor = ((1.0 - parameters.min_pixel_factor) / f(0.0, parameters.fog_factor))
