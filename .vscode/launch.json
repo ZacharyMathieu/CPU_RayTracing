@@ -1,0 +1,45 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'cpu_ray_tracing'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=cpu_ray_tracing",
+                    "--package=cpu_ray_tracing"
+                ],
+                "filter": {
+                    "name": "cpu_ray_tracing",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'cpu_ray_tracing'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=cpu_ray_tracing",
+                    "--package=cpu_ray_tracing"
+                ],
+                "filter": {
+                    "name": "cpu_ray_tracing",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
