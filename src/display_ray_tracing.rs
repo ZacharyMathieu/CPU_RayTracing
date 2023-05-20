@@ -45,7 +45,6 @@ pub fn display(
         }
 
         if !factor.is_nan() {
-            // canvas.set_draw_color(*color);
             canvas.set_draw_color(get_adjusted_sphere_color_from_factor(
                 color,
                 get_adjusted_factor_from_sphere_radius(factor),

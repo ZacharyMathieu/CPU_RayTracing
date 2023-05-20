@@ -23,7 +23,6 @@ pub struct Parameters {
 }
 
 impl Parameters {
-    // Horrible way to make a factory
     pub fn default() -> Parameters {
         let half_width: i32 = 150;
         let half_height: i32 = 75;

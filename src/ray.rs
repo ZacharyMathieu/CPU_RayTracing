@@ -1,5 +1,9 @@
 use crate::{position::Position, sphere::Sphere};
 
+fn squared(f: f64) -> f64 {
+    return f * f;
+}
+
 pub struct Ray {
     pub p1: Position,
     pub p2: Position,
@@ -46,23 +50,25 @@ impl Ray {
     }
 
     pub fn factor_from_point(&self, s: &Sphere) -> f64 {
-        let x1: f64 = self.p1.x;
-        let y1: f64 = self.p1.y;
-        let z1: f64 = self.p1.z;
-        let x2: f64 = self.p2.x;
-        let y2: f64 = self.p2.y;
-        let z2: f64 = self.p2.z;
-        let x3: f64 = s.pos.x;
-        let y3: f64 = s.pos.y;
-        let z3: f64 = s.pos.z;
-        let a: f64 = (x2 - x1).powf(2.0) + (y2 - y1).powf(2.0) + (z2 - z1).powf(2.0);
-        let b: f64 = 2.0 * ((x2 - x1) * (x1 - x3) + (y2 - y1) * (y1 - y3) + (z2 - z1) * (z1 - z3));
-        let c: f64 =
-            x3.powf(2.0) + y3.powf(2.0) + z3.powf(2.0) + x1.powf(2.0) + y1.powf(2.0) + z1.powf(2.0)
-                - 2.0 * (x3 * x1 + y3 * y1 + z3 * z1)
-                - s.radius.powf(2.0);
+        // These are the parts of a quadratic equation given by substituting
+        // the values of the line (ray) into the equation for the given sphere
+        let a: f64 = squared(self.p2.x - self.p1.x)
+            + squared(self.p2.y - self.p1.y)
+            + squared(self.p2.z - self.p1.z);
+        let b: f64 = 2.0
+            * ((self.p2.x - self.p1.x) * (self.p1.x - s.pos.x)
+                + (self.p2.y - self.p1.y) * (self.p1.y - s.pos.y)
+                + (self.p2.z - self.p1.z) * (self.p1.z - s.pos.z));
+        let c: f64 = squared(s.pos.x)
+            + squared(s.pos.y)
+            + squared(s.pos.z)
+            + squared(self.p1.x)
+            + squared(self.p1.y)
+            + squared(self.p1.z)
+            - 2.0 * (s.pos.x * self.p1.x + s.pos.y * self.p1.y + s.pos.z * self.p1.z)
+            - squared(s.radius);
 
-        let d = b.powf(2.0) - 4.0 * a * c;
+        let d = squared(b) - 4.0 * a * c;
         if d < 0.0 {
             return f64::NAN;
         } else {
