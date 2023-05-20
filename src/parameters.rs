@@ -25,29 +25,31 @@ pub struct Parameters {
 impl Parameters {
     // Horrible way to make a factory
     pub fn default() -> Parameters {
-        let ray_value = 50;
+        let half_width: i32 = 150;
+        let half_height: i32 = 75;
+        let physics_bounds_value = 50.0;
 
         return Parameters {
-            min_hor_ray_value: -ray_value,
-            max_hor_ray_value: ray_value,
-            min_ver_ray_value: -ray_value,
-            max_ver_ray_value: ray_value,
-            observer_look_vector_distance: ray_value as f64,
-            sphere_count: 2,
+            min_hor_ray_value: -half_width,
+            max_hor_ray_value: half_width,
+            min_ver_ray_value: -half_height,
+            max_ver_ray_value: half_height,
+            observer_look_vector_distance: 75.0,
+            sphere_count: 5,
             g: 0.0,
-            display_scale: 5.0,
+            display_scale: 4.0,
             physics: true,
             frame_period_ms: 0,
             observer_look_up_angle: -0.1,
             observer_look_down_angle: 0.1,
             observer_look_left_angle: -0.1,
             observer_look_right_angle: 0.1,
-            min_x: -100.0,
-            max_x: 100.0,
-            min_y: -100.0,
-            max_y: 100.0,
-            min_z: -100.0,
-            max_z: 100.0,
+            min_x: -physics_bounds_value,
+            max_x: physics_bounds_value,
+            min_y: -physics_bounds_value,
+            max_y: physics_bounds_value,
+            min_z: -physics_bounds_value,
+            max_z: physics_bounds_value,
             min_pixel_factor: 0.5,
         };
     }
