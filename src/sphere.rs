@@ -36,7 +36,6 @@ impl Sphere {
         return v;
     }
 
-    // TODO: Optimize... Method too slow because conversion to f64 is bad
     pub fn physics(&mut self, params: &Parameters) {
         self.v_z += params.g;
 
