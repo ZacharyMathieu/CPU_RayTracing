@@ -6,12 +6,14 @@ fn get_adjusted_factor_from_sphere_radius(factor: f64) -> f64 {
     return factor.abs().min(1.0);
 }
 
-fn get_adjusted_sphere_color_from_factor(c: &Color, factor: f64, min_factor: f64) -> Color {
-    fn f(x: f64) -> f64 {
-        return 1.0 - x;
+fn get_adjusted_sphere_color_from_factor(c: &Color, factor: f64, parameters: &Parameters) -> Color {
+    fn f(x: f64, fog: f64) -> f64 {
+        return 1.0 - (x * fog);
     }
 
-    let factor = ((1.0 - min_factor) / f(0.0)) * f(factor) + min_factor;
+    let factor = ((1.0 - parameters.min_pixel_factor) / f(0.0, parameters.fog_factor))
+        * f(factor, parameters.fog_factor)
+        + parameters.min_pixel_factor;
 
     return Color::RGB(
         (c.r as f64 * factor) as u8,
@@ -48,7 +50,7 @@ pub fn display(
             canvas.set_draw_color(get_adjusted_sphere_color_from_factor(
                 color,
                 get_adjusted_factor_from_sphere_radius(factor),
-                parameters.min_pixel_factor,
+                parameters,
             ));
             canvas.draw_point(Point::new(r.x_value, r.y_value)).unwrap();
         }

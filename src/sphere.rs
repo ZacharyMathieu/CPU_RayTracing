@@ -22,14 +22,14 @@ impl Sphere {
             let progress = i as f64 / (parameters.sphere_count - 1) as f64;
             v.push(Sphere {
                 pos: Position {
-                    x: 40.0,
+                    x: 20.0,
                     y: parameters.min_y + (progress * parameters.max_y),
                     z: 0.0,
                 },
-                v_x: 0.0,
+                v_x: -0.1 + (progress * 0.2),
                 v_y: -0.1 + (progress * 0.2),
-                v_z: 0.0,
-                radius: 5.0 + (progress * 10.0),
+                v_z: 0.1 - (progress * 0.2),
+                radius: 1.0 + (progress * 4.0),
                 color: float_to_color(progress),
             })
         }
