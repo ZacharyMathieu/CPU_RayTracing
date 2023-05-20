@@ -1,10 +1,8 @@
 pub struct Parameters {
-    pub min_hor_angle: f64,
-    pub max_hor_angle: f64,
-    pub hor_rays: u32,
-    pub min_ver_angle: f64,
-    pub max_ver_angle: f64,
-    pub ver_rays: u32,
+    pub min_hor_ray_value: i32,
+    pub max_hor_ray_value: i32,
+    pub min_ver_ray_value: i32,
+    pub max_ver_ray_value: i32,
     pub observer_look_vector_distance: f64,
     pub sphere_count: u32,
     pub g: f64,
@@ -27,13 +25,11 @@ impl Parameters {
     // Horrible way to make a factory
     pub fn default() -> Parameters {
         return Parameters {
-            min_hor_angle: -2.0,
-            max_hor_angle: 2.0,
-            hor_rays: 100,
-            min_ver_angle: -2.0,
-            max_ver_angle: 2.0,
-            ver_rays: 100,
-            observer_look_vector_distance: 1.0,
+            min_hor_ray_value: -50,
+            max_hor_ray_value: 50,
+            min_ver_ray_value: -50,
+            max_ver_ray_value: 50,
+            observer_look_vector_distance: 100.0,
             sphere_count: 5,
             g: 0.0,
             display_scale: 5.0,

@@ -36,8 +36,10 @@ fn main() {
     let window = video_subsystem
         .window(
             "Example",
-            (params.hor_rays as f32 * params.display_scale) as u32,
-            (params.ver_rays as f32 * params.display_scale) as u32,
+            ((params.max_hor_ray_value - params.min_hor_ray_value) as f32 * params.display_scale)
+                as u32,
+            ((params.max_ver_ray_value - params.min_ver_ray_value) as f32 * params.display_scale)
+                as u32,
         )
         .build()
         .unwrap();

@@ -21,13 +21,19 @@ impl Ray {
         };
     }
 
-    // pub fn get_p(&self) -> &Position {
-    //     return &self.p;
-    // }
-
-    // pub fn get_d(&self) -> &Position {
-    //     return &self.d;
-    // }
+    pub fn new_turned(
+        p: Position,
+        d: Position,
+        x_value: i32,
+        y_value: i32,
+        hor_angle: f64,
+        ver_angle: f64,
+    ) -> Ray {
+        let mut r = Ray::new(p, d, x_value, y_value);
+        r.turn_hor(hor_angle);
+        r.turn_ver(ver_angle);
+        return r;
+    }
 
     pub fn turn_hor(&mut self, angle: f64) {
         self.d.turn_hor_around(angle, &self.p);
@@ -39,28 +45,17 @@ impl Ray {
         self.vector = self.d - self.p;
     }
 
-    pub fn generate_turned(&self, hor_angle: f64, ver_angle: f64, new_x: i32, new_y: i32) -> Ray {
-        let mut ray = Ray::new(self.p, self.d, new_x, new_y);
+    // pub fn generate_turned(&self, hor_angle: f64, ver_angle: f64, new_x: i32, new_y: i32) -> Ray {
+    //     let mut ray = Ray::new(self.p, self.d, new_x, new_y);
 
-        ray.turn_hor(hor_angle);
-        ray.turn_ver(ver_angle);
+    //     ray.turn_hor(hor_angle);
+    //     ray.turn_ver(ver_angle);
 
-        return ray;
-    }
+    //     return ray;
+    // }
 
     pub fn distance_from_point(&self, p: &Position) -> (f64, f64) {
-        // let factor =
-        //     -(((self.p - *p).dot_product(&(self.d - self.p))) / (self.d - self.p).len_squared());
-        // let closest_point = Position {
-        //     x: self.p.x + ((self.d.x - self.p.x) * factor),
-        //     y: self.p.y + ((self.d.y - self.p.y) * factor),
-        //     z: self.p.z + ((self.d.z - self.p.z) * factor),
-        // };
-        // return (closest_point.dist(p), factor);
-
         let ap = *p - self.p;
-        // let cross = ap.holy_cross_product(&self.vector);
-        // let closest_point = cross.mul(1.0 / self.l);
 
         let dot_ap_ab = ap.dot(&self.vector);
         let dot_ab_ab = self.vector.len_squared();

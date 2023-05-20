@@ -26,15 +26,10 @@ impl Sphere {
                     y: parameters.min_y + (progress * parameters.max_y),
                     z: 0.0,
                 },
-                // pos: Position {
-                //     x: 40.0,
-                //     y: 0.0,
-                //     z: 0.0,
-                // },
                 v_x: 0.0,
                 v_y: -0.1 + (progress * 0.2),
                 v_z: 0.0,
-                radius: 10.0 + (progress * 20.0),
+                radius: 5.0 + (progress * 10.0),
                 color: float_to_color(progress),
             })
         }

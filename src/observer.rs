@@ -1,27 +1,22 @@
 use crate::{parameters::Parameters, position::Position, ray::Ray};
 
 pub struct Observer {
-    pub ray: Ray,
+    pub pos: Position,
+    pub hor_angle: f64,
+    pub ver_angle: f64,
     pub rays: Vec<Ray>,
 }
 
 impl Observer {
     pub fn default(parameters: &Parameters) -> Observer {
         let mut obs = Observer {
-            ray: Ray::new(
-                Position {
-                    x: 0.0,
-                    y: 0.0,
-                    z: 0.0,
-                },
-                Position {
-                    x: parameters.observer_look_vector_distance,
-                    y: 0.0,
-                    z: 0.0,
-                },
-                0,
-                0,
-            ),
+            pos: Position {
+                x: 0.0,
+                y: 0.0,
+                z: 0.0,
+            },
+            hor_angle: 0.0,
+            ver_angle: 0.0,
             rays: Vec::new(),
         };
         obs.generate_rays(parameters);
@@ -31,36 +26,32 @@ impl Observer {
     fn generate_rays(&mut self, parameters: &Parameters) {
         self.rays.clear();
 
-        let hor_step = (parameters.max_hor_angle - parameters.min_hor_angle)
-            / (parameters.hor_rays - 1) as f64;
-        let ver_step = (parameters.max_ver_angle - parameters.min_ver_angle)
-            / (parameters.ver_rays - 1) as f64;
-
-        let mut hor_angle: f64 = parameters.min_hor_angle;
-        let mut ver_angle: f64;
-
-        for x in 0..parameters.hor_rays as i32 {
-            ver_angle = parameters.min_ver_angle;
-            for y in 0..parameters.ver_rays as i32 {
-                self.rays.push(self.ray.generate_turned(
-                    hor_angle.clone(),
-                    ver_angle.clone(),
-                    x,
-                    y,
-                ));
-                ver_angle += ver_step;
+        for x in parameters.min_hor_ray_value..parameters.max_hor_ray_value as i32 {
+            for y in parameters.min_ver_ray_value..parameters.max_ver_ray_value as i32 {
+                let r = Ray::new_turned(
+                    self.pos,
+                    Position {
+                        x: parameters.observer_look_vector_distance,
+                        y: x as f64,
+                        z: y as f64,
+                    },
+                    x - parameters.min_hor_ray_value,
+                    y - parameters.min_ver_ray_value,
+                    self.hor_angle,
+                    self.ver_angle,
+                );
+                self.rays.push(r);
             }
-            hor_angle += hor_step;
         }
     }
 
     pub fn turn_hor(&mut self, angle: f64, parameters: &Parameters) {
-        self.ray.turn_hor(angle);
+        self.hor_angle += angle;
         self.generate_rays(parameters);
     }
 
     pub fn turn_ver(&mut self, angle: f64, parameters: &Parameters) {
-        self.ray.turn_ver(angle);
+        self.ver_angle += angle;
         self.generate_rays(parameters);
     }
 }

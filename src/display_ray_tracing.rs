@@ -2,18 +2,12 @@ use sdl2::{pixels::Color, rect::Point, render::Canvas, video::Window};
 
 use crate::{observer::Observer, ray::Ray, sphere::Sphere};
 
-// fn adjust_point_to_radius(r: &Ray, p: &Position, s: &Sphere, d: f64) -> Position {
-//     return *p
-//         - (r.d
-//             .mul((s.radius.powf(2.0) - d.powf(2.0)).sqrt() / r.l));
-// }
-
 fn get_factor_from_point_to_sphere_edge(r: &Ray, s: &Sphere, d: f64) -> f64 {
     return (s.radius.powf(2.0) - d.powf(2.0)).sqrt() / r.l;
 }
 
 fn get_adjusted_sphere_color_from_distance(s: &Sphere, d: f64) -> Color {
-    let factor = (1.0 - (d / s.radius)).min(1.0);
+    let factor = (1.0 - (d / s.radius)).min(1.0).max(0.25);
 
     return Color::RGB(
         (s.color.r as f64 * factor) as u8,
