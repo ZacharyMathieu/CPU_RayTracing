@@ -25,13 +25,15 @@ pub struct Parameters {
 impl Parameters {
     // Horrible way to make a factory
     pub fn default() -> Parameters {
+        let ray_value = 50;
+
         return Parameters {
-            min_hor_ray_value: -50,
-            max_hor_ray_value: 50,
-            min_ver_ray_value: -50,
-            max_ver_ray_value: 50,
-            observer_look_vector_distance: 50.0,
-            sphere_count: 3,
+            min_hor_ray_value: -ray_value,
+            max_hor_ray_value: ray_value,
+            min_ver_ray_value: -ray_value,
+            max_ver_ray_value: ray_value,
+            observer_look_vector_distance: ray_value as f64,
+            sphere_count: 2,
             g: 0.0,
             display_scale: 5.0,
             physics: true,

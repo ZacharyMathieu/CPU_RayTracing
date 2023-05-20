@@ -13,14 +13,6 @@ impl Position {
             .sqrt();
     }
 
-    pub fn dot(&self, p: &Position) -> f64 {
-        return (self.x * p.x) + (self.y * p.y) + (self.z * p.z);
-    }
-
-    pub fn len_squared(&self) -> f64 {
-        return self.x.powf(2.0) + self.y.powf(2.0) + self.y.powf(2.0);
-    }
-
     pub fn turn_hor_around(&mut self, angle: f64, center: &Position) {
         let dx = self.x - center.x;
         let dy = self.y - center.y;
@@ -39,14 +31,6 @@ impl Position {
 
         self.x = (dx * cos) - (dz * sin) + center.x;
         self.z = (dx * sin) + (dz * cos) + center.z;
-    }
-
-    pub fn mul(&self, c: f64) -> Position {
-        return Position {
-            x: self.x * c,
-            y: self.y * c,
-            z: self.z * c,
-        };
     }
 }
 

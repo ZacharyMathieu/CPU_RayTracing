@@ -1,8 +1,8 @@
-use crate::position::Position;
+use crate::{position::Position, sphere::Sphere};
 
 pub struct Ray {
-    pub p: Position,
-    pub d: Position,
+    pub p1: Position,
+    pub p2: Position,
     vector: Position,
     pub l: f64,
     pub x_value: i32,
@@ -10,12 +10,12 @@ pub struct Ray {
 }
 
 impl Ray {
-    pub fn new(p: Position, d: Position, x_value: i32, y_value: i32) -> Ray {
+    pub fn new(p1: Position, p2: Position, x_value: i32, y_value: i32) -> Ray {
         return Ray {
-            p: p,
-            d: d,
-            vector: d - p,
-            l: p.dist(&d),
+            p1,
+            p2,
+            vector: p2 - p1,
+            l: p1.dist(&p2),
             x_value: x_value,
             y_value: y_value,
         };
@@ -36,33 +36,38 @@ impl Ray {
     }
 
     pub fn turn_hor(&mut self, angle: f64) {
-        self.d.turn_hor_around(angle, &self.p);
-        self.vector = self.d - self.p;
+        self.p2.turn_hor_around(angle, &self.p1);
+        self.vector = self.p2 - self.p1;
     }
 
     pub fn turn_ver(&mut self, angle: f64) {
-        self.d.turn_ver_around(angle, &self.p);
-        self.vector = self.d - self.p;
+        self.p2.turn_ver_around(angle, &self.p1);
+        self.vector = self.p2 - self.p1;
     }
 
-    // pub fn generate_turned(&self, hor_angle: f64, ver_angle: f64, new_x: i32, new_y: i32) -> Ray {
-    //     let mut ray = Ray::new(self.p, self.d, new_x, new_y);
+    pub fn factor_from_point(&self, s: &Sphere) -> f64 {
+        let x1: f64 = self.p1.x;
+        let y1: f64 = self.p1.y;
+        let z1: f64 = self.p1.z;
+        let x2: f64 = self.p2.x;
+        let y2: f64 = self.p2.y;
+        let z2: f64 = self.p2.z;
+        let x3: f64 = s.pos.x;
+        let y3: f64 = s.pos.y;
+        let z3: f64 = s.pos.z;
+        let a: f64 = (x2 - x1).powf(2.0) + (y2 - y1).powf(2.0) + (z2 - z1).powf(2.0);
+        let b: f64 = 2.0 * ((x2 - x1) * (x1 - x3) + (y2 - y1) * (y1 - y3) + (z2 - z1) * (z1 - z3));
+        let c: f64 =
+            x3.powf(2.0) + y3.powf(2.0) + z3.powf(2.0) + x1.powf(2.0) + y1.powf(2.0) + z1.powf(2.0)
+                - 2.0 * (x3 * x1 + y3 * y1 + z3 * z1)
+                - s.radius.powf(2.0);
 
-    //     ray.turn_hor(hor_angle);
-    //     ray.turn_ver(ver_angle);
-
-    //     return ray;
-    // }
-
-    pub fn distance_from_point(&self, p: &Position) -> (f64, f64) {
-        let ap = *p - self.p;
-
-        let dot_ap_ab = ap.dot(&self.vector);
-        let dot_ab_ab = self.vector.len_squared();
-        let factor = dot_ap_ab / dot_ab_ab;
-        let closest_point = self.p + (self.vector.mul(factor));
-
-        let dist = closest_point.dist(p);
-        return (dist, factor);
+        let d = b.powf(2.0) - 4.0 * a * c;
+        if d < 0.0 {
+            return f64::NAN;
+        } else {
+            let ret = (b + f64::sqrt(d)) / (2.0 * a);
+            return ret;
+        }
     }
 }
