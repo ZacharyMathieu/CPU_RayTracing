@@ -49,7 +49,11 @@ impl Ray {
         self.vector = self.p2 - self.p1;
     }
 
-    pub fn factor_from_point(&self, s: &Sphere) -> f64 {
+    pub fn get_position_from_factor(&self, factor: f64) -> Position {
+        return self.p1 + (self.p2.scaled(factor));
+    }
+
+    pub fn factor_distance_from_point(&self, s: &Sphere) -> f64 {
         // These are the parts of a quadratic equation given by substituting
         // the values of the line (ray) into the equation for the given sphere
         let a: f64 = squared(self.p2.x - self.p1.x)
@@ -74,7 +78,9 @@ impl Ray {
             return f64::NAN;
         }
 
-        let ret = (b + f64::sqrt(d)) / (2.0 * a);
+        let ret = (b - f64::sqrt(d)) / (2.0 * a);
+
+        // Remove the points behind the observer
         if ret > 0.0 {
             return f64::NAN;
         }

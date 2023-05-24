@@ -32,6 +32,14 @@ impl Position {
         self.x = (dx * cos) - (dz * sin) + center.x;
         self.z = (dx * sin) + (dz * cos) + center.z;
     }
+
+    pub fn scaled(&self, factor: f64) -> Position {
+        return Position {
+            x: self.x * factor,
+            y: self.y * factor,
+            z: self.z * factor,
+        };
+    }
 }
 
 impl Add for Position {

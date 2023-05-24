@@ -1,3 +1,7 @@
+use sdl2::pixels::Color;
+
+use crate::position::Position;
+
 pub struct Parameters {
     pub min_hor_ray_value: i32,
     pub max_hor_ray_value: i32,
@@ -9,6 +13,7 @@ pub struct Parameters {
     pub display_scale: f32,
     pub physics: bool,
     pub frame_period_ms: u64,
+    pub observer_default_position: Position,
     pub observer_look_up_angle: f64,
     pub observer_look_down_angle: f64,
     pub observer_look_left_angle: f64,
@@ -35,14 +40,16 @@ pub struct Parameters {
     pub max_sphere_radius: f64,
     pub min_pixel_factor: f64,
     pub fog_factor: f64,
+    pub background_color: Color,
+    pub ray_bounce_count: u32,
 }
 
 impl Parameters {
     pub fn default() -> Parameters {
-        let half_width: i32 = 150;
-        let half_height: i32 = 75;
+        let half_width: i32 = 100;
+        let half_height: i32 = 50;
         let look_angle = 0.1;
-        let move_distance = 1.0;
+        let move_distance = 2.0;
         let physics_bounds_value = 30.0;
         let speed_bounds_value = 0.25;
 
@@ -51,12 +58,17 @@ impl Parameters {
             max_hor_ray_value: half_width,
             min_ver_ray_value: -half_height,
             max_ver_ray_value: half_height,
-            observer_look_vector_distance: 150.0,
-            sphere_count: 50,
-            g: 0.05,
+            observer_look_vector_distance: 50.0,
+            sphere_count: 5,
+            g: 0.01,
             display_scale: 4.0,
             physics: true,
-            frame_period_ms: 0,
+            frame_period_ms: 50,
+            observer_default_position: Position {
+                x: -50.0,
+                y: 0.0,
+                z: 0.0,
+            },
             observer_look_up_angle: -look_angle,
             observer_look_down_angle: look_angle,
             observer_look_left_angle: -look_angle,
@@ -79,10 +91,12 @@ impl Parameters {
             max_vy: speed_bounds_value,
             min_vz: -speed_bounds_value,
             max_vz: speed_bounds_value,
-            min_sphere_radius: 0.5,
+            min_sphere_radius: 2.5,
             max_sphere_radius: 5.0,
             min_pixel_factor: 0.2,
-            fog_factor: 5.0,
+            fog_factor: 1.0,
+            background_color: Color::RGB(0, 0, 0),
+            ray_bounce_count: 0,
         };
     }
 }

@@ -10,11 +10,7 @@ pub struct Observer {
 impl Observer {
     pub fn default(parameters: &Parameters) -> Observer {
         let mut obs = Observer {
-            pos: Position {
-                x: 0.0,
-                y: 0.0,
-                z: 0.0,
-            },
+            pos: parameters.observer_default_position,
             hor_angle: 0.0,
             ver_angle: 0.0,
             rays: Vec::new(),
