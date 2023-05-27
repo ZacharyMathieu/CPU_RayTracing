@@ -42,30 +42,31 @@ pub struct Parameters {
     pub fog_factor: f64,
     pub background_color: Color,
     pub ray_bounce_count: u32,
+    pub ray_bounce_color_reflection_factor: f64,
 }
 
 impl Parameters {
     pub fn default() -> Parameters {
-        let half_width: i32 = 100;
-        let half_height: i32 = 50;
-        let look_angle = 0.1;
-        let move_distance = 2.0;
-        let physics_bounds_value = 30.0;
+        let half_width: i32 = 200;
+        let half_height: i32 = 100;
+        let look_angle = 0.05;
+        let move_distance = 0.25;
+        let physics_bounds_value = 20.0;
         let speed_bounds_value = 0.25;
 
         return Parameters {
             min_hor_ray_value: -half_width,
             max_hor_ray_value: half_width,
-            min_ver_ray_value: -half_height,
+            min_ver_ray_value: -half_width,
             max_ver_ray_value: half_height,
-            observer_look_vector_distance: 50.0,
+            observer_look_vector_distance: half_height as f64,
             sphere_count: 5,
-            g: 0.01,
-            display_scale: 4.0,
+            g: 0.001,
+            display_scale: 2.5,
             physics: true,
-            frame_period_ms: 50,
+            frame_period_ms: 0,
             observer_default_position: Position {
-                x: -50.0,
+                x: 0.0,
                 y: 0.0,
                 z: 0.0,
             },
@@ -84,7 +85,7 @@ impl Parameters {
             min_y: -physics_bounds_value,
             max_y: physics_bounds_value,
             min_z: -physics_bounds_value,
-            max_z: physics_bounds_value,
+            max_z: 10.0,
             min_vx: -speed_bounds_value,
             max_vx: speed_bounds_value,
             min_vy: -speed_bounds_value,
@@ -93,10 +94,11 @@ impl Parameters {
             max_vz: speed_bounds_value,
             min_sphere_radius: 2.5,
             max_sphere_radius: 5.0,
-            min_pixel_factor: 0.2,
-            fog_factor: 1.0,
+            min_pixel_factor: 0.5,
+            fog_factor: 5.0,
             background_color: Color::RGB(0, 0, 0),
-            ray_bounce_count: 0,
+            ray_bounce_count: 1,
+            ray_bounce_color_reflection_factor: 0.5,
         };
     }
 }

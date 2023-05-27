@@ -50,7 +50,7 @@ impl Ray {
     }
 
     pub fn get_position_from_factor(&self, factor: f64) -> Position {
-        return self.p1 + (self.p2.scaled(factor));
+        return self.p1 + (self.vector).scaled(factor);
     }
 
     pub fn factor_distance_from_point(&self, s: &Sphere) -> f64 {
@@ -78,13 +78,27 @@ impl Ray {
             return f64::NAN;
         }
 
-        let ret = (b - f64::sqrt(d)) / (2.0 * a);
+        let mut ret = (-b - f64::sqrt(d)) / (2.0 * a);
+
+        if ret < 0.0 {
+            ret = (-b + f64::sqrt(d)) / (2.0 * a);
+        }
 
         // Remove the points behind the observer
-        if ret > 0.0 {
+        if ret < 0.0 {
             return f64::NAN;
         }
 
         return ret;
+    }
+
+    pub fn get_reflection(&self, sphere: &Sphere, intersection_factor: f64) -> Ray {
+        let intersection = self.get_position_from_factor(intersection_factor);
+        let u = self.p2 - sphere.pos;
+        let v = self.p2 - self.p1;
+        let w = u.scaled(u.dot_product(&v) / (self.l * self.l));
+        let direction = self.p2.scaled(2.0) - self.p1 - w.scaled(2.0);
+
+        return Ray::new(direction, intersection, self.x_value, self.y_value);
     }
 }

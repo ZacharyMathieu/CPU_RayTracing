@@ -8,9 +8,16 @@ pub struct Position {
 }
 
 impl Position {
+    pub fn dist_squared(&self, p: &Position) -> f64 {
+        return (self.x - p.x).powf(2.0) + (self.y - p.y).powf(2.0) + (self.z - p.z).powf(2.0);
+    }
+
     pub fn dist(&self, p: &Position) -> f64 {
-        return ((self.x - p.x).powf(2.0) + (self.y - p.y).powf(2.0) + (self.z - p.z).powf(2.0))
-            .sqrt();
+        return self.dist_squared(p).sqrt();
+    }
+
+    pub fn dot_product(&self, p: &Position) -> f64 {
+        return (self.x * p.x) + (self.y * p.y) + (self.z * p.z);
     }
 
     pub fn turn_hor_around(&mut self, angle: f64, center: &Position) {
