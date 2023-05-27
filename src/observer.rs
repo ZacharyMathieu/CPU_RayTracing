@@ -10,7 +10,7 @@ pub struct Observer {
 impl Observer {
     pub fn default(parameters: &Parameters) -> Observer {
         let mut obs = Observer {
-            pos: parameters.observer_default_position,
+            pos: parameters.observer_default_position.clone(),
             hor_angle: 0.0,
             ver_angle: 0.0,
             rays: Vec::new(),
@@ -25,11 +25,12 @@ impl Observer {
         for x in parameters.min_hor_ray_value..parameters.max_hor_ray_value as i32 {
             for y in parameters.min_ver_ray_value..parameters.max_ver_ray_value as i32 {
                 let r = Ray::new_turned(
-                    self.pos,
+                    self.pos.clone(),
                     Position {
                         x: parameters.observer_look_vector_distance,
                         y: x as f64,
                         z: y as f64,
+                        name: format!("observer ray ({x}, {y})"),
                     },
                     x - parameters.min_hor_ray_value,
                     y - parameters.min_ver_ray_value,

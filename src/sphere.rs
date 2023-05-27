@@ -14,6 +14,7 @@ pub struct Sphere {
     pub v_z: f64,
     pub radius: f64,
     pub color: Color,
+    // pub name: String,
 }
 
 impl Sphere {
@@ -22,12 +23,13 @@ impl Sphere {
         rng: &mut rand::prelude::ThreadRng,
     ) -> Vec<Sphere> {
         let mut v: Vec<Sphere> = vec![];
-        // Blue
+
         v.push(Sphere {
             pos: Position {
                 x: 10.0,
                 y: 0.0,
                 z: 0.0,
+                name: "blue".to_string(),
             },
             v_x: 0.0,
             v_y: 0.0,
@@ -35,38 +37,38 @@ impl Sphere {
             radius: 6.0,
             color: Color::RGB(0, 0, 255),
         });
-        // Red
-        v.push(Sphere {
-            pos: Position {
-                x: 10.0,
-                y: -5.0,
-                z: 0.0,
-            },
-            v_x: 0.0,
-            v_y: 0.0,
-            v_z: 0.0,
-            radius: 2.0,
-            color: Color::RGB(255, 0, 0),
-        });
-        // Green
-        v.push(Sphere {
-            pos: Position {
-                x: 10.0,
-                y: -4.0,
-                z: 2.5,
-            },
-            v_x: 0.0,
-            v_y: 0.0,
-            v_z: 0.0,
-            radius: 3.0,
-            color: Color::RGB(0, 255, 0),
-        });
-        // Yellow
+        // v.push(Sphere {
+        //     pos: Position {
+        //         x: 10.0,
+        //         y: -5.0,
+        //         z: 0.0,
+        // name: "red".to_string(),
+        //     },
+        //     v_x: 0.0,
+        //     v_y: 0.0,
+        //     v_z: 0.0,
+        //     radius: 2.0,
+        //     color: Color::RGB(255, 0, 0),
+        // });
+        // v.push(Sphere {
+        //     pos: Position {
+        //         x: 10.0,
+        //         y: -4.0,
+        //         z: 2.5,
+        // name: "green".to_string(),
+        //     },
+        //     v_x: 0.0,
+        //     v_y: 0.0,
+        //     v_z: 0.0,
+        //     radius: 3.0,
+        //     color: Color::RGB(0, 255, 0),
+        // });
         v.push(Sphere {
             pos: Position {
                 x: 2.0,
-                y: 3.0,
+                y: 0.0,
                 z: 0.0,
+                name: "yellow".to_string(),
             },
             v_x: 0.0,
             v_y: 0.0,
@@ -74,12 +76,12 @@ impl Sphere {
             radius: 1.5,
             color: Color::RGB(255, 255, 0),
         });
-        // Light blue
         v.push(Sphere {
             pos: Position {
                 x: 4.0,
-                y: 2.0,
-                z: -0.5,
+                y: 0.0,
+                z: 0.0,
+                name: "light blue".to_string(),
             },
             v_x: 0.0,
             v_y: 0.0,
@@ -87,19 +89,20 @@ impl Sphere {
             radius: 0.25,
             color: Color::RGB(0, 255, 255),
         });
-        // Orange
-        v.push(Sphere {
-            pos: Position {
-                x: -12.0,
-                y: 0.0,
-                z: 0.0,
-            },
-            v_x: 0.0,
-            v_y: 0.0,
-            v_z: 0.0,
-            radius: 9.5,
-            color: Color::RGB(255, 150, 0),
-        });
+        // v.push(Sphere {
+        //     pos: Position {
+        //         x: -12.0,
+        //         y: 0.0,
+        //         z: 0.0,
+        // name: "orange".to_string(),
+        //     },
+        //     v_x: 0.0,
+        //     v_y: 0.0,
+        //     v_z: 0.0,
+        //     radius: 9.5,
+        //     color: Color::RGB(255, 150, 0),
+        // });
+
         // for i in 0..parameters.sphere_count {
         //     let progress = i as f64 / (parameters.sphere_count - 1) as f64;
         //     v.push(Sphere {

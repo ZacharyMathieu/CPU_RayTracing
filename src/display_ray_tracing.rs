@@ -40,7 +40,7 @@ pub fn get_average_color(color_vector: &Vec<&Color>, importance_factor: f64) -> 
 
 pub fn display(
     observer: &Observer,
-    vector: &Vec<Sphere>,
+    sphere_vector: &Vec<Sphere>,
     parameters: &Parameters,
     canvas: &mut Canvas<Window>,
 ) {
@@ -54,6 +54,7 @@ pub fn display(
             x: 0.0,
             y: 0.0,
             z: 0.0,
+            name: "i cant just put an empty value here because cant figure out how".to_string(),
         },
         v_x: 0.0,
         v_y: 0.0,
@@ -61,12 +62,13 @@ pub fn display(
         radius: 0.0,
         color: Color::RGB(0, 0, 0),
     };
+    let mut ray_sphere: &Sphere;
     let colors: &mut Vec<&Color> = &mut Vec::new();
     for r in observer.rays.iter() {
         main_factor = f64::NAN;
         colors.clear();
 
-        for s in vector.iter() {
+        for s in sphere_vector.iter() {
             let ray_factor = r.factor_distance_from_point(&s);
 
             if !ray_factor.is_nan() && (main_factor.is_nan() || ray_factor < main_factor) {
@@ -82,24 +84,26 @@ pub fn display(
         if !main_factor.is_nan() {
             factor = main_factor;
             for _ in 0..parameters.ray_bounce_count {
+                ray_sphere = sphere;
                 let bounce_ray = r.get_reflection(sphere, factor);
 
                 factor = f64::NAN;
 
-                for s in vector.iter() {
+                for s in sphere_vector.iter() {
                     if (s as *const Sphere) != (sphere as *const Sphere) {
                         let ray_factor = bounce_ray.factor_distance_from_point(&s);
 
                         if !ray_factor.is_nan() && (factor.is_nan() || ray_factor < factor) {
                             factor = ray_factor;
-                            sphere = s;
-                            colors.push(&s.color);
+                            ray_sphere = s;
                         }
                     }
                 }
 
                 if factor.is_nan() {
                     break;
+                } else {
+                    colors.push(&ray_sphere.color);
                 }
             }
         }
