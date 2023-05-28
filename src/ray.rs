@@ -1,5 +1,3 @@
-use std::ops::Sub;
-
 use crate::{position::Position, sphere::Sphere};
 
 fn squared(f: f64) -> f64 {
@@ -17,8 +15,8 @@ pub struct Ray {
 
 impl Ray {
     pub fn new(p1: Position, p2: Position, x_value: i32, y_value: i32) -> Ray {
-        let vector = p2.clone() - p1.clone();
-        let l = p1.clone().dist(&p2);
+        let vector = p2 - p1;
+        let l = p1.dist(&p2);
         return Ray {
             p1,
             p2,
@@ -44,7 +42,7 @@ impl Ray {
     }
 
     fn update_vector_and_len(&mut self) {
-        self.vector = self.p2.clone() - self.p1.clone();
+        self.vector = self.p2 - self.p1;
         self.l = self.p1.dist(&self.p2);
     }
 
@@ -59,7 +57,7 @@ impl Ray {
     }
 
     pub fn get_position_from_factor(&self, factor: f64) -> Position {
-        return self.p1.clone() + (self.vector).scaled(factor);
+        return self.p1 + (self.vector).scaled(factor);
     }
 
     pub fn factor_distance_from_point(&self, s: &Sphere) -> f64 {
@@ -101,14 +99,45 @@ impl Ray {
         return ret;
     }
 
-    pub fn get_reflection(&self, sphere: &Sphere, intersection_factor: f64) -> Ray {
-        let intersection = self.get_position_from_factor(intersection_factor);
-        // let u = self.p2 - sphere.pos;
-        // let v = self.p2 - self.p1;
-        // let w = u.scaled(u.dot_product(&v) / (self.l * self.l));
-        // let direction = self.p2.scaled(2.0) - self.p1 - w.scaled(2.0);
-        let direction = self.p1.clone();
+    pub fn find_collision<'a>(
+        &self,
+        sphere_vector: &'a Vec<Sphere>,
+        ignored_sphere: Option<&Sphere>,
+    ) -> Option<(f64, &'a Sphere)> {
+        let mut result: Option<(f64, &Sphere)> = Option::None;
 
-        return Ray::new(direction, intersection, self.x_value, self.y_value);
+        for sphere in sphere_vector.iter() {
+            if match ignored_sphere {
+                None => true,
+                Some(ignored) => (sphere as *const Sphere) != (ignored as *const Sphere),
+            } {
+                let ray_factor = self.factor_distance_from_point(&sphere);
+
+                if !ray_factor.is_nan() {
+                    match result {
+                        None => {
+                            result = Option::Some((ray_factor, sphere));
+                        }
+                        Some((factor, _)) => {
+                            if ray_factor < factor {
+                                result = Option::Some((ray_factor, sphere));
+                            }
+                        }
+                    };
+                }
+            }
+        }
+
+        return result;
+    }
+
+    pub fn get_reflection(&self, intersection_factor: f64, sphere: &Sphere) -> Ray {
+        let intersection = self.get_position_from_factor(intersection_factor);
+        let u = intersection - sphere.pos;
+        let v = intersection - self.p1;
+        let w = u.scaled(u.dot_product(&v));
+        let direction = (intersection - w).scaled(2.0) - self.p1;
+
+        return Ray::new(intersection, direction, self.x_value, self.y_value);
     }
 }

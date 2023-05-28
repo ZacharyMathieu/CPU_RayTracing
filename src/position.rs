@@ -1,11 +1,10 @@
 use std::ops::{Add, Sub};
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub struct Position {
     pub x: f64,
     pub y: f64,
     pub z: f64,
-    pub name: String,
 }
 
 impl Position {
@@ -46,7 +45,6 @@ impl Position {
             x: self.x * factor,
             y: self.y * factor,
             z: self.z * factor,
-            name: self.name.clone() + "_copy",
         };
     }
 }
@@ -59,7 +57,6 @@ impl Add for Position {
             x: self.x + p.x,
             y: self.y + p.y,
             z: self.z + p.z,
-            name: format!("({name_1} + {name_2})", name_1 = self.name, name_2 = p.name),
         };
     }
 }
@@ -72,7 +69,6 @@ impl Sub for Position {
             x: self.x - p.x,
             y: self.y - p.y,
             z: self.z - p.z,
-            name: format!("({name_1} - {name_2})", name_1 = self.name, name_2 = p.name),
         };
     }
 }

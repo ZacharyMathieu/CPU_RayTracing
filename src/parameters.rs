@@ -57,19 +57,18 @@ impl Parameters {
         return Parameters {
             min_hor_ray_value: -half_width,
             max_hor_ray_value: half_width,
-            min_ver_ray_value: -half_width,
+            min_ver_ray_value: -half_height,
             max_ver_ray_value: half_height,
             observer_look_vector_distance: half_height as f64,
             sphere_count: 5,
             g: 0.001,
             display_scale: 4.0,
-            physics: false,
+            physics: true,
             frame_period_ms: 0,
             observer_default_position: Position {
                 x: 0.0,
                 y: 0.0,
                 z: 0.0,
-                name: "observer_position".to_string(),
             },
             observer_look_up_angle: -look_angle,
             observer_look_down_angle: look_angle,
@@ -95,11 +94,11 @@ impl Parameters {
             max_vz: speed_bounds_value,
             min_sphere_radius: 2.5,
             max_sphere_radius: 5.0,
-            min_pixel_factor: 0.5,
-            fog_factor: 0.0,
-            background_color: Color::RGB(0, 0, 0),
-            ray_bounce_count: 1,
-            ray_bounce_color_reflection_factor: 0.25,
+            min_pixel_factor: 0.75,
+            fog_factor: 5.0,
+            background_color: Color::RGB(255, 255, 255),
+            ray_bounce_count: 4,
+            ray_bounce_color_reflection_factor: 0.35,
         };
     }
 }

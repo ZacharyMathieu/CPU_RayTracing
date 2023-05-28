@@ -30,7 +30,6 @@ impl Observer {
                         x: parameters.observer_look_vector_distance,
                         y: x as f64,
                         z: y as f64,
-                        name: format!("observer ray ({x}, {y})"),
                     },
                     x - parameters.min_hor_ray_value,
                     y - parameters.min_ver_ray_value,

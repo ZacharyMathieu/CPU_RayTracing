@@ -47,82 +47,84 @@ pub fn display(
     canvas.set_draw_color(parameters.background_color);
     canvas.clear();
 
-    let mut main_factor: f64;
-    let mut factor: f64;
-    let mut sphere: &Sphere = &Sphere {
-        pos: Position {
-            x: 0.0,
-            y: 0.0,
-            z: 0.0,
-            name: "i cant just put an empty value here because cant figure out how".to_string(),
-        },
-        v_x: 0.0,
-        v_y: 0.0,
-        v_z: 0.0,
-        radius: 0.0,
-        color: Color::RGB(0, 0, 0),
-    };
-    let mut ray_sphere: &Sphere;
-    let colors: &mut Vec<&Color> = &mut Vec::new();
-    for r in observer.rays.iter() {
-        main_factor = f64::NAN;
-        colors.clear();
+    let color_vector: &mut Vec<&Color> = &mut Vec::new();
 
-        for s in sphere_vector.iter() {
-            let ray_factor = r.factor_distance_from_point(&s);
+    let mut collision: Option<(f64, &Sphere)>;
+    let mut bounce_factor: f64;
+    let mut bounce_sphere: &Sphere;
+    let mut bounce_ray: Ray;
 
-            if !ray_factor.is_nan() && (main_factor.is_nan() || ray_factor < main_factor) {
-                main_factor = ray_factor;
-                sphere = s;
-            }
-        }
+    for ray in observer.rays.iter() {
+        color_vector.clear();
 
-        if !main_factor.is_nan() {
-            colors.push(&sphere.color);
-        }
+        collision = ray.find_collision(sphere_vector, Option::None);
 
-        if !main_factor.is_nan() {
-            factor = main_factor;
-            for _ in 0..parameters.ray_bounce_count {
-                ray_sphere = sphere;
-                let bounce_ray = r.get_reflection(sphere, factor);
+        match collision {
+            None => (),
+            Some((factor, sphere)) => {
+                color_vector.push(&sphere.color);
 
-                factor = f64::NAN;
+                bounce_factor = factor;
+                bounce_sphere = sphere;
 
-                for s in sphere_vector.iter() {
-                    if (s as *const Sphere) != (sphere as *const Sphere) {
-                        let ray_factor = bounce_ray.factor_distance_from_point(&s);
+                for _ in 0..parameters.ray_bounce_count {
+                    bounce_ray = ray.get_reflection(bounce_factor, bounce_sphere);
+                    collision = bounce_ray.find_collision(sphere_vector, Option::Some(sphere));
 
-                        if !ray_factor.is_nan() && (factor.is_nan() || ray_factor < factor) {
-                            factor = ray_factor;
-                            ray_sphere = s;
+                    match collision {
+                        None => {
+                            color_vector.push(&parameters.background_color);
+                            break;
                         }
-                    }
+                        Some((factor, sphere)) => {
+                            color_vector.push(&sphere.color);
+                            bounce_factor = factor;
+                            bounce_sphere = sphere;
+                        }
+                    };
                 }
 
-                if factor.is_nan() {
-                    break;
-                } else {
-                    colors.push(&ray_sphere.color);
-                }
+                canvas.set_draw_color(add_fog(
+                    factor,
+                    ray,
+                    get_average_color(color_vector, parameters.ray_bounce_color_reflection_factor),
+                    parameters,
+                ));
+                canvas
+                    .draw_point(Point::new(ray.x_value, ray.y_value))
+                    .unwrap();
             }
-        }
+        };
 
-        if !colors.is_empty() {
-            canvas.set_draw_color(add_fog(
-                main_factor,
-                r,
-                get_average_color(colors, parameters.ray_bounce_color_reflection_factor),
-                parameters,
-            ));
-            // canvas.set_draw_color(sphere.color);
-            // canvas.set_draw_color(get_color_with_fog(
-            //     sphere,
-            //     &r.get_position_from_factor(factor),
-            //     parameters,
-            // ));
-            canvas.draw_point(Point::new(r.x_value, r.y_value)).unwrap();
-        }
+        // if !main_factor.is_nan() {
+        //     factor = main_factor;
+        //     for _ in 0..parameters.ray_bounce_count {
+        //         ray_sphere = sphere;
+        //         let bounce_ray = r.get_reflection(sphere, factor);
+
+        //         factor = f64::NAN;
+
+        //         for s in sphere_vector.iter() {
+        //             if (s as *const Sphere) != (sphere as *const Sphere) {
+        //                 let ray_factor = bounce_ray.factor_distance_from_point(&s);
+
+        //                 if !ray_factor.is_nan() && (factor.is_nan() || ray_factor < factor) {
+        //                     factor = ray_factor;
+        //                     ray_sphere = s;
+        //                 }
+        //             }
+        //         }
+
+        //         if factor.is_nan() {
+        //             break;
+        //         } else {
+        //             colors.push(&ray_sphere.color);
+        //         }
+        //     }
+        // }
+
+        // if !color_vector.is_empty() {
+        // }
     }
 
     canvas.present();
