@@ -4,6 +4,7 @@ fn squared(f: f64) -> f64 {
     return f * f;
 }
 
+#[derive(Clone, Copy)]
 pub struct Ray {
     pub p1: Position,
     pub p2: Position,
@@ -85,46 +86,40 @@ impl Ray {
             return f64::NAN;
         }
 
-        let mut ret = (-b - f64::sqrt(d)) / (2.0 * a);
+        let root = f64::sqrt(d);
+        let ret: f64;
 
-        if ret < 0.0 {
-            ret = (-b + f64::sqrt(d)) / (2.0 * a);
+        if root > b {
+            ret = (-b - root) / (2.0 * a);
+        } else {
+            ret = (-b + root) / (2.0 * a);
         }
 
         // Remove the points behind the observer
-        if ret < 0.0 {
+        if ret <= 0.0 {
             return f64::NAN;
         }
 
         return ret;
     }
 
-    pub fn find_collision<'a>(
-        &self,
-        sphere_vector: &'a Vec<Sphere>,
-        ignored_sphere: Option<&Sphere>,
-    ) -> Option<(f64, &'a Sphere)> {
+    pub fn find_collision<'a>(&self, sphere_vector: &'a Vec<Sphere>) -> Option<(f64, &'a Sphere)> {
         let mut result: Option<(f64, &Sphere)> = Option::None;
 
         for sphere in sphere_vector.iter() {
-            if match ignored_sphere {
-                None => true,
-                Some(ignored) => (sphere as *const Sphere) != (ignored as *const Sphere),
-            } {
-                let ray_factor = self.factor_distance_from_point(&sphere);
+            let ray_factor = self.factor_distance_from_point(&sphere);
 
-                if !ray_factor.is_nan() {
-                    match result {
-                        None => {
+            if !ray_factor.is_nan() {
+                match result {
+                    None => {
+                        result = Option::Some((ray_factor, sphere));
+                    }
+                    Some((factor, _)) => {
+                        if ray_factor < factor {
                             result = Option::Some((ray_factor, sphere));
                         }
-                        Some((factor, _)) => {
-                            if ray_factor < factor {
-                                result = Option::Some((ray_factor, sphere));
-                            }
-                        }
-                    };
-                }
+                    }
+                };
             }
         }
 
@@ -135,8 +130,8 @@ impl Ray {
         let intersection = self.get_position_from_factor(intersection_factor);
         let u = intersection - sphere.pos;
         let v = intersection - self.p1;
-        let w = u.scaled(u.dot_product(&v));
-        let direction = (intersection - w).scaled(2.0) - self.p1;
+        let w = u.scaled(-(v.dot_product(&u) / u.dot_product(&u)));
+        let direction = (intersection + w).scaled(2.0) - self.p1;
 
         return Ray::new(intersection, direction, self.x_value, self.y_value);
     }

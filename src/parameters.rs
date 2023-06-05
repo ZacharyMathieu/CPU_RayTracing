@@ -49,6 +49,8 @@ impl Parameters {
     pub fn default() -> Parameters {
         let half_width: i32 = 100;
         let half_height: i32 = 50;
+        // let half_width: i32 = 1;
+        // let half_height: i32 = 1;
         let look_angle = 0.05;
         let move_distance = 0.25;
         let physics_bounds_value = 20.0;
@@ -59,11 +61,15 @@ impl Parameters {
             max_hor_ray_value: half_width,
             min_ver_ray_value: -half_height,
             max_ver_ray_value: half_height,
+            // min_hor_ray_value: 0,
+            // max_hor_ray_value: half_width,
+            // min_ver_ray_value: 0,
+            // max_ver_ray_value: half_height,
             observer_look_vector_distance: half_height as f64,
-            sphere_count: 5,
-            g: 0.001,
+            sphere_count: 20,
+            g: 0.0001,
             display_scale: 4.0,
-            physics: true,
+            physics: false,
             frame_period_ms: 0,
             observer_default_position: Position {
                 x: 0.0,
@@ -94,11 +100,11 @@ impl Parameters {
             max_vz: speed_bounds_value,
             min_sphere_radius: 2.5,
             max_sphere_radius: 5.0,
-            min_pixel_factor: 0.75,
-            fog_factor: 5.0,
-            background_color: Color::RGB(255, 255, 255),
-            ray_bounce_count: 4,
-            ray_bounce_color_reflection_factor: 0.35,
+            min_pixel_factor: 0.25,
+            fog_factor: 1.0,
+            background_color: Color::RGB(0, 0, 0),
+            ray_bounce_count: 3,
+            ray_bounce_color_reflection_factor: 0.2,
         };
     }
 }

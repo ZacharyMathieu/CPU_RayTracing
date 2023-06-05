@@ -57,19 +57,20 @@ pub fn display(
     for ray in observer.rays.iter() {
         color_vector.clear();
 
-        collision = ray.find_collision(sphere_vector, Option::None);
+        collision = ray.find_collision(sphere_vector);
 
         match collision {
             None => (),
             Some((factor, sphere)) => {
                 color_vector.push(&sphere.color);
 
+                bounce_ray = ray.clone();
                 bounce_factor = factor;
                 bounce_sphere = sphere;
 
                 for _ in 0..parameters.ray_bounce_count {
-                    bounce_ray = ray.get_reflection(bounce_factor, bounce_sphere);
-                    collision = bounce_ray.find_collision(sphere_vector, Option::Some(sphere));
+                    bounce_ray = bounce_ray.get_reflection(bounce_factor, bounce_sphere);
+                    collision = bounce_ray.find_collision(sphere_vector);
 
                     match collision {
                         None => {

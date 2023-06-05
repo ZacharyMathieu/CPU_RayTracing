@@ -23,101 +23,113 @@ impl Sphere {
     ) -> Vec<Sphere> {
         let mut v: Vec<Sphere> = vec![];
 
-        // Blue
-        v.push(Sphere {
-            pos: Position {
-                x: 10.0,
-                y: 0.0,
-                z: 0.0,
-            },
-            v_x: 0.0,
-            v_y: 0.0,
-            v_z: 0.0,
-            radius: 6.0,
-            color: Color::RGB(0, 0, 255),
-        });
-        // Red
-        v.push(Sphere {
-            pos: Position {
-                x: 10.0,
-                y: -5.0,
-                z: 0.0,
-            },
-            v_x: 0.0,
-            v_y: 0.0,
-            v_z: 0.0,
-            radius: 2.0,
-            color: Color::RGB(255, 0, 0),
-        });
-        // Green
-        v.push(Sphere {
-            pos: Position {
-                x: 10.0,
-                y: -4.0,
-                z: 2.5,
-            },
-            v_x: 0.0,
-            v_y: 0.0,
-            v_z: 0.0,
-            radius: 3.0,
-            color: Color::RGB(0, 255, 0),
-        });
-        // Yellow
-        v.push(Sphere {
-            pos: Position {
-                x: 2.0,
-                y: 0.0,
-                z: 0.0,
-            },
-            v_x: 0.0,
-            v_y: 0.0,
-            v_z: 0.0,
-            radius: 1.5,
-            color: Color::RGB(255, 255, 0),
-        });
-        // Green
-        v.push(Sphere {
-            pos: Position {
-                x: 4.0,
-                y: 0.0,
-                z: 0.0,
-            },
-            v_x: 0.0,
-            v_y: 0.0,
-            v_z: 0.0,
-            radius: 0.25,
-            color: Color::RGB(0, 255, 0),
-        });
-        // Orange
-        v.push(Sphere {
-            pos: Position {
-                x: -12.0,
-                y: 0.0,
-                z: 0.0,
-            },
-            v_x: 0.0,
-            v_y: 0.0,
-            v_z: 0.0,
-            radius: 9.5,
-            color: Color::RGB(255, 150, 0),
-        });
+        // // Blue
+        // v.push(Sphere {
+        //     pos: Position {
+        //         x: 10.0,
+        //         y: 0.0,
+        //         z: 0.0,
+        //     },
+        //     v_x: 0.0,
+        //     v_y: 0.0,
+        //     v_z: 0.0,
+        //     radius: 6.0,
+        //     color: Color::RGB(0, 0, 255),
+        // });
+        // // Red
+        // v.push(Sphere {
+        //     pos: Position {
+        //         x: 10.0,
+        //         y: -5.0,
+        //         z: 0.0,
+        //     },
+        //     v_x: 0.0,
+        //     v_y: 0.0,
+        //     v_z: 0.0,
+        //     radius: 2.0,
+        //     color: Color::RGB(255, 0, 0),
+        // });
+        // // Green
+        // v.push(Sphere {
+        //     pos: Position {
+        //         x: 10.0,
+        //         y: -4.0,
+        //         z: 2.5,
+        //     },
+        //     v_x: 0.0,
+        //     v_y: 0.0,
+        //     v_z: 0.0,
+        //     radius: 3.0,
+        //     color: Color::RGB(0, 255, 0),
+        // });
+        // // Yellow
+        // v.push(Sphere {
+        //     pos: Position {
+        //         x: 2.0,
+        //         y: 0.0,
+        //         z: 0.0,
+        //     },
+        //     v_x: 0.0,
+        //     v_y: 0.0,
+        //     v_z: 0.0,
+        //     radius: 1.5,
+        //     color: Color::RGB(255, 255, 0),
+        // });
+        // // Turquoise
+        // v.push(Sphere {
+        //     pos: Position {
+        //         x: 4.0,
+        //         y: 0.0,
+        //         z: 0.0,
+        //     },
+        //     v_x: 0.0,
+        //     v_y: 0.0,
+        //     v_z: 0.0,
+        //     radius: 0.25,
+        //     color: Color::RGB(0, 255, 255),
+        // });
+        // // Orange
+        // v.push(Sphere {
+        //     pos: Position {
+        //         x: -12.0,
+        //         y: 0.0,
+        //         z: 0.0,
+        //     },
+        //     v_x: 0.0,
+        //     v_y: 0.0,
+        //     v_z: 0.0,
+        //     radius: 9.5,
+        //     color: Color::RGB(255, 150, 0),
+        // });
 
-        // for i in 0..parameters.sphere_count {
-        //     let progress = i as f64 / (parameters.sphere_count - 1) as f64;
-        //     v.push(Sphere {
-        //         pos: Position {
-        //             x: rng.gen_range(parameters.min_x, parameters.max_x),
-        //             y: rng.gen_range(parameters.min_y, parameters.max_y),
-        //             z: rng.gen_range(parameters.min_z, parameters.max_z),
-        //         },
-        //         v_x: rng.gen_range(-0.1, 0.1),
-        //         v_y: rng.gen_range(-0.1, 0.1),
-        //         v_z: rng.gen_range(-0.1, 0.1),
-        //         radius: rng.gen_range(0.1, 10.0),
-        //         color: float_to_color(progress),
-        //     });
-        // }
+        for i in 0..parameters.sphere_count {
+            let progress = i as f64 / (parameters.sphere_count - 1) as f64;
+            v.push(Sphere::generate_random(
+                parameters,
+                rng,
+                float_to_color(progress),
+            ));
+        }
         return v;
+    }
+
+    pub fn generate_random(
+        parameters: &Parameters,
+        rng: &mut rand::prelude::ThreadRng,
+        color: Color,
+    ) -> Sphere {
+        return Sphere {
+            pos: Position {
+                x: rng.gen_range(parameters.min_x, parameters.max_x),
+                y: rng.gen_range(parameters.min_y, parameters.max_y),
+                z: rng.gen_range(parameters.min_z, parameters.max_z),
+            },
+            v_x: rng.gen_range(-0.1, 0.1),
+            v_y: rng.gen_range(-0.1, 0.1),
+            v_z: rng.gen_range(-0.1, 0.1),
+            radius: rng.gen_range(0.1, 10.0),
+            color: color,
+        };
     }
 
     pub fn physics(&mut self, params: &Parameters) {
