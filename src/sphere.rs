@@ -124,10 +124,10 @@ impl Sphere {
                 y: rng.gen_range(parameters.min_y, parameters.max_y),
                 z: rng.gen_range(parameters.min_z, parameters.max_z),
             },
-            v_x: rng.gen_range(-0.1, 0.1),
-            v_y: rng.gen_range(-0.1, 0.1),
-            v_z: rng.gen_range(-0.1, 0.1),
-            radius: rng.gen_range(0.1, 10.0),
+            v_x: rng.gen_range(parameters.min_vx, parameters.max_vx),
+            v_y: rng.gen_range(parameters.min_vy, parameters.max_vy),
+            v_z: rng.gen_range(parameters.min_vz, parameters.max_vz),
+            radius: rng.gen_range(parameters.min_sphere_radius, parameters.max_sphere_radius),
             color: color,
         };
     }

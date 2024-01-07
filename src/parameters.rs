@@ -47,8 +47,8 @@ pub struct Parameters {
 
 impl Parameters {
     pub fn default() -> Parameters {
-        let half_width: i32 = 100;
-        let half_height: i32 = 50;
+        let half_width: i32 = 60;
+        let half_height: i32 = 30;
         // let half_width: i32 = 1;
         // let half_height: i32 = 1;
         let look_angle = 0.05;
@@ -66,15 +66,15 @@ impl Parameters {
             // min_ver_ray_value: 0,
             // max_ver_ray_value: half_height,
             observer_look_vector_distance: half_height as f64,
-            sphere_count: 20,
+            sphere_count: 100,
             g: 0.0001,
-            display_scale: 4.0,
-            physics: false,
+            display_scale: 8.0,
+            physics: true,
             frame_period_ms: 0,
             observer_default_position: Position {
                 x: 0.0,
                 y: 0.0,
-                z: 0.0,
+                z: -physics_bounds_value,
             },
             observer_look_up_angle: -look_angle,
             observer_look_down_angle: look_angle,
@@ -91,15 +91,15 @@ impl Parameters {
             min_y: -physics_bounds_value,
             max_y: physics_bounds_value,
             min_z: -physics_bounds_value,
-            max_z: 10.0,
+            max_z: physics_bounds_value,
             min_vx: -speed_bounds_value,
             max_vx: speed_bounds_value,
             min_vy: -speed_bounds_value,
             max_vy: speed_bounds_value,
             min_vz: -speed_bounds_value,
             max_vz: speed_bounds_value,
-            min_sphere_radius: 2.5,
-            max_sphere_radius: 5.0,
+            min_sphere_radius: 0.1,
+            max_sphere_radius: 0.5,
             min_pixel_factor: 0.25,
             fog_factor: 1.0,
             background_color: Color::RGB(0, 0, 0),
