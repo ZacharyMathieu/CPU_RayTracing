@@ -1,7 +1,7 @@
 use sdl2::{pixels::Color, rect::Point, render::Canvas, video::Window};
 
 use crate::{
-    observer::Observer, parameters::Parameters, position::Position, ray::Ray, sphere::Sphere,
+    observer::Observer, parameters::Parameters, ray::Ray, sphere::Sphere,
 };
 
 fn add_fog(factor: f64, ray: &Ray, color: Color, parameters: &Parameters) -> Color {
