@@ -97,9 +97,9 @@ pub fn display(
     canvas.set_draw_color(parameters.background_color);
     canvas.clear();
 
-    for ray in observer.rays.iter() {
+    observer.rays.iter().for_each(|ray| {
         display_ray(sphere_vector, parameters, canvas, ray);
-    }
+    });
 
     canvas.present();
 }
