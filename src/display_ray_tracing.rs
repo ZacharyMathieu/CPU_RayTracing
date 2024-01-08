@@ -1,10 +1,12 @@
+use rayon::prelude::*;
 use sdl2::{pixels::Color, rect::Point, render::Canvas, video::Window};
 
 use crate::{observer::Observer, parameters::Parameters, ray::Ray, sphere::Sphere};
 
-fn add_fog(factor: f64, ray: &Ray, color: Color, parameters: &Parameters) -> Color {
+fn add_fog(factor: f64, ray_length: f64, color: Color, parameters: &Parameters) -> Color {
     let mult = (1.0
-        - ((factor * ray.l * parameters.fog_factor) / parameters.observer_look_vector_distance))
+        - ((factor * ray_length * parameters.fog_factor)
+            / parameters.observer_look_vector_distance))
         .max(parameters.min_pixel_factor);
 
     return Color::RGB(
@@ -35,57 +37,86 @@ pub fn get_average_color(color_vector: &Vec<&Color>, importance_factor: f64) -> 
         ((b / total) as u128) as u8,
     );
 }
+// let mut color_vector: Vec<&Color> = Vec::new()
+struct RayCollision {
+    pub factor: f64,
+    pub length: f64,
+    pub color_vector: Vec<Color>,
+}
 
-pub fn display_ray(
+impl RayCollision {
+    fn default() -> RayCollision {
+        return RayCollision {
+            factor: 0.,
+            length: 0.,
+            color_vector: Vec::new(),
+        };
+    }
+}
+
+fn get_ray_collision(
     sphere_vector: &Vec<Sphere>,
     parameters: &Parameters,
-    canvas: &mut Canvas<Window>,
     ray: &Ray,
+    result: &mut RayCollision,
+    remaining_bounces: u32,
 ) {
-    let color_vector: &mut Vec<&Color> = &mut Vec::new();
+    if remaining_bounces > 0 {
+        let mut collision: Option<(f64, &Sphere)> = ray.find_collision(sphere_vector);
+        let mut bounce_factor: f64;
+        let mut bounce_sphere: &Sphere;
+        let mut bounce_ray: Ray;
 
-    let mut collision: Option<(f64, &Sphere)> = ray.find_collision(sphere_vector);
-    let mut bounce_factor: f64;
-    let mut bounce_sphere: &Sphere;
-    let mut bounce_ray: Ray;
-
-    match collision {
-        None => (),
-        Some((factor, sphere)) => {
-            color_vector.push(&sphere.color);
-
-            bounce_ray = ray.clone();
-            bounce_factor = factor;
-            bounce_sphere = sphere;
-
-            for _ in 0..parameters.ray_bounce_count {
-                bounce_ray = bounce_ray.get_reflection(bounce_factor, bounce_sphere);
-                collision = bounce_ray.find_collision(sphere_vector);
-
-                match collision {
-                    None => {
-                        color_vector.push(&parameters.background_color);
-                        break;
-                    }
-                    Some((factor, sphere)) => {
-                        color_vector.push(&sphere.color);
-                        bounce_factor = factor;
-                        bounce_sphere = sphere;
-                    }
-                };
+        match collision {
+            None => {
+                result.color_vector.push(parameters.background_color);
             }
+            Some((factor, sphere)) => {
+                result.color_vector.push(sphere.color);
 
-            canvas.set_draw_color(add_fog(
-                factor,
-                ray,
-                get_average_color(color_vector, parameters.ray_bounce_color_reflection_factor),
-                parameters,
-            ));
-            canvas
-                .draw_point(Point::new(ray.x_value, ray.y_value))
-                .unwrap();
-        }
-    };
+                bounce_ray = ray.clone(); // TODO remove
+                bounce_factor = factor;
+                bounce_sphere = sphere;
+
+                if remaining_bounces > 0 {
+                    bounce_ray = bounce_ray.get_reflection(bounce_factor, bounce_sphere);
+
+                    get_ray_collision(
+                        sphere_vector,
+                        parameters,
+                        &bounce_ray,
+                        result,
+                        remaining_bounces - 1,
+                    );
+
+                    // collision = bounce_ray.find_collision(sphere_vector);
+
+                    // match collision {
+                    //     None => {
+                    //         result.color_vector.push(&parameters.background_color);
+                    //         break;
+                    //     }
+                    //     Some((factor, sphere)) => {
+                    //         color_vector.push(&sphere.color);
+                    //         bounce_factor = factor;
+                    //         bounce_sphere = sphere;
+                    //     }
+                    // };
+                }
+
+                // result.replace(RayCollision {
+                //     factor: factor,
+                //     length: ray.length,
+                //     color_vector: color_vector,
+                // });
+                // return Option::Some(RayCollision {
+                //     factor: factor,
+                //     length: ray.length,
+                //     color_vector: &color_vector
+                // });
+            }
+        };
+    }
 }
 
 pub fn display(
@@ -97,9 +128,34 @@ pub fn display(
     canvas.set_draw_color(parameters.background_color);
     canvas.clear();
 
-    observer.rays.iter().for_each(|ray| {
-        display_ray(sphere_vector, parameters, canvas, ray);
+    let rays_slice: &[Ray] = &observer.rays;
+
+    let mut ray_collisions: Vec<RayCollision> = Vec::with_capacity(rays_slice.len());
+    
+    for i in 0..ray_collisions.len() {
+        ray_collisions[i] = RayCollision::default();
+    }
+
+    rays_slice.par_iter().enumerate().for_each(|(index, ray)| {
+        let col: &mut RayCollision = &mut ray_collisions[index];
+        get_ray_collision(
+            sphere_vector,
+            parameters,
+            ray,
+            col,
+            parameters.ray_bounce_count,
+        );
     });
+
+    // canvas.set_draw_color(add_fog(
+    //     factor,
+    //     ray.length,
+    //     get_average_color(color_vector, parameters.ray_bounce_color_reflection_factor),
+    //     parameters,
+    // ));
+    // canvas
+    //     .draw_point(Point::new(ray.x_value, ray.y_value))
+    //     .unwrap();
 
     canvas.present();
 }
