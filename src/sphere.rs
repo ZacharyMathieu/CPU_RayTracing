@@ -14,6 +14,7 @@ pub struct Sphere {
     pub v_z: f64,
     pub radius: f64,
     pub color: Color,
+    pub light_factor: f64,
 }
 
 impl Sphere {
@@ -129,6 +130,10 @@ impl Sphere {
             v_z: rng.gen_range(parameters.min_vz, parameters.max_vz),
             radius: rng.gen_range(parameters.min_sphere_radius, parameters.max_sphere_radius),
             color: color,
+            light_factor: rng.gen_range(
+                parameters.min_sphere_light_factor,
+                parameters.max_sphere_light_factor,
+            ),
         };
     }
 

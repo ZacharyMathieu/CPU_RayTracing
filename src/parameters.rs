@@ -38,6 +38,8 @@ pub struct Parameters {
     pub max_vz: f64,
     pub min_sphere_radius: f64,
     pub max_sphere_radius: f64,
+    pub min_sphere_light_factor: f64,
+    pub max_sphere_light_factor: f64,
     pub min_pixel_factor: f64,
     pub fog_factor: f64,
     pub background_color: Color,
@@ -100,11 +102,13 @@ impl Parameters {
             max_vz: speed_bounds_value,
             min_sphere_radius: 0.5,
             max_sphere_radius: 5.0,
+            min_sphere_light_factor: 0.,
+            max_sphere_light_factor: 10.,
             min_pixel_factor: 0.,
-            fog_factor: 1.,
+            fog_factor: 0.25,
             background_color: Color::RGB(0, 0, 0),
             ray_bounce_count: 5,
-            ray_bounce_color_reflection_factor: 0.25,
+            ray_bounce_color_reflection_factor: 0.75,
         };
     }
 }
