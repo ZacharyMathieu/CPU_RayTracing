@@ -24,6 +24,7 @@ impl Sphere {
     ) -> Vec<Sphere> {
         let mut v: Vec<Sphere> = vec![];
 
+        // let light_factor: f64 = 0.1;
         // // Blue
         // v.push(Sphere {
         //     pos: Position {
@@ -36,6 +37,7 @@ impl Sphere {
         //     v_z: 0.0,
         //     radius: 6.0,
         //     color: Color::RGB(0, 0, 255),
+        //     light_factor: light_factor,
         // });
         // // Red
         // v.push(Sphere {
@@ -49,6 +51,7 @@ impl Sphere {
         //     v_z: 0.0,
         //     radius: 2.0,
         //     color: Color::RGB(255, 0, 0),
+        //     light_factor: light_factor,
         // });
         // // Green
         // v.push(Sphere {
@@ -62,6 +65,7 @@ impl Sphere {
         //     v_z: 0.0,
         //     radius: 3.0,
         //     color: Color::RGB(0, 255, 0),
+        //     light_factor: light_factor,
         // });
         // // Yellow
         // v.push(Sphere {
@@ -75,6 +79,7 @@ impl Sphere {
         //     v_z: 0.0,
         //     radius: 1.5,
         //     color: Color::RGB(255, 255, 0),
+        //     light_factor: light_factor,
         // });
         // // Turquoise
         // v.push(Sphere {
@@ -88,19 +93,21 @@ impl Sphere {
         //     v_z: 0.0,
         //     radius: 0.25,
         //     color: Color::RGB(0, 255, 255),
+        //     light_factor: light_factor,
         // });
-        // // Orange
+        // // White
         // v.push(Sphere {
         //     pos: Position {
-        //         x: -12.0,
-        //         y: 0.0,
-        //         z: 0.0,
+        //         x: -20.0,
+        //         y: 20.0,
+        //         z: -20.0,
         //     },
         //     v_x: 0.0,
         //     v_y: 0.0,
         //     v_z: 0.0,
-        //     radius: 9.5,
-        //     color: Color::RGB(255, 150, 0),
+        //     radius: 10.,
+        //     color: Color::RGB(255, 255, 255),
+        //     light_factor: 100.,
         // });
 
         for i in 0..parameters.sphere_count {
@@ -111,6 +118,7 @@ impl Sphere {
                 float_to_color(progress),
             ));
         }
+
         return v;
     }
 
