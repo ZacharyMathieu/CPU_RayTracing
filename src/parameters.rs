@@ -51,8 +51,6 @@ impl Parameters {
     pub fn default() -> Parameters {
         let half_width: i32 = 60;
         let half_height: i32 = 30;
-        // let half_width: i32 = 1;
-        // let half_height: i32 = 1;
         let look_angle = 0.05;
         let move_distance = 0.25;
         let physics_bounds_value = 20.0;
@@ -63,10 +61,6 @@ impl Parameters {
             max_hor_ray_value: half_width,
             min_ver_ray_value: -half_height,
             max_ver_ray_value: half_height,
-            // min_hor_ray_value: 0,
-            // max_hor_ray_value: half_width,
-            // min_ver_ray_value: 0,
-            // max_ver_ray_value: half_height,
             observer_look_vector_distance: half_height as f64,
             sphere_count: 100,
             g: 0.00001,
