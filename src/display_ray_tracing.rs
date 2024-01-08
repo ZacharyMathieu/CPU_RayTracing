@@ -16,7 +16,7 @@ fn add_fog(factor: f64, ray_length: f64, color: Color, parameters: &Parameters) 
     );
 }
 
-pub fn get_average_color(color_vector: &Vec<&Color>, importance_factor: f64) -> Color {
+pub fn get_average_color(color_vector: &Vec<Color>, importance_factor: f64) -> Color {
     let mut r: f64 = 0.0;
     let mut g: f64 = 0.0;
     let mut b: f64 = 0.0;
@@ -67,7 +67,6 @@ fn get_ray_collision(
         let mut collision: Option<(f64, &Sphere)> = ray.find_collision(sphere_vector);
         let mut bounce_factor: f64;
         let mut bounce_sphere: &Sphere;
-        let mut bounce_ray: Ray;
 
         match collision {
             None => {
@@ -75,42 +74,15 @@ fn get_ray_collision(
             }
             Some((factor, sphere)) => {
                 result.color_vector.push(sphere.color);
-
-                bounce_ray = ray.clone(); // TODO remove
-                bounce_factor = factor;
-                bounce_sphere = sphere;
+                result.factor = factor;
+                result.length = result.ray.length;
 
                 if remaining_bounces > 0 {
-                    bounce_ray = bounce_ray.get_reflection(bounce_factor, bounce_sphere);
+                    let bounce_ray: Ray = result.ray.get_reflection(factor, sphere);
                     result.ray = bounce_ray;
 
                     get_ray_collision(sphere_vector, parameters, result, remaining_bounces - 1);
-
-                    // collision = bounce_ray.find_collision(sphere_vector);
-
-                    // match collision {
-                    //     None => {
-                    //         result.color_vector.push(&parameters.background_color);
-                    //         break;
-                    //     }
-                    //     Some((factor, sphere)) => {
-                    //         color_vector.push(&sphere.color);
-                    //         bounce_factor = factor;
-                    //         bounce_sphere = sphere;
-                    //     }
-                    // };
                 }
-
-                // result.replace(RayCollision {
-                //     factor: factor,
-                //     length: ray.length,
-                //     color_vector: color_vector,
-                // });
-                // return Option::Some(RayCollision {
-                //     factor: factor,
-                //     length: ray.length,
-                //     color_vector: &color_vector
-                // });
             }
         };
     }
@@ -127,13 +99,13 @@ pub fn display(
 
     let rays_slice: &[Ray] = &observer.rays;
 
-    let mut ray_collisions: Vec<RayCollision> = Vec::with_capacity(rays_slice.len());
+    let mut ray_collisions: Vec<RayCollision> = Vec::new();
 
-    for i in 0..ray_collisions.len() {
-        ray_collisions[i] = RayCollision::default(rays_slice[i]);
-    }
+    rays_slice.iter().for_each(|ray| {
+        ray_collisions.push(RayCollision::default(*ray));
+    });
 
-    ray_collisions.par_iter_mut().for_each(|collision| {
+    ray_collisions.iter_mut().for_each(|collision| {
         get_ray_collision(
             sphere_vector,
             parameters,
@@ -142,15 +114,20 @@ pub fn display(
         );
     });
 
-    // canvas.set_draw_color(add_fog(
-    //     factor,
-    //     ray.length,
-    //     get_average_color(color_vector, parameters.ray_bounce_color_reflection_factor),
-    //     parameters,
-    // ));
-    // canvas
-    //     .draw_point(Point::new(ray.x_value, ray.y_value))
-    //     .unwrap();
+    ray_collisions.iter().for_each(|collision| {
+        canvas.set_draw_color(add_fog(
+            collision.factor,
+            collision.ray.length,
+            get_average_color(
+                &collision.color_vector,
+                parameters.ray_bounce_color_reflection_factor,
+            ),
+            parameters,
+        ));
+        canvas
+            .draw_point(Point::new(collision.ray.x_value, collision.ray.y_value))
+            .unwrap();
+    });
 
     canvas.present();
 }

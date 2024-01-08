@@ -69,7 +69,7 @@ impl Parameters {
             sphere_count: 100,
             g: 0.0001,
             display_scale: 8.0,
-            physics: true,
+            physics: false,
             frame_period_ms: 1,
             observer_default_position: Position {
                 x: -physics_bounds_value,
