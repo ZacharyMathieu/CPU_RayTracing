@@ -4,7 +4,6 @@ use crate::{parameters::Parameters, ray::Ray, sphere::Sphere};
 
 pub struct RayTrace<'a> {
     pub ray: &'a Ray,
-    // pub fog_factor: f64,
     color_vector: Vec<Color>,
     pub color: Color,
 }
@@ -69,7 +68,7 @@ impl<'a> RayTrace<'a> {
 }
 
 fn add_fog(color: Color, fog_factor: f64, parameters: &Parameters) -> Color {
-    let mult = (1.0
+    let mult: f64 = (1.0
         - ((fog_factor * parameters.fog_factor) / parameters.observer_look_vector_distance))
         .max(parameters.min_pixel_factor);
 
@@ -80,10 +79,7 @@ fn add_fog(color: Color, fog_factor: f64, parameters: &Parameters) -> Color {
     );
 }
 
-fn get_average_color(
-    color_vector: &Vec<Color>,
-    importance_factor: f64,
-) -> Color {
+fn get_average_color(color_vector: &Vec<Color>, importance_factor: f64) -> Color {
     let mut r: f64 = 0.0;
     let mut g: f64 = 0.0;
     let mut b: f64 = 0.0;

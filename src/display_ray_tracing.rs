@@ -19,12 +19,12 @@ pub fn display(
     });
 
     // Parallel ray casting
-    ray_traces.par_iter_mut().for_each(|trace| {
+    ray_traces.par_iter_mut().for_each(|trace: &mut RayTrace<'_>| {
         trace.trace(sphere_vector, parameters);
     });
 
     // Displaying the colors
-    ray_traces.iter().for_each(|trace| {
+    ray_traces.iter().for_each(|trace: &RayTrace<'_>| {
         canvas.set_draw_color(trace.color);
         canvas
             .draw_point(Point::new(trace.ray.x_value, trace.ray.y_value))
