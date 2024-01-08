@@ -9,6 +9,7 @@ mod parameters;
 mod position;
 mod ray;
 mod sphere;
+mod ray_trace;
 
 use crate::observer::Observer;
 use crate::parameters::Parameters;

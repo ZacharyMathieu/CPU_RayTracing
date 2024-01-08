@@ -54,7 +54,7 @@ impl Parameters {
         let look_angle = 0.05;
         let move_distance = 0.25;
         let physics_bounds_value = 20.0;
-        let speed_bounds_value = 0.25;
+        let speed_bounds_value = 0.01;
 
         return Parameters {
             min_hor_ray_value: -half_width,
@@ -67,9 +67,9 @@ impl Parameters {
             // max_ver_ray_value: half_height,
             observer_look_vector_distance: half_height as f64,
             sphere_count: 100,
-            g: 0.0001,
+            g: 0.00001,
             display_scale: 8.0,
-            physics: false,
+            physics: true,
             frame_period_ms: 1,
             observer_default_position: Position {
                 x: -physics_bounds_value,
@@ -100,11 +100,11 @@ impl Parameters {
             max_vz: speed_bounds_value,
             min_sphere_radius: 0.5,
             max_sphere_radius: 5.0,
-            min_pixel_factor: 0.25,
-            fog_factor: 1.0,
+            min_pixel_factor: 0.,
+            fog_factor: 1.,
             background_color: Color::RGB(0, 0, 0),
-            ray_bounce_count: 3,
-            ray_bounce_color_reflection_factor: 0.2,
+            ray_bounce_count: 5,
+            ray_bounce_color_reflection_factor: 0.25,
         };
     }
 }
