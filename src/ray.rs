@@ -37,6 +37,7 @@ impl Ray {
         ver_angle: f64,
     ) -> Ray {
         let mut r = Ray::new(p, d, x_value, y_value);
+        // TODO - fix this turn thing that causes problems with controling the obs
         r.turn_hor(hor_angle);
         r.turn_ver(ver_angle);
         return r;

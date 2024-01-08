@@ -51,6 +51,7 @@ impl Observer {
         self.generate_rays(parameters);
     }
 
+    // TODO - fix the move commands directions
     pub fn move_forward(&mut self, dist: f64, parameters: &Parameters) {
         self.pos.x += self.hor_angle.cos() * self.ver_angle.cos() * dist;
         self.pos.y += self.hor_angle.sin() * dist;
