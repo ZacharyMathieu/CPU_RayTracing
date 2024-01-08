@@ -39,14 +39,16 @@ pub fn get_average_color(color_vector: &Vec<&Color>, importance_factor: f64) -> 
 }
 // let mut color_vector: Vec<&Color> = Vec::new()
 struct RayCollision {
+    pub ray: Ray,
     pub factor: f64,
     pub length: f64,
     pub color_vector: Vec<Color>,
 }
 
 impl RayCollision {
-    fn default() -> RayCollision {
+    fn default(ray: Ray) -> RayCollision {
         return RayCollision {
+            ray: ray,
             factor: 0.,
             length: 0.,
             color_vector: Vec::new(),
@@ -57,11 +59,11 @@ impl RayCollision {
 fn get_ray_collision(
     sphere_vector: &Vec<Sphere>,
     parameters: &Parameters,
-    ray: &Ray,
     result: &mut RayCollision,
     remaining_bounces: u32,
 ) {
     if remaining_bounces > 0 {
+        let ray: &Ray = &result.ray;
         let mut collision: Option<(f64, &Sphere)> = ray.find_collision(sphere_vector);
         let mut bounce_factor: f64;
         let mut bounce_sphere: &Sphere;
@@ -80,14 +82,9 @@ fn get_ray_collision(
 
                 if remaining_bounces > 0 {
                     bounce_ray = bounce_ray.get_reflection(bounce_factor, bounce_sphere);
+                    result.ray = bounce_ray;
 
-                    get_ray_collision(
-                        sphere_vector,
-                        parameters,
-                        &bounce_ray,
-                        result,
-                        remaining_bounces - 1,
-                    );
+                    get_ray_collision(sphere_vector, parameters, result, remaining_bounces - 1);
 
                     // collision = bounce_ray.find_collision(sphere_vector);
 
@@ -131,18 +128,16 @@ pub fn display(
     let rays_slice: &[Ray] = &observer.rays;
 
     let mut ray_collisions: Vec<RayCollision> = Vec::with_capacity(rays_slice.len());
-    
+
     for i in 0..ray_collisions.len() {
-        ray_collisions[i] = RayCollision::default();
+        ray_collisions[i] = RayCollision::default(rays_slice[i]);
     }
 
-    rays_slice.par_iter().enumerate().for_each(|(index, ray)| {
-        let col: &mut RayCollision = &mut ray_collisions[index];
+    ray_collisions.par_iter_mut().for_each(|collision| {
         get_ray_collision(
             sphere_vector,
             parameters,
-            ray,
-            col,
+            collision,
             parameters.ray_bounce_count,
         );
     });
