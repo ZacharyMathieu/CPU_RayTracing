@@ -9,7 +9,7 @@ pub struct Ray {
     pub p1: Position,
     pub p2: Position,
     vector: Position,
-    pub l: f64,
+    pub length: f64,
     pub x_value: i32,
     pub y_value: i32,
 }
@@ -22,7 +22,7 @@ impl Ray {
             p1,
             p2,
             vector: vector,
-            l: l,
+            length: l,
             x_value: x_value,
             y_value: y_value,
         };
@@ -44,7 +44,7 @@ impl Ray {
 
     fn update_vector_and_len(&mut self) {
         self.vector = self.p2 - self.p1;
-        self.l = self.p1.dist(&self.p2);
+        self.length = self.p1.dist(&self.p2);
     }
 
     pub fn turn_hor(&mut self, angle: f64) {
