@@ -33,26 +33,63 @@ impl Observer {
                     },
                     x - parameters.min_hor_ray_value,
                     y - parameters.min_ver_ray_value,
-                    self.hor_angle,
+                    0.,
                     self.ver_angle,
+                    self.hor_angle,
                 );
                 self.rays.push(r);
             }
         }
     }
 
-    // TODO - fix this turn thing that causes problems with controling the obs
+    fn limit_angle(current: f64, min_angle: f64, max_angle: f64, loop_angle: bool) -> f64 {
+        if current < min_angle {
+            if loop_angle {
+                println!("ANGLE LOOPY (min) ACCURED");
+                return max_angle - (min_angle - current);
+            } else {
+                println!("ANGLE LIMIT (min) ACCURED");
+                return min_angle;
+            }
+        } else if current > max_angle {
+            if loop_angle {
+                println!("ANGLE LOOPY (max) ACCURED");
+                return min_angle + (current - max_angle);
+            } else {
+                println!("ANGLE LIMIT (max) ACCURED");
+                return max_angle;
+            }
+        } else {
+            return current;
+        }
+    }
+
     pub fn turn_hor(&mut self, angle: f64, parameters: &Parameters) {
         self.hor_angle += angle;
+
+        self.hor_angle = Self::limit_angle(
+            self.hor_angle,
+            parameters.observer_min_hor_angle,
+            parameters.observer_max_hor_angle,
+            parameters.observer_hor_angle_loop,
+        );
+
         self.generate_rays(parameters);
     }
 
     pub fn turn_ver(&mut self, angle: f64, parameters: &Parameters) {
         self.ver_angle += angle;
+
+        self.ver_angle = Self::limit_angle(
+            self.ver_angle,
+            parameters.observer_min_ver_angle,
+            parameters.observer_max_ver_angle,
+            parameters.observer_ver_angle_loop,
+        );
+
         self.generate_rays(parameters);
     }
 
-    // TODO - fix the move commands directions
     pub fn move_forward(&mut self, dist: f64, parameters: &Parameters) {
         self.pos.x += self.hor_angle.cos() * self.ver_angle.cos() * dist;
         self.pos.y += self.hor_angle.sin() * dist;

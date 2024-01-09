@@ -33,12 +33,14 @@ impl Ray {
         d: Position,
         x_value: i32,
         y_value: i32,
-        hor_angle: f64,
-        ver_angle: f64,
+        x_angle: f64,
+        y_angle: f64,
+        z_angle: f64,
     ) -> Ray {
         let mut r = Ray::new(p, d, x_value, y_value);
-        r.turn_hor(hor_angle);
-        r.turn_ver(ver_angle);
+        r.turn_x(x_angle);
+        r.turn_y(y_angle);
+        r.turn_z(z_angle);
         return r;
     }
 
@@ -47,13 +49,18 @@ impl Ray {
         self.length = self.p1.dist(&self.p2);
     }
 
-    pub fn turn_hor(&mut self, angle: f64) {
-        self.p2.turn_hor_around(angle, &self.p1);
+    pub fn turn_x(&mut self, angle: f64) {
+        self.p2.turn_x_around(angle, &self.p1);
         self.update_vector_and_len();
     }
 
-    pub fn turn_ver(&mut self, angle: f64) {
-        self.p2.turn_ver_around(angle, &self.p1);
+    pub fn turn_y(&mut self, angle: f64) {
+        self.p2.turn_y_around(angle, &self.p1);
+        self.update_vector_and_len();
+    }
+
+    pub fn turn_z(&mut self, angle: f64) {
+        self.p2.turn_z_around(angle, &self.p1);
         self.update_vector_and_len();
     }
 

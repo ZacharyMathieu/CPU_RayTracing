@@ -21,17 +21,17 @@ impl Position {
         return (self.x * p.x) + (self.y * p.y) + (self.z * p.z);
     }
 
-    pub fn turn_hor_around(&mut self, angle: f64, center: &Position) {
-        let dx = self.x - center.x;
+    pub fn turn_x_around(&mut self, angle: f64, center: &Position) {
         let dy = self.y - center.y;
+        let dz = self.z - center.z;
         let sin = angle.sin();
         let cos = angle.cos();
 
-        self.x = (dx * cos) - (dy * sin) + center.x;
-        self.y = (dx * sin) + (dy * cos) + center.y;
+        self.y = (dy * cos) - (dz * sin) + center.y;
+        self.z = (dy * sin) + (dz * cos) + center.z;
     }
 
-    pub fn turn_ver_around(&mut self, angle: f64, center: &Position) {
+    pub fn turn_y_around(&mut self, angle: f64, center: &Position) {
         let dx = self.x - center.x;
         let dz = self.z - center.z;
         let sin = angle.sin();
@@ -39,6 +39,16 @@ impl Position {
 
         self.x = (dx * cos) - (dz * sin) + center.x;
         self.z = (dx * sin) + (dz * cos) + center.z;
+    }
+
+    pub fn turn_z_around(&mut self, angle: f64, center: &Position) {
+        let dx = self.x - center.x;
+        let dy = self.y - center.y;
+        let sin = angle.sin();
+        let cos = angle.cos();
+
+        self.x = (dx * cos) - (dy * sin) + center.x;
+        self.y = (dx * sin) + (dy * cos) + center.y;
     }
 
     pub fn scaled(&self, factor: f64) -> Position {
