@@ -45,18 +45,14 @@ impl Observer {
     fn limit_angle(current: f64, min_angle: f64, max_angle: f64, loop_angle: bool) -> f64 {
         if current < min_angle {
             if loop_angle {
-                println!("ANGLE LOOPY (min) ACCURED");
                 return max_angle - (min_angle - current);
             } else {
-                println!("ANGLE LIMIT (min) ACCURED");
                 return min_angle;
             }
         } else if current > max_angle {
             if loop_angle {
-                println!("ANGLE LOOPY (max) ACCURED");
                 return min_angle + (current - max_angle);
             } else {
-                println!("ANGLE LIMIT (max) ACCURED");
                 return max_angle;
             }
         } else {
