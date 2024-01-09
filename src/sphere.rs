@@ -127,6 +127,7 @@ impl Sphere {
         rng: &mut rand::prelude::ThreadRng,
         color: Color,
     ) -> Sphere {
+        let radius_factor: f64 = rng.gen();
         return Sphere {
             pos: Position {
                 x: rng.gen_range(parameters.min_x, parameters.max_x),
@@ -136,12 +137,13 @@ impl Sphere {
             v_x: rng.gen_range(parameters.min_vx, parameters.max_vx),
             v_y: rng.gen_range(parameters.min_vy, parameters.max_vy),
             v_z: rng.gen_range(parameters.min_vz, parameters.max_vz),
-            radius: rng.gen_range(parameters.min_sphere_radius, parameters.max_sphere_radius),
+            radius: ((radius_factor
+                * (parameters.max_sphere_radius - parameters.min_sphere_radius))
+                + parameters.min_sphere_radius),
             color: color,
-            light_factor: rng.gen_range(
-                parameters.min_sphere_light_factor,
-                parameters.max_sphere_light_factor,
-            ),
+            light_factor: f64::sqrt(((1. - radius_factor)
+                * (parameters.max_sphere_light_factor - parameters.min_sphere_light_factor))
+                + parameters.min_sphere_light_factor),
         };
     }
 
