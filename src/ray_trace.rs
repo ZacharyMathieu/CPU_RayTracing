@@ -79,7 +79,6 @@ fn get_light_factor(length: &f64, sphere_light_factor: &f64, parameters: &Parame
         * sphere_light_factor)
         .max(parameters.min_pixel_factor)
         .min(1.);
-    // return f64::powi(length, 2) * factor * light_factor;
 }
 
 fn apply_light_factor(color: &Color, light_factor: &f64) -> Color {

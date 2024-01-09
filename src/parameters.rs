@@ -49,8 +49,8 @@ pub struct Parameters {
 
 impl Parameters {
     pub fn default() -> Parameters {
-        let half_width: i32 = 60;
-        let half_height: i32 = 30;
+        let half_width: i32 = 80;
+        let half_height: i32 = 40;
         let look_angle = 0.05;
         let move_distance = 0.25;
         let physics_bounds_value = 20.0;
@@ -101,8 +101,8 @@ impl Parameters {
             min_pixel_factor: 0.,
             fog_factor: 0.25,
             background_color: Color::RGB(0, 0, 0),
-            ray_bounce_count: 5,
-            ray_bounce_color_reflection_factor: 0.75,
+            ray_bounce_count: 2,
+            ray_bounce_color_reflection_factor: 1.,
         };
     }
 }

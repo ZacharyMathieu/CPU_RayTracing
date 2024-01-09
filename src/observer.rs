@@ -41,6 +41,7 @@ impl Observer {
         }
     }
 
+    // TODO - fix this turn thing that causes problems with controling the obs
     pub fn turn_hor(&mut self, angle: f64, parameters: &Parameters) {
         self.hor_angle += angle;
         self.generate_rays(parameters);
