@@ -55,8 +55,8 @@ pub struct Parameters {
 
 impl Parameters {
     pub fn default() -> Parameters {
-        let half_width: i32 = 80;
-        let half_height: i32 = 40;
+        let half_width: i32 = 320;
+        let half_height: i32 = 160;
         let look_angle = 0.05;
         let move_distance = 0.25;
         let physics_bounds_value = 20.0;
@@ -70,7 +70,7 @@ impl Parameters {
             observer_look_vector_distance: half_height as f64,
             sphere_count: 100,
             g: 0.00001,
-            display_scale: 8.0,
+            display_scale: 2.,
             physics: true,
             frame_period_ms: 1,
             observer_default_position: Position {
@@ -113,8 +113,8 @@ impl Parameters {
             min_pixel_factor: 0.,
             fog_factor: 0.25,
             background_color: Color::RGB(0, 0, 0),
-            ray_bounce_count: 2,
-            ray_bounce_color_reflection_factor: 1.,
+            ray_bounce_count: 6,
+            ray_bounce_color_reflection_factor: 0.75,
         };
     }
 }
