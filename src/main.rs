@@ -1,4 +1,5 @@
 extern crate sdl2;
+
 use rand::rngs::ThreadRng;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
@@ -8,8 +9,8 @@ mod observer;
 mod parameters;
 mod position;
 mod ray;
-mod sphere;
 mod ray_trace;
+mod sphere;
 
 use crate::observer::Observer;
 use crate::parameters::Parameters;
