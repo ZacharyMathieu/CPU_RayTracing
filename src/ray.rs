@@ -1,4 +1,6 @@
-use crate::{position::Position, sphere::Sphere};
+use rand::random;
+
+use crate::{parameters::RayParameters, position::Position, sphere::Sphere};
 
 fn squared(f: f64) -> f64 {
     return f * f;
@@ -87,7 +89,6 @@ impl Ray {
             - 2.0 * (s.pos.x * self.p1.x + s.pos.y * self.p1.y + s.pos.z * self.p1.z)
             - squared(s.radius);
 
-        // Guard clause :D
         let d = squared(b) - 4.0 * a * c;
         if d < 0.0 {
             return f64::NAN;
@@ -133,7 +134,20 @@ impl Ray {
         return result;
     }
 
-    pub fn get_reflection(&self, intersection_factor: f64, sphere: &Sphere) -> Ray {
+    pub fn get_bounce(
+        &self,
+        intersection_factor: f64,
+        sphere: &Sphere,
+        ray_parameters: &RayParameters,
+    ) -> Ray {
+        if random::<f64>() < sphere.reflexivity_factor {
+            return self.bounce_reflect(intersection_factor, sphere);
+        } else {
+            return self.bounce_random(intersection_factor, sphere, ray_parameters);
+        }
+    }
+
+    fn bounce_reflect(&self, intersection_factor: f64, sphere: &Sphere) -> Ray {
         let intersection = self.get_position_from_factor(intersection_factor);
         let u = intersection - sphere.pos;
         let v = intersection - self.p1;
@@ -141,5 +155,35 @@ impl Ray {
         let direction = (intersection + w).scaled(2.0) - self.p1;
 
         return Ray::new(intersection, direction, self.x_value, self.y_value);
+    }
+
+    fn bounce_random(
+        &self,
+        intersection_factor: f64,
+        sphere: &Sphere,
+        ray_parameters: &RayParameters,
+    ) -> Ray {
+        let mut bounced_ray = self.bounce_reflect(intersection_factor, sphere);
+
+        bounced_ray.turn_x(
+            (random::<f64>()
+                * (ray_parameters.max_random_bounce_angle_change
+                    - ray_parameters.min_random_bounce_angle_change))
+                - ray_parameters.min_random_bounce_angle_change,
+        );
+        bounced_ray.turn_y(
+            (random::<f64>()
+                * (ray_parameters.max_random_bounce_angle_change
+                    - ray_parameters.min_random_bounce_angle_change))
+                - ray_parameters.min_random_bounce_angle_change,
+        );
+        bounced_ray.turn_z(
+            (random::<f64>()
+                * (ray_parameters.max_random_bounce_angle_change
+                    - ray_parameters.min_random_bounce_angle_change))
+                - ray_parameters.min_random_bounce_angle_change,
+        );
+
+        return bounced_ray;
     }
 }

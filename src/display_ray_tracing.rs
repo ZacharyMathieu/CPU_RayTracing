@@ -19,9 +19,11 @@ pub fn display(
     });
 
     // Parallel ray casting
-    ray_traces.par_iter_mut().for_each(|trace: &mut RayTrace<'_>| {
-        trace.trace(sphere_vector, parameters);
-    });
+    ray_traces
+        .par_iter_mut()
+        .for_each(|trace: &mut RayTrace<'_>| {
+            trace.trace(sphere_vector, parameters);
+        });
 
     // Displaying the colors
     ray_traces.iter().for_each(|trace: &RayTrace<'_>| {

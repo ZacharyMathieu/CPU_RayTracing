@@ -33,6 +33,8 @@ pub struct RayParameters {
     pub background_color: Color,
     pub bounce_count: u32,
     pub bounce_color_reflection_factor: f64,
+    pub min_random_bounce_angle_change: f64,
+    pub max_random_bounce_angle_change: f64,
 }
 
 pub struct SphereParameters {
@@ -41,6 +43,8 @@ pub struct SphereParameters {
     pub max_radius: f64,
     pub min_light_factor: f64,
     pub max_light_factor: f64,
+    pub min_reflexivity_factor: f64,
+    pub max_reflexivity_factor: f64,
 }
 
 pub struct PhysicsParameters {
@@ -71,8 +75,8 @@ pub struct Parameters {
 
 impl Parameters {
     pub fn default() -> Parameters {
-        let width: i32 = 160;
-        let height: i32 = 160;
+        let width: i32 = 640;
+        let height: i32 = 320;
         let look_angle = 0.05;
         let move_distance = 0.25;
         let physics_bounds_value = 20.0;
@@ -80,7 +84,7 @@ impl Parameters {
 
         return Parameters {
             frame_period_ms: 1,
-            display_scale: 4.,
+            display_scale: 2.,
             observer_parameters: ObserverParameters {
                 look_vector_distance: (height / 2) as f64,
                 default_position: Position {
@@ -95,8 +99,8 @@ impl Parameters {
                 min_hor_angle: 0.,
                 max_hor_angle: 2. * std::f64::consts::PI,
                 hor_angle_loop: true,
-                min_ver_angle: -std::f64::consts::PI / 2.,
-                max_ver_angle: std::f64::consts::PI / 2.,
+                min_ver_angle: -std::f64::consts::FRAC_PI_2,
+                max_ver_angle: std::f64::consts::FRAC_PI_2,
                 ver_angle_loop: false,
                 move_forward_distance: move_distance,
                 move_backward_distance: -move_distance,
@@ -115,6 +119,8 @@ impl Parameters {
                 background_color: Color::RGB(0, 0, 0),
                 bounce_count: 6,
                 bounce_color_reflection_factor: 0.75,
+                min_random_bounce_angle_change: 0.,
+                max_random_bounce_angle_change: std::f64::consts::FRAC_PI_2,
             },
             sphere_parameters: SphereParameters {
                 sphere_count: 100,
@@ -122,6 +128,8 @@ impl Parameters {
                 max_radius: 5.0,
                 min_light_factor: 0.,
                 max_light_factor: 10.,
+                min_reflexivity_factor: 0.,
+                max_reflexivity_factor: 1.,
             },
             physics_parameters: PhysicsParameters {
                 g: 0.00001,

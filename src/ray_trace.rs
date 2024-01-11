@@ -19,7 +19,7 @@ impl<'a> RayTrace<'a> {
 
     pub fn trace(&mut self, sphere_vector: &Vec<Sphere>, parameters: &Parameters) {
         self.trace_rec(
-            &mut self.ray.clone(),
+            &mut self.ray.clone(), // TODO remove clone the ray??
             sphere_vector,
             parameters,
             parameters.ray_parameters.bounce_count,
@@ -61,7 +61,7 @@ impl<'a> RayTrace<'a> {
 
                     if remaining_bounces > 0 {
                         self.trace_rec(
-                            &mut ray.get_reflection(factor, sphere),
+                            &mut ray.get_bounce(factor, sphere, &parameters.ray_parameters),
                             sphere_vector,
                             parameters,
                             remaining_bounces - 1,
@@ -75,7 +75,9 @@ impl<'a> RayTrace<'a> {
 }
 
 fn get_light_factor(length: &f64, sphere_light_factor: &f64, parameters: &Parameters) -> f64 {
-    return ((1. / ((length + (1. / parameters.ray_parameters.fog_factor)) * parameters.ray_parameters.fog_factor))
+    return ((1.
+        / ((length + (1. / parameters.ray_parameters.fog_factor))
+            * parameters.ray_parameters.fog_factor))
         * sphere_light_factor)
         .max(parameters.ray_parameters.min_pixel_factor)
         .min(1.);

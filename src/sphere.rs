@@ -15,6 +15,7 @@ pub struct Sphere {
     pub radius: f64,
     pub color: Color,
     pub light_factor: f64,
+    pub reflexivity_factor: f64,
 }
 
 impl Sphere {
@@ -128,22 +129,49 @@ impl Sphere {
         color: Color,
     ) -> Sphere {
         let radius_factor: f64 = rng.gen();
+
         return Sphere {
             pos: Position {
-                x: rng.gen_range(parameters.physics_parameters.min_x, parameters.physics_parameters.max_x),
-                y: rng.gen_range(parameters.physics_parameters.min_y, parameters.physics_parameters.max_y),
-                z: rng.gen_range(parameters.physics_parameters.min_z, parameters.physics_parameters.max_z),
+                x: rng.gen_range(
+                    parameters.physics_parameters.min_x,
+                    parameters.physics_parameters.max_x,
+                ),
+                y: rng.gen_range(
+                    parameters.physics_parameters.min_y,
+                    parameters.physics_parameters.max_y,
+                ),
+                z: rng.gen_range(
+                    parameters.physics_parameters.min_z,
+                    parameters.physics_parameters.max_z,
+                ),
             },
-            v_x: rng.gen_range(parameters.physics_parameters.min_vx, parameters.physics_parameters.max_vx),
-            v_y: rng.gen_range(parameters.physics_parameters.min_vy, parameters.physics_parameters.max_vy),
-            v_z: rng.gen_range(parameters.physics_parameters.min_vz, parameters.physics_parameters.max_vz),
+            v_x: rng.gen_range(
+                parameters.physics_parameters.min_vx,
+                parameters.physics_parameters.max_vx,
+            ),
+            v_y: rng.gen_range(
+                parameters.physics_parameters.min_vy,
+                parameters.physics_parameters.max_vy,
+            ),
+            v_z: rng.gen_range(
+                parameters.physics_parameters.min_vz,
+                parameters.physics_parameters.max_vz,
+            ),
             radius: ((radius_factor
-                * (parameters.sphere_parameters.max_radius - parameters.sphere_parameters.min_radius))
+                * (parameters.sphere_parameters.max_radius
+                    - parameters.sphere_parameters.min_radius))
                 + parameters.sphere_parameters.min_radius),
             color: color,
-            light_factor: f64::sqrt(((1. - radius_factor)
-                * (parameters.sphere_parameters.max_light_factor - parameters.sphere_parameters.min_light_factor))
-                + parameters.sphere_parameters.min_light_factor),
+            light_factor: f64::sqrt(
+                ((1. - radius_factor)
+                    * (parameters.sphere_parameters.max_light_factor
+                        - parameters.sphere_parameters.min_light_factor))
+                    + parameters.sphere_parameters.min_light_factor,
+            ),
+            reflexivity_factor: rng.gen_range(
+                parameters.sphere_parameters.min_reflexivity_factor,
+                parameters.sphere_parameters.max_reflexivity_factor,
+            ),
         };
     }
 
