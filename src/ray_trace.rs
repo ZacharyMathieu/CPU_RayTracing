@@ -19,7 +19,7 @@ impl<'a> RayTrace<'a> {
 
     pub fn trace(&mut self, sphere_vector: &Vec<Sphere>, ray_parameters: &RayParameters) {
         self.trace_rec(
-            &mut self.ray.clone(), // TODO remove clone the ray??
+            self.ray,
             sphere_vector,
             ray_parameters,
             ray_parameters.bounce_count,
@@ -30,6 +30,8 @@ impl<'a> RayTrace<'a> {
     }
 
     fn set_color(&mut self, ray_parameters: &RayParameters) {
+        // self.color_vector.reverse();
+
         if self.color_vector.len() > 0 {
             self.color = get_average_color(
                 &self.color_vector,
@@ -40,37 +42,41 @@ impl<'a> RayTrace<'a> {
 
     fn trace_rec(
         &mut self,
-        ray: &mut Ray,
+        ray: &Ray,
         sphere_vector: &Vec<Sphere>,
         ray_parameters: &RayParameters,
         remaining_bounces: u32,
         distance: &f64,
     ) {
-        if remaining_bounces > 0 {
-            let collision: Option<(f64, &Sphere)> = ray.find_collision(sphere_vector);
+        let collision: Option<(f64, &Sphere)> = ray.find_collision(sphere_vector);
 
-            match collision {
-                None => (),
-                Some((factor, sphere)) => {
-                    let new_distance: f64 = distance + ray.length * factor;
-
-                    self.color_vector.push(apply_light_factor(
-                        &sphere.color,
-                        &get_light_factor(&new_distance, &sphere.light_factor, ray_parameters),
-                    ));
-
-                    if remaining_bounces > 0 {
-                        self.trace_rec(
-                            &mut ray.get_bounce(factor, sphere, ray_parameters),
-                            sphere_vector,
-                            ray_parameters,
-                            remaining_bounces - 1,
-                            &new_distance,
-                        );
-                    }
+        match collision {
+            None => {
+                if remaining_bounces > 0 {
+                    self.color_vector.push(ray_parameters.background_color);
                 }
-            };
-        }
+            }
+            Some((factor, sphere)) => {
+                let new_distance: f64 = distance + ray.length * factor;
+
+                self.color_vector.push(apply_light_factor(
+                    &sphere.color,
+                    &get_light_factor(&new_distance, &sphere.light_factor, ray_parameters),
+                ));
+
+                if remaining_bounces > 0 {
+                    let ray_bounce = ray.get_bounce(factor, sphere, ray_parameters);
+
+                    self.trace_rec(
+                        &ray_bounce,
+                        sphere_vector,
+                        ray_parameters,
+                        remaining_bounces - 1,
+                        &new_distance,
+                    );
+                }
+            }
+        };
     }
 }
 

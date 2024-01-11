@@ -168,10 +168,17 @@ impl Sphere {
                         - parameters.sphere_parameters.min_light_factor))
                     + parameters.sphere_parameters.min_light_factor,
             ),
-            reflexivity_factor: rng.gen_range(
-                parameters.sphere_parameters.min_reflexivity_factor,
-                parameters.sphere_parameters.max_reflexivity_factor,
-            ),
+            reflexivity_factor: if parameters.sphere_parameters.min_reflexivity_factor
+                == parameters.sphere_parameters.max_reflexivity_factor
+            {
+                parameters.sphere_parameters.min_reflexivity_factor
+            } else {
+                rng.gen_range(
+                    parameters.sphere_parameters.min_reflexivity_factor,
+                    parameters.sphere_parameters.max_reflexivity_factor,
+                )
+                // reflexivity_factor: (radius_factor)
+            },
         };
     }
 

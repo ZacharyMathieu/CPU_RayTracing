@@ -35,6 +35,7 @@ pub struct RayParameters {
     pub bounce_color_reflection_factor: f64,
     pub min_random_bounce_angle_change: f64,
     pub max_random_bounce_angle_change: f64,
+    // pub bounce_split_count: u32,
 }
 
 pub struct SphereParameters {
@@ -75,8 +76,10 @@ pub struct Parameters {
 
 impl Parameters {
     pub fn default() -> Parameters {
-        let width: i32 = 640;
-        let height: i32 = 320;
+        // let width: i32 = 640;
+        // let height: i32 = 320;
+        let width: i32 = 100;
+        let height: i32 = 100;
         let look_angle = 0.05;
         let move_distance = 0.25;
         let physics_bounds_value = 20.0;
@@ -84,7 +87,7 @@ impl Parameters {
 
         return Parameters {
             frame_period_ms: 1,
-            display_scale: 2.,
+            display_scale: 8.,
             observer_parameters: ObserverParameters {
                 look_vector_distance: (height / 2) as f64,
                 default_position: Position {
@@ -115,20 +118,21 @@ impl Parameters {
                 min_ver_value: -height / 2,
                 max_ver_value: height / 2,
                 min_pixel_factor: 0.,
-                fog_factor: 0.25,
+                fog_factor: 0.05,
                 background_color: Color::RGB(0, 0, 0),
-                bounce_count: 6,
+                bounce_count: 1,
                 bounce_color_reflection_factor: 0.75,
                 min_random_bounce_angle_change: 0.,
                 max_random_bounce_angle_change: std::f64::consts::FRAC_PI_2,
+                // bounce_split_count: 200,
             },
             sphere_parameters: SphereParameters {
                 sphere_count: 100,
                 min_radius: 0.5,
                 max_radius: 5.0,
                 min_light_factor: 0.,
-                max_light_factor: 10.,
-                min_reflexivity_factor: 0.,
+                max_light_factor: 20.,
+                min_reflexivity_factor: 1.,
                 max_reflexivity_factor: 1.,
             },
             physics_parameters: PhysicsParameters {
