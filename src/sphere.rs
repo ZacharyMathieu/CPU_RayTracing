@@ -1,11 +1,11 @@
 use rand::Rng;
 use sdl2::pixels::Color;
 
-use crate::{parameters::Parameters, position::Position};
-
-fn float_to_color(f: f64) -> Color {
-    return Color::RGB((f * 255.0) as u8, 0, ((1.0 - f) * 255.0) as u8);
-}
+use crate::{
+    parameters::Parameters,
+    position::Position,
+    util::{rand_color, rand_range},
+};
 
 pub struct Sphere {
     pub pos: Position,
@@ -111,13 +111,18 @@ impl Sphere {
         //     light_factor: 100.,
         // });
 
-        for i in 0..parameters.sphere_parameters.sphere_count {
-            let progress = i as f64 / (parameters.sphere_parameters.sphere_count - 1) as f64;
-            v.push(Sphere::generate_random(
-                parameters,
-                rng,
-                float_to_color(progress),
-            ));
+        // for i in 0..parameters.sphere_parameters.sphere_count {
+        //     let progress = i as f64 / (parameters.sphere_parameters.sphere_count - 1) as f64;
+        //     v.push(Sphere::generate_random(
+        //         parameters,
+        //         rng,
+        //         float_to_color(progress),
+        //     ));
+        // }
+
+        for _ in 0..parameters.sphere_parameters.sphere_count {
+            let color: Color = rand_color(rng);
+            v.push(Sphere::generate_random(parameters, rng, color));
         }
 
         return v;
@@ -132,28 +137,34 @@ impl Sphere {
 
         return Sphere {
             pos: Position {
-                x: rng.gen_range(
+                x: rand_range(
+                    rng,
                     parameters.physics_parameters.min_x,
                     parameters.physics_parameters.max_x,
                 ),
-                y: rng.gen_range(
+                y: rand_range(
+                    rng,
                     parameters.physics_parameters.min_y,
                     parameters.physics_parameters.max_y,
                 ),
-                z: rng.gen_range(
+                z: rand_range(
+                    rng,
                     parameters.physics_parameters.min_z,
                     parameters.physics_parameters.max_z,
                 ),
             },
-            v_x: rng.gen_range(
+            v_x: rand_range(
+                rng,
                 parameters.physics_parameters.min_vx,
                 parameters.physics_parameters.max_vx,
             ),
-            v_y: rng.gen_range(
+            v_y: rand_range(
+                rng,
                 parameters.physics_parameters.min_vy,
                 parameters.physics_parameters.max_vy,
             ),
-            v_z: rng.gen_range(
+            v_z: rand_range(
+                rng,
                 parameters.physics_parameters.min_vz,
                 parameters.physics_parameters.max_vz,
             ),
@@ -162,23 +173,16 @@ impl Sphere {
                     - parameters.sphere_parameters.min_radius))
                 + parameters.sphere_parameters.min_radius),
             color: color,
-            light_factor: f64::sqrt(
-                ((1. - radius_factor)
-                    * (parameters.sphere_parameters.max_light_factor
-                        - parameters.sphere_parameters.min_light_factor))
-                    + parameters.sphere_parameters.min_light_factor,
+            light_factor: rand_range(
+                rng,
+                parameters.sphere_parameters.min_light_factor,
+                parameters.sphere_parameters.max_light_factor,
             ),
-            reflexivity_factor: if parameters.sphere_parameters.min_reflexivity_factor
-                == parameters.sphere_parameters.max_reflexivity_factor
-            {
-                parameters.sphere_parameters.min_reflexivity_factor
-            } else {
-                rng.gen_range(
-                    parameters.sphere_parameters.min_reflexivity_factor,
-                    parameters.sphere_parameters.max_reflexivity_factor,
-                )
-                // reflexivity_factor: (radius_factor)
-            },
+            reflexivity_factor: rand_range(
+                rng,
+                parameters.sphere_parameters.min_reflexivity_factor,
+                parameters.sphere_parameters.max_reflexivity_factor,
+            ),
         };
     }
 

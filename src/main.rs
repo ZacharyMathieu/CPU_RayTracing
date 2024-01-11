@@ -11,6 +11,7 @@ mod position;
 mod ray;
 mod ray_trace;
 mod sphere;
+mod util;
 
 use crate::observer::Observer;
 use crate::parameters::Parameters;

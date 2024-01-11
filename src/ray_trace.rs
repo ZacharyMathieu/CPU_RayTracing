@@ -1,3 +1,4 @@
+use rand::rngs::ThreadRng;
 use sdl2::pixels::Color;
 
 use crate::{parameters::RayParameters, ray::Ray, sphere::Sphere};
@@ -18,20 +19,20 @@ impl<'a> RayTrace<'a> {
     }
 
     pub fn trace(&mut self, sphere_vector: &Vec<Sphere>, ray_parameters: &RayParameters) {
+        let mut rng: ThreadRng = rand::thread_rng();
         self.trace_rec(
             self.ray,
             sphere_vector,
             ray_parameters,
             ray_parameters.bounce_count,
             &0.,
+            &mut rng,
         );
 
         self.set_color(ray_parameters)
     }
 
     fn set_color(&mut self, ray_parameters: &RayParameters) {
-        // self.color_vector.reverse();
-
         if self.color_vector.len() > 0 {
             self.color = get_average_color(
                 &self.color_vector,
@@ -47,17 +48,21 @@ impl<'a> RayTrace<'a> {
         ray_parameters: &RayParameters,
         remaining_bounces: u32,
         distance: &f64,
+        rng: &mut rand::prelude::ThreadRng,
     ) {
         let collision: Option<(f64, &Sphere)> = ray.find_collision(sphere_vector);
 
         match collision {
             None => {
-                if remaining_bounces > 0 {
-                    self.color_vector.push(ray_parameters.background_color);
+                if (ray_parameters.reflect_background)
+                    && (remaining_bounces > 0)
+                    && (*distance > 0.)
+                {
+                    self.color_vector.push(ray_parameters.background_color)
                 }
             }
             Some((factor, sphere)) => {
-                let new_distance: f64 = distance + ray.length * factor;
+                let new_distance: f64 = distance + (ray.length * factor);
 
                 self.color_vector.push(apply_light_factor(
                     &sphere.color,
@@ -65,7 +70,7 @@ impl<'a> RayTrace<'a> {
                 ));
 
                 if remaining_bounces > 0 {
-                    let ray_bounce = ray.get_bounce(factor, sphere, ray_parameters);
+                    let ray_bounce = ray.get_bounce(factor, sphere, ray_parameters, rng);
 
                     self.trace_rec(
                         &ray_bounce,
@@ -73,6 +78,7 @@ impl<'a> RayTrace<'a> {
                         ray_parameters,
                         remaining_bounces - 1,
                         &new_distance,
+                        rng,
                     );
                 }
             }
@@ -85,10 +91,14 @@ fn get_light_factor(
     sphere_light_factor: &f64,
     ray_parameters: &RayParameters,
 ) -> f64 {
-    return ((1. / ((length + (1. / ray_parameters.fog_factor)) * ray_parameters.fog_factor))
-        * sphere_light_factor)
-        .max(ray_parameters.min_pixel_factor)
-        .min(1.);
+    return if ray_parameters.fog_factor == 0. {
+        1.
+    } else {
+        ((1. / ((length + (1. / ray_parameters.fog_factor)) * ray_parameters.fog_factor))
+            * sphere_light_factor)
+            .max(ray_parameters.min_pixel_factor)
+            .min(1.)
+    };
 }
 
 fn apply_light_factor(color: &Color, light_factor: &f64) -> Color {
