@@ -127,7 +127,12 @@ fn main() {
         }
 
         // draw and refresh the canvas display
-        display(&observer, &sphere_vector, &params, &mut canvas);
+        display(
+            &observer,
+            &sphere_vector,
+            &params.ray_parameters,
+            &mut canvas,
+        );
 
         // sleep between frames
         thread::sleep(time::Duration::from_millis(params.frame_period_ms));
