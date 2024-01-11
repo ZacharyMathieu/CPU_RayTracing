@@ -9,7 +9,7 @@ pub fn display(
     parameters: &Parameters,
     canvas: &mut Canvas<Window>,
 ) {
-    canvas.set_draw_color(parameters.background_color);
+    canvas.set_draw_color(parameters.ray_parameters.background_color);
     canvas.clear();
 
     let mut ray_traces: Vec<RayTrace> = Vec::new();

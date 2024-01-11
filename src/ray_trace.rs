@@ -13,7 +13,7 @@ impl<'a> RayTrace<'a> {
         return RayTrace {
             ray: ray,
             color_vector: Vec::new(),
-            color: parameters.background_color,
+            color: parameters.ray_parameters.background_color,
         };
     }
 
@@ -22,7 +22,7 @@ impl<'a> RayTrace<'a> {
             &mut self.ray.clone(),
             sphere_vector,
             parameters,
-            parameters.ray_bounce_count,
+            parameters.ray_parameters.bounce_count,
             &0.,
         );
 
@@ -33,7 +33,7 @@ impl<'a> RayTrace<'a> {
         if self.color_vector.len() > 0 {
             self.color = get_average_color(
                 &self.color_vector,
-                &parameters.ray_bounce_color_reflection_factor,
+                &parameters.ray_parameters.bounce_color_reflection_factor,
             );
         }
     }
@@ -75,9 +75,9 @@ impl<'a> RayTrace<'a> {
 }
 
 fn get_light_factor(length: &f64, sphere_light_factor: &f64, parameters: &Parameters) -> f64 {
-    return ((1. / ((length + (1. / parameters.fog_factor)) * parameters.fog_factor))
+    return ((1. / ((length + (1. / parameters.ray_parameters.fog_factor)) * parameters.ray_parameters.fog_factor))
         * sphere_light_factor)
-        .max(parameters.min_pixel_factor)
+        .max(parameters.ray_parameters.min_pixel_factor)
         .min(1.);
 }
 

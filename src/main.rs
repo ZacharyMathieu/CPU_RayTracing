@@ -42,10 +42,10 @@ fn main() {
     let window = video_subsystem
         .window(
             "Example",
-            ((params.max_hor_ray_value - params.min_hor_ray_value) as f32 * params.display_scale)
-                as u32,
-            ((params.max_ver_ray_value - params.min_ver_ray_value) as f32 * params.display_scale)
-                as u32,
+            ((params.ray_parameters.max_hor_value - params.ray_parameters.min_hor_value) as f32
+                * params.display_scale) as u32,
+            ((params.ray_parameters.max_ver_value - params.ray_parameters.min_ver_value) as f32
+                * params.display_scale) as u32,
         )
         .build()
         .unwrap();
@@ -71,59 +71,56 @@ fn main() {
                 Event::KeyDown {
                     keycode: Some(Keycode::Up),
                     ..
-                } => observer.turn_ver(params.observer_look_up_angle, &params),
+                } => observer.turn_ver(params.observer_parameters.look_up_angle, &params),
                 Event::KeyDown {
                     keycode: Some(Keycode::Down),
                     ..
-                } => observer.turn_ver(params.observer_look_down_angle, &params),
+                } => observer.turn_ver(params.observer_parameters.look_down_angle, &params),
                 Event::KeyDown {
                     keycode: Some(Keycode::Left),
                     ..
-                } => observer.turn_hor(params.observer_look_left_angle, &params),
+                } => observer.turn_hor(params.observer_parameters.look_left_angle, &params),
                 Event::KeyDown {
                     keycode: Some(Keycode::Right),
                     ..
-                } => observer.turn_hor(params.observer_look_right_angle, &params),
+                } => observer.turn_hor(params.observer_parameters.look_right_angle, &params),
                 Event::KeyDown {
                     keycode: Some(Keycode::W),
                     ..
-                } => observer.move_forward(params.observer_move_forward_distance, &params),
+                } => {
+                    observer.move_forward(params.observer_parameters.move_forward_distance, &params)
+                }
                 Event::KeyDown {
                     keycode: Some(Keycode::S),
                     ..
-                } => observer.move_forward(params.observer_move_backward_distance, &params),
+                } => observer
+                    .move_forward(params.observer_parameters.move_backward_distance, &params),
                 Event::KeyDown {
                     keycode: Some(Keycode::A),
                     ..
-                } => observer.move_hor(params.observer_move_left_distance, &params),
+                } => observer.move_hor(params.observer_parameters.move_left_distance, &params),
                 Event::KeyDown {
                     keycode: Some(Keycode::D),
                     ..
-                } => observer.move_hor(params.observer_move_right_distance, &params),
+                } => observer.move_hor(params.observer_parameters.move_right_distance, &params),
                 Event::KeyDown {
                     keycode: Some(Keycode::Space),
                     ..
-                } => observer.move_ver(params.observer_move_up_distance, &params),
+                } => observer.move_ver(params.observer_parameters.move_up_distance, &params),
                 Event::KeyDown {
                     keycode: Some(Keycode::LShift),
                     ..
-                } => observer.move_ver(params.observer_move_down_distance, &params),
+                } => observer.move_ver(params.observer_parameters.move_down_distance, &params),
                 Event::KeyDown {
                     keycode: Some(Keycode::R),
                     ..
                 } => observer = Observer::default(&params),
-                _ => {}
-                // TODO : change the resolution
-                // TODO : change the observer_look_vector_distance
-                // TODO : change observer movement/rotation speed
-                // TODO : change the fog factor
-                // TODO : ray_bounce_color_reflection_factor
-                // TODO : 
+                _ => {} // TODO : issue #1
             }
         }
 
         // physics
-        if params.physics {
+        if params.physics_parameters.enabled {
             for s in sphere_vector.iter_mut() {
                 s.physics(&params);
             }

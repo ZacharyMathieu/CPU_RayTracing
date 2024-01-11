@@ -10,7 +10,7 @@ pub struct Observer {
 impl Observer {
     pub fn default(parameters: &Parameters) -> Observer {
         let mut obs = Observer {
-            pos: parameters.observer_default_position.clone(),
+            pos: parameters.observer_parameters.default_position.clone(),
             hor_angle: 0.0,
             ver_angle: 0.0,
             rays: Vec::new(),
@@ -22,17 +22,21 @@ impl Observer {
     fn generate_rays(&mut self, parameters: &Parameters) {
         self.rays.clear();
 
-        for x in parameters.min_hor_ray_value..parameters.max_hor_ray_value as i32 {
-            for y in parameters.min_ver_ray_value..parameters.max_ver_ray_value as i32 {
+        for x in
+            parameters.ray_parameters.min_hor_value..parameters.ray_parameters.max_hor_value as i32
+        {
+            for y in parameters.ray_parameters.min_ver_value
+                ..parameters.ray_parameters.max_ver_value as i32
+            {
                 let r = Ray::new_turned(
                     self.pos.clone(),
                     Position {
-                        x: parameters.observer_look_vector_distance,
+                        x: parameters.observer_parameters.look_vector_distance,
                         y: x as f64,
                         z: y as f64,
                     },
-                    x - parameters.min_hor_ray_value,
-                    y - parameters.min_ver_ray_value,
+                    x - parameters.ray_parameters.min_hor_value,
+                    y - parameters.ray_parameters.min_ver_value,
                     0.,
                     self.ver_angle,
                     self.hor_angle,
@@ -65,9 +69,9 @@ impl Observer {
 
         self.hor_angle = Self::limit_angle(
             self.hor_angle,
-            parameters.observer_min_hor_angle,
-            parameters.observer_max_hor_angle,
-            parameters.observer_hor_angle_loop,
+            parameters.observer_parameters.min_hor_angle,
+            parameters.observer_parameters.max_hor_angle,
+            parameters.observer_parameters.hor_angle_loop,
         );
 
         self.generate_rays(parameters);
@@ -78,9 +82,9 @@ impl Observer {
 
         self.ver_angle = Self::limit_angle(
             self.ver_angle,
-            parameters.observer_min_ver_angle,
-            parameters.observer_max_ver_angle,
-            parameters.observer_ver_angle_loop,
+            parameters.observer_parameters.min_ver_angle,
+            parameters.observer_parameters.max_ver_angle,
+            parameters.observer_parameters.ver_angle_loop,
         );
 
         self.generate_rays(parameters);
