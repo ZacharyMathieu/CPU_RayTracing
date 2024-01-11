@@ -113,6 +113,12 @@ fn main() {
                     ..
                 } => observer = Observer::default(&params),
                 _ => {}
+                // TODO : change the resolution
+                // TODO : change the observer_look_vector_distance
+                // TODO : change observer movement/rotation speed
+                // TODO : change the fog factor
+                // TODO : ray_bounce_color_reflection_factor
+                // TODO : 
             }
         }
 
