@@ -81,7 +81,7 @@ impl Parameters {
         let height: i32 = 128;
         let look_angle = 0.1;
         let move_distance = 0.5;
-        let physics_bounds_value = 20.0;
+        let physics_bounds_value = 20.;
         let speed_bounds_value = 0.0025;
         let random_bounce_angle_change = std::f64::consts::FRAC_PI_2;
 
@@ -125,7 +125,7 @@ impl Parameters {
                         b: 255,
                         a: 255,
                     },
-                    light_factor: 1.,
+                    light_factor: 10.,
                     reflexivity_factor: 0.,
                     is_visible: true,
                 },
@@ -147,11 +147,11 @@ impl Parameters {
             sphere_parameters: SphereParameters {
                 sphere_count: 50,
                 min_radius: 0.5,
-                max_radius: 10.0,
+                max_radius: 10.,
                 min_light_factor: 0.1,
-                max_light_factor: 1.,
+                max_light_factor: 10.,
                 min_reflexivity_factor: 0.,
-                max_reflexivity_factor: 0.8,
+                max_reflexivity_factor: 0.5,
             },
             physics_parameters: PhysicsParameters {
                 g: 0.002,

@@ -31,55 +31,55 @@ impl Sphere {
         // // Blue
         // v.push(Sphere {
         //     pos: Position {
-        //         x: 10.0,
-        //         y: 0.0,
-        //         z: 0.0,
+        //         x: 10.,
+        //         y: 0.,
+        //         z: 0.,
         //     },
-        //     v_x: 0.0,
-        //     v_y: 0.0,
-        //     v_z: 0.0,
-        //     radius: 6.0,
+        //     v_x: 0.,
+        //     v_y: 0.,
+        //     v_z: 0.,
+        //     radius: 6.,
         //     color: Color::RGB(0, 0, 255),
         //     light_factor: light_factor,
         // });
         // // Red
         // v.push(Sphere {
         //     pos: Position {
-        //         x: 10.0,
-        //         y: -5.0,
-        //         z: 0.0,
+        //         x: 10.,
+        //         y: -5.,
+        //         z: 0.,
         //     },
-        //     v_x: 0.0,
-        //     v_y: 0.0,
-        //     v_z: 0.0,
-        //     radius: 2.0,
+        //     v_x: 0.,
+        //     v_y: 0.,
+        //     v_z: 0.,
+        //     radius: 2.,
         //     color: Color::RGB(255, 0, 0),
         //     light_factor: light_factor,
         // });
         // // Green
         // v.push(Sphere {
         //     pos: Position {
-        //         x: 10.0,
-        //         y: -4.0,
+        //         x: 10.,
+        //         y: -4.,
         //         z: 2.5,
         //     },
-        //     v_x: 0.0,
-        //     v_y: 0.0,
-        //     v_z: 0.0,
-        //     radius: 3.0,
+        //     v_x: 0.,
+        //     v_y: 0.,
+        //     v_z: 0.,
+        //     radius: 3.,
         //     color: Color::RGB(0, 255, 0),
         //     light_factor: light_factor,
         // });
         // // Yellow
         // v.push(Sphere {
         //     pos: Position {
-        //         x: 2.0,
-        //         y: 0.0,
-        //         z: 0.0,
+        //         x: 2.,
+        //         y: 0.,
+        //         z: 0.,
         //     },
-        //     v_x: 0.0,
-        //     v_y: 0.0,
-        //     v_z: 0.0,
+        //     v_x: 0.,
+        //     v_y: 0.,
+        //     v_z: 0.,
         //     radius: 1.5,
         //     color: Color::RGB(255, 255, 0),
         //     light_factor: light_factor,
@@ -87,13 +87,13 @@ impl Sphere {
         // // Turquoise
         // v.push(Sphere {
         //     pos: Position {
-        //         x: 4.0,
-        //         y: 0.0,
-        //         z: 0.0,
+        //         x: 4.,
+        //         y: 0.,
+        //         z: 0.,
         //     },
-        //     v_x: 0.0,
-        //     v_y: 0.0,
-        //     v_z: 0.0,
+        //     v_x: 0.,
+        //     v_y: 0.,
+        //     v_z: 0.,
         //     radius: 0.25,
         //     color: Color::RGB(0, 255, 255),
         //     light_factor: light_factor,
@@ -101,13 +101,13 @@ impl Sphere {
         // // White
         // v.push(Sphere {
         //     pos: Position {
-        //         x: -20.0,
-        //         y: 20.0,
-        //         z: -20.0,
+        //         x: -20.,
+        //         y: 20.,
+        //         z: -20.,
         //     },
-        //     v_x: 0.0,
-        //     v_y: 0.0,
-        //     v_z: 0.0,
+        //     v_x: 0.,
+        //     v_y: 0.,
+        //     v_z: 0.,
         //     radius: 10.,
         //     color: Color::RGB(255, 255, 255),
         //     light_factor: 100.,

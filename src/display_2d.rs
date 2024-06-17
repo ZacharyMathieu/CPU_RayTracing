@@ -17,8 +17,8 @@ pub fn display(
             let res = canvas.fill_rect(Rect::new(
                 (s.pos.y - s.radius - observer.pos.y) as i32,
                 (s.pos.z - s.radius - observer.pos.z) as i32,
-                (s.radius * 2.0) as u32,
-                (s.radius * 2.0) as u32,
+                (s.radius * 2.) as u32,
+                (s.radius * 2.) as u32,
             ));
             if res.is_err() {
                 println!("{}", res.unwrap_err());

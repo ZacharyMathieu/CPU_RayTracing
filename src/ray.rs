@@ -75,7 +75,7 @@ impl Ray {
         let a: f64 = squared(self.p2.x - self.p1.x)
             + squared(self.p2.y - self.p1.y)
             + squared(self.p2.z - self.p1.z);
-        let b: f64 = 2.0
+        let b: f64 = 2.
             * ((self.p2.x - self.p1.x) * (self.p1.x - s.pos.x)
                 + (self.p2.y - self.p1.y) * (self.p1.y - s.pos.y)
                 + (self.p2.z - self.p1.z) * (self.p1.z - s.pos.z));
@@ -85,11 +85,11 @@ impl Ray {
             + squared(self.p1.x)
             + squared(self.p1.y)
             + squared(self.p1.z)
-            - 2.0 * (s.pos.x * self.p1.x + s.pos.y * self.p1.y + s.pos.z * self.p1.z)
+            - 2. * (s.pos.x * self.p1.x + s.pos.y * self.p1.y + s.pos.z * self.p1.z)
             - squared(s.radius);
 
-        let d = squared(b) - 4.0 * a * c;
-        if d < 0.0 {
+        let d = squared(b) - 4. * a * c;
+        if d < 0. {
             return f64::NAN;
         }
 
@@ -97,13 +97,13 @@ impl Ray {
         let ret: f64;
 
         if root > b {
-            ret = (-b - root) / (2.0 * a);
+            ret = (-b - root) / (2. * a);
         } else {
-            ret = (-b + root) / (2.0 * a);
+            ret = (-b + root) / (2. * a);
         }
 
         // Remove the points behind the observer
-        if ret <= 0.0 {
+        if ret <= 0. {
             return f64::NAN;
         }
 
@@ -169,7 +169,7 @@ impl Ray {
         let u = intersection - sphere.pos;
         let v = intersection - self.p1;
         let w = u.scaled(-(v.dot_product(&u) / u.dot_product(&u)));
-        let direction = (intersection + w).scaled(2.0) - self.p1;
+        let direction = (intersection + w).scaled(2.) - self.p1;
 
         return Ray::new(intersection, direction, self.x_value, self.y_value);
     }

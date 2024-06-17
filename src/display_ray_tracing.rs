@@ -23,11 +23,9 @@ pub fn display(
     frame
         .colors
         .into_iter()
-        .for_each(|pixel: ((i32, i32), Color)| {
-            canvas.set_draw_color(pixel.1);
-            canvas
-                .draw_point(Point::new(pixel.0 .0, pixel.0 .1))
-                .unwrap();
+        .for_each(|((x, y), color): ((i32, i32), Color)| {
+            canvas.set_draw_color(color);
+            canvas.draw_point(Point::new(x, y)).unwrap();
         });
 
     canvas.present();

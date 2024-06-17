@@ -5,7 +5,7 @@ use crate::{parameters::RayParameters, ray::Ray, sphere::Sphere};
 
 pub struct RayTrace<'a> {
     pub ray: &'a Ray,
-    color_vector: Vec<Color>,
+    color_vector: Vec<(Color, f64)>,
     pub color: Color,
 }
 
@@ -34,10 +34,7 @@ impl<'a> RayTrace<'a> {
 
     fn set_color(&mut self, ray_parameters: &RayParameters) {
         if self.color_vector.len() > 0 {
-            self.color = get_average_color(
-                &self.color_vector,
-                &ray_parameters.bounce_color_reflection_factor,
-            );
+            self.color = self.get_average_color(&ray_parameters.bounce_color_reflection_factor);
         }
     }
 
@@ -58,15 +55,19 @@ impl<'a> RayTrace<'a> {
                     && (remaining_bounces > 0)
                     && (*distance > 0.)
                 {
-                    self.color_vector.push(ray_parameters.background_color)
+                    self.color_vector
+                        .push((ray_parameters.background_color, 1.));
                 }
             }
             Some((factor, sphere)) => {
                 let new_distance: f64 = distance + (ray.length * factor);
 
-                self.color_vector.push(apply_light_factor(
-                    &sphere.color,
-                    &get_light_factor(&new_distance, &sphere.light_factor, ray_parameters),
+                self.color_vector.push((
+                    apply_light_factor(
+                        &sphere.color,
+                        &get_light_factor(&new_distance, &sphere.light_factor, ray_parameters),
+                    ),
+                    sphere.light_factor,
                 ));
 
                 if remaining_bounces > 0 {
@@ -83,6 +84,28 @@ impl<'a> RayTrace<'a> {
                 }
             }
         };
+    }
+
+    fn get_average_color(&self, importance_factor: &f64) -> Color {
+        let mut r: f64 = 0.;
+        let mut g: f64 = 0.;
+        let mut b: f64 = 0.;
+        let mut ratio: f64 = 1.;
+        let mut total: f64 = 0.;
+
+        self.color_vector.iter().for_each(|(c, f): &(Color, f64)| {
+            r += c.r as f64 * f * ratio;
+            g += c.g as f64 * f * ratio;
+            b += c.b as f64 * f * ratio;
+            total += ratio;
+            ratio *= importance_factor;
+        });
+
+        return Color::RGB(
+            ((r / total) as u128) as u8,
+            ((g / total) as u128) as u8,
+            ((b / total) as u128) as u8,
+        );
     }
 }
 
@@ -106,27 +129,5 @@ fn apply_light_factor(color: &Color, light_factor: &f64) -> Color {
         (color.r as f64 * light_factor) as u8,
         (color.g as f64 * light_factor) as u8,
         (color.b as f64 * light_factor) as u8,
-    );
-}
-
-fn get_average_color(color_vector: &Vec<Color>, importance_factor: &f64) -> Color {
-    let mut r: f64 = 0.0;
-    let mut g: f64 = 0.0;
-    let mut b: f64 = 0.0;
-    let mut ratio: f64 = 1.0;
-    let mut total: f64 = 0.0;
-
-    for c in color_vector {
-        r += c.r as f64 * ratio;
-        g += c.g as f64 * ratio;
-        b += c.b as f64 * ratio;
-        total += ratio;
-        ratio *= importance_factor;
-    }
-
-    return Color::RGB(
-        ((r / total) as u128) as u8,
-        ((g / total) as u128) as u8,
-        ((b / total) as u128) as u8,
     );
 }

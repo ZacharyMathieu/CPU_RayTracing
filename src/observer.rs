@@ -22,8 +22,8 @@ pub struct Observer {
 impl Observer {
     pub fn default(parameters: &Parameters) -> Observer {
         let mut obs = Observer {
-            hor_angle: 0.0,
-            ver_angle: 0.0,
+            hor_angle: 0.,
+            ver_angle: 0.,
             rays: Vec::new(),
             accumulation_mode: false,
             frame_stack: Vec::new(),

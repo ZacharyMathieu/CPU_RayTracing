@@ -51,23 +51,23 @@ impl Frame {
             frame
                 .colors
                 .iter()
-                .for_each(|pixel: (&(i32, i32), &Color)| {
-                    if pixels.contains_key(&pixel.0) {
-                        let accumulator: &mut PixelAccumulator = pixels.get_mut(pixel.0).unwrap();
+                .for_each(|(position, color): (&(i32, i32), &Color)| {
+                    if pixels.contains_key(&position) {
+                        let accumulator: &mut PixelAccumulator = pixels.get_mut(position).unwrap();
 
-                        accumulator.r += pixel.1.r as u64;
-                        accumulator.g += pixel.1.g as u64;
-                        accumulator.b += pixel.1.b as u64;
-                        accumulator.a += pixel.1.a as u64;
+                        accumulator.r += color.r as u64;
+                        accumulator.g += color.g as u64;
+                        accumulator.b += color.b as u64;
+                        accumulator.a += color.a as u64;
                         accumulator.count += 1;
                     } else {
                         pixels.insert(
-                            *pixel.0,
+                            *position,
                             PixelAccumulator {
-                                r: pixel.1.r as u64,
-                                g: pixel.1.g as u64,
-                                b: pixel.1.b as u64,
-                                a: pixel.1.a as u64,
+                                r: color.r as u64,
+                                g: color.g as u64,
+                                b: color.b as u64,
+                                a: color.a as u64,
                                 count: 1,
                             },
                         );
@@ -77,11 +77,11 @@ impl Frame {
 
         let mut new_frame: Frame = Frame::create_empty();
 
-        pixels
-            .iter()
-            .for_each(|pixels: (&(i32, i32), &PixelAccumulator)| {
-                new_frame.colors.insert(*pixels.0, pixels.1.get_color());
-            });
+        pixels.iter().for_each(
+            |(position, accumulator): (&(i32, i32), &PixelAccumulator)| {
+                new_frame.colors.insert(*position, accumulator.get_color());
+            },
+        );
 
         return new_frame;
     }

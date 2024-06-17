@@ -10,7 +10,7 @@ pub fn rand_range(rng: &mut rand::prelude::ThreadRng, low: f64, high: f64) -> f6
 }
 
 // fn float_to_color(f: f64) -> Color {
-//     return Color::RGB((f * 255.0) as u8, 0, ((1.0 - f) * 255.0) as u8);
+//     return Color::RGB((f * 255.) as u8, 0, ((1. - f) * 255.) as u8);
 // }
 
 pub fn rand_color(rng: &mut rand::prelude::ThreadRng) -> Color {
