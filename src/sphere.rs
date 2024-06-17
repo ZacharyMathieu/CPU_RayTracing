@@ -4,18 +4,20 @@ use sdl2::pixels::Color;
 use crate::{
     parameters::Parameters,
     position::Position,
+    speed::Speed,
     util::{rand_color, rand_range},
 };
 
+#[derive(Clone, Copy)]
+
 pub struct Sphere {
     pub pos: Position,
-    pub v_x: f64,
-    pub v_y: f64,
-    pub v_z: f64,
+    pub speed: Speed,
     pub radius: f64,
     pub color: Color,
     pub light_factor: f64,
     pub reflexivity_factor: f64,
+    pub is_visible: bool,
 }
 
 impl Sphere {
@@ -122,7 +124,8 @@ impl Sphere {
 
         for _ in 0..parameters.sphere_parameters.sphere_count {
             let color: Color = rand_color(rng);
-            v.push(Sphere::generate_random(parameters, rng, color));
+            let new_sphere: Sphere = Sphere::generate_random(parameters, rng, color);
+            v.push(new_sphere);
         }
 
         return v;
@@ -135,7 +138,7 @@ impl Sphere {
     ) -> Sphere {
         let radius_factor: f64 = rng.gen();
 
-        return Sphere {
+        let new_sphere: Sphere = Sphere {
             pos: Position {
                 x: rand_range(
                     rng,
@@ -153,21 +156,23 @@ impl Sphere {
                     parameters.physics_parameters.max_z,
                 ),
             },
-            v_x: rand_range(
-                rng,
-                parameters.physics_parameters.min_vx,
-                parameters.physics_parameters.max_vx,
-            ),
-            v_y: rand_range(
-                rng,
-                parameters.physics_parameters.min_vy,
-                parameters.physics_parameters.max_vy,
-            ),
-            v_z: rand_range(
-                rng,
-                parameters.physics_parameters.min_vz,
-                parameters.physics_parameters.max_vz,
-            ),
+            speed: Speed {
+                x: rand_range(
+                    rng,
+                    parameters.physics_parameters.min_vx,
+                    parameters.physics_parameters.max_vx,
+                ),
+                y: rand_range(
+                    rng,
+                    parameters.physics_parameters.min_vy,
+                    parameters.physics_parameters.max_vy,
+                ),
+                z: rand_range(
+                    rng,
+                    parameters.physics_parameters.min_vz,
+                    parameters.physics_parameters.max_vz,
+                ),
+            },
             radius: ((radius_factor
                 * (parameters.sphere_parameters.max_radius
                     - parameters.sphere_parameters.min_radius))
@@ -183,29 +188,31 @@ impl Sphere {
                 parameters.sphere_parameters.min_reflexivity_factor,
                 parameters.sphere_parameters.max_reflexivity_factor,
             ),
+            is_visible: true,
         };
+        return new_sphere;
     }
 
     pub fn physics(&mut self, params: &Parameters) {
-        self.v_z += params.physics_parameters.g;
+        self.speed.z += params.physics_parameters.g;
 
-        (self.pos.x, self.v_x) = self.move_(
+        (self.pos.x, self.speed.x) = self.move_(
             self.pos.x,
-            self.v_x,
+            self.speed.x,
             params.physics_parameters.min_x,
             params.physics_parameters.max_x,
         );
 
-        (self.pos.y, self.v_y) = self.move_(
+        (self.pos.y, self.speed.y) = self.move_(
             self.pos.y,
-            self.v_y,
+            self.speed.y,
             params.physics_parameters.min_y,
             params.physics_parameters.max_y,
         );
 
-        (self.pos.z, self.v_z) = self.move_(
+        (self.pos.z, self.speed.z) = self.move_(
             self.pos.z,
-            self.v_z,
+            self.speed.z,
             params.physics_parameters.min_z,
             params.physics_parameters.max_z,
         );

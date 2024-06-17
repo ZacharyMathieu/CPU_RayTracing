@@ -1,10 +1,9 @@
 use sdl2::pixels::Color;
 
-use crate::position::Position;
+use crate::{position::Position, speed::Speed, sphere::Sphere};
 
 pub struct ObserverParameters {
     pub look_vector_distance: f64,
-    pub default_position: Position,
     pub look_up_angle: f64,
     pub look_down_angle: f64,
     pub look_left_angle: f64,
@@ -22,6 +21,7 @@ pub struct ObserverParameters {
     pub move_up_distance: f64,
     pub move_down_distance: f64,
     pub slow_mode_factor: f64,
+    pub default_body: Sphere,
 }
 
 pub struct RayParameters {
@@ -90,11 +90,6 @@ impl Parameters {
             display_scale: 5.,
             observer_parameters: ObserverParameters {
                 look_vector_distance: (height / 2) as f64,
-                default_position: Position {
-                    x: -physics_bounds_value,
-                    y: 0.0,
-                    z: 0.0,
-                },
                 look_up_angle: -look_angle,
                 look_down_angle: look_angle,
                 look_left_angle: -look_angle,
@@ -112,6 +107,28 @@ impl Parameters {
                 move_up_distance: -move_distance,
                 move_down_distance: move_distance,
                 slow_mode_factor: 0.01,
+                default_body: Sphere {
+                    pos: Position {
+                        x: 0.,
+                        y: 0.,
+                        z: 0.,
+                    },
+                    speed: Speed {
+                        x: 0.,
+                        y: 0.,
+                        z: 0.,
+                    },
+                    radius: 0.5,
+                    color: Color {
+                        r: 255,
+                        g: 255,
+                        b: 255,
+                        a: 255,
+                    },
+                    light_factor: 1.,
+                    reflexivity_factor: 0.,
+                    is_visible: true,
+                },
             },
             ray_parameters: RayParameters {
                 min_hor_value: -width / 2,
@@ -132,12 +149,12 @@ impl Parameters {
                 min_radius: 0.5,
                 max_radius: 10.0,
                 min_light_factor: 0.1,
-                max_light_factor: 100.,
+                max_light_factor: 1.,
                 min_reflexivity_factor: 0.,
-                max_reflexivity_factor: 0.25,
+                max_reflexivity_factor: 0.8,
             },
             physics_parameters: PhysicsParameters {
-                g: 0.0002,
+                g: 0.002,
                 enabled: false,
                 min_x: -physics_bounds_value,
                 max_x: physics_bounds_value,

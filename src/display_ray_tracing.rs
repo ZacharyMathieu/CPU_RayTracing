@@ -11,7 +11,13 @@ pub fn display(
     canvas.set_draw_color(ray_parameters.background_color);
     canvas.clear();
 
-    let frame: Frame = observer.get_next_frame(ray_parameters, sphere_vector);
+    let mut observer_bodies: Vec<Sphere> = vec![];
+    observer_bodies.push(observer.body);
+
+    let frame: Frame = observer.get_next_frame(
+        ray_parameters,
+        &sphere_vector.iter().chain(observer_bodies.iter()).collect(),
+    );
 
     // Displaying the colors
     frame

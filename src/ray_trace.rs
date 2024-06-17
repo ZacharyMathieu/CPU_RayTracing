@@ -18,7 +18,7 @@ impl<'a> RayTrace<'a> {
         };
     }
 
-    pub fn trace(&mut self, sphere_vector: &Vec<Sphere>, ray_parameters: &RayParameters) {
+    pub fn trace(&mut self, sphere_vector: &Vec<&Sphere>, ray_parameters: &RayParameters) {
         let mut rng: ThreadRng = rand::thread_rng();
         self.trace_rec(
             self.ray,
@@ -44,7 +44,7 @@ impl<'a> RayTrace<'a> {
     fn trace_rec(
         &mut self,
         ray: &Ray,
-        sphere_vector: &Vec<Sphere>,
+        sphere_vector: &Vec<&Sphere>,
         ray_parameters: &RayParameters,
         remaining_bounces: u32,
         distance: &f64,

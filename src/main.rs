@@ -11,6 +11,7 @@ mod parameters;
 mod position;
 mod ray;
 mod ray_trace;
+mod speed;
 mod sphere;
 mod util;
 
@@ -30,11 +31,11 @@ fn main() {
     // init RNG
     let mut rng: ThreadRng = rand::thread_rng();
 
-    // init sphere vector
-    let mut sphere_vector = Sphere::good_ol_vector(&params, &mut rng);
-
     // init observer
-    let mut observer = Observer::default(&params);
+    let mut observer: Observer = Observer::default(&params);
+
+    // init sphere vector
+    let mut sphere_vector: Vec<Sphere> = Sphere::good_ol_vector(&params, &mut rng);
 
     // init video subsystem
     let sdl_context = sdl2::init().unwrap();
@@ -116,7 +117,7 @@ fn main() {
                 Event::KeyDown {
                     keycode: Some(Keycode::R),
                     ..
-                } => observer = Observer::default(&params),
+                } => observer.reset_position(&params),
                 Event::KeyDown {
                     keycode: Some(Keycode::Return),
                     ..

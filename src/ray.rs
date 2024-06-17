@@ -5,6 +5,7 @@ fn squared(f: f64) -> f64 {
 }
 
 #[derive(Clone, Copy)]
+
 pub struct Ray {
     pub p1: Position,
     pub p2: Position,
@@ -109,23 +110,26 @@ impl Ray {
         return ret;
     }
 
-    pub fn find_collision<'a>(&self, sphere_vector: &'a Vec<Sphere>) -> Option<(f64, &'a Sphere)> {
+    pub fn find_collision<'a>(&self, sphere_vector: &'a Vec<&Sphere>) -> Option<(f64, &'a Sphere)> {
         let mut result: Option<(f64, &Sphere)> = Option::None;
 
         for sphere in sphere_vector.iter() {
-            let ray_factor = self.factor_distance_from_point(&sphere);
+            if sphere.is_visible {
+                let ray_factor = self.factor_distance_from_point(&sphere);
 
-            if !ray_factor.is_nan() {
-                match result {
-                    None => {
-                        result = Option::Some((ray_factor, sphere));
-                    }
-                    Some((factor, _)) => {
-                        if ray_factor < factor {
+                if !ray_factor.is_nan() {
+                    // Check if result is already assigned and if so, override the value if the new factor is smaller
+                    match result {
+                        None => {
                             result = Option::Some((ray_factor, sphere));
                         }
-                    }
-                };
+                        Some((factor, _)) => {
+                            if ray_factor < factor {
+                                result = Option::Some((ray_factor, sphere));
+                            }
+                        }
+                    };
+                }
             }
         }
 

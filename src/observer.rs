@@ -4,12 +4,13 @@ use crate::{
     position::Position,
     ray::Ray,
     ray_trace::RayTrace,
+    speed::Speed,
     sphere::Sphere,
 };
 use rayon::prelude::*;
 
 pub struct Observer {
-    pub pos: Position,
+    pub body: Sphere,
     pub hor_angle: f64,
     pub ver_angle: f64,
     pub rays: Vec<Ray>,
@@ -21,13 +22,13 @@ pub struct Observer {
 impl Observer {
     pub fn default(parameters: &Parameters) -> Observer {
         let mut obs = Observer {
-            pos: parameters.observer_parameters.default_position.clone(),
             hor_angle: 0.0,
             ver_angle: 0.0,
             rays: Vec::new(),
             accumulation_mode: false,
             frame_stack: Vec::new(),
             slow_speed_mode: false,
+            body: parameters.observer_parameters.default_body.clone(),
         };
         obs.generate_rays(parameters);
         return obs;
@@ -43,7 +44,7 @@ impl Observer {
                 ..parameters.ray_parameters.max_ver_value as i32
             {
                 let r = Ray::new_turned(
-                    self.pos.clone(),
+                    self.body.pos.clone(),
                     Position {
                         x: parameters.observer_parameters.look_vector_distance,
                         y: x as f64,
@@ -73,7 +74,7 @@ impl Observer {
     fn trace_parallel(
         &self,
         ray_parameters: &RayParameters,
-        sphere_vector: &Vec<Sphere>,
+        sphere_vector: &Vec<&Sphere>,
     ) -> Vec<RayTrace> {
         let mut ray_traces: Vec<RayTrace> = self.generate_ray_traces(ray_parameters);
 
@@ -90,7 +91,7 @@ impl Observer {
     pub fn get_next_frame(
         &mut self,
         ray_parameters: &RayParameters,
-        sphere_vector: &Vec<Sphere>,
+        sphere_vector: &Vec<&Sphere>,
     ) -> Frame {
         let traces: Vec<RayTrace> = self.trace_parallel(ray_parameters, sphere_vector);
 
@@ -158,31 +159,53 @@ impl Observer {
     }
 
     pub fn move_forward(&mut self, dist: f64, parameters: &Parameters) {
-        self.pos.x += self.apply_slow_mode(
-            self.hor_angle.cos() * self.ver_angle.cos() * dist,
+        self.move_(
+            Speed {
+                x: self.hor_angle.cos() * self.ver_angle.cos() * dist,
+                y: self.hor_angle.sin() * dist,
+                z: self.ver_angle.sin() * dist,
+            },
             &parameters.observer_parameters,
         );
-        self.pos.y +=
-            self.apply_slow_mode(self.hor_angle.sin() * dist, &parameters.observer_parameters);
-        self.pos.z +=
-            self.apply_slow_mode(self.ver_angle.sin() * dist, &parameters.observer_parameters);
 
         self.generate_rays(parameters);
     }
 
     pub fn move_hor(&mut self, dist: f64, parameters: &Parameters) {
-        self.pos.x += self.apply_slow_mode(
-            -self.hor_angle.sin() * dist,
+        self.move_(
+            Speed {
+                x: -self.hor_angle.sin() * dist,
+                y: self.hor_angle.cos() * dist,
+                z: 0.,
+            },
             &parameters.observer_parameters,
         );
-        self.pos.y +=
-            self.apply_slow_mode(self.hor_angle.cos() * dist, &parameters.observer_parameters);
 
         self.generate_rays(parameters);
     }
 
     pub fn move_ver(&mut self, dist: f64, parameters: &Parameters) {
-        self.pos.z += self.apply_slow_mode(dist, &parameters.observer_parameters);
+        self.move_(
+            Speed {
+                x: 0.,
+                y: 0.,
+                z: dist,
+            },
+            &parameters.observer_parameters,
+        );
+
+        self.generate_rays(parameters);
+    }
+
+    fn move_(&mut self, speed: Speed, observer_parameters: &ObserverParameters) {
+        self.body.pos.x += self.apply_slow_mode(speed.x, &observer_parameters);
+        self.body.pos.y += self.apply_slow_mode(speed.y, &observer_parameters);
+        self.body.pos.z += self.apply_slow_mode(speed.z, &observer_parameters);
+    }
+
+    pub fn reset_position(&mut self, parameters: &Parameters) {
+        self.body.pos = parameters.observer_parameters.default_body.pos.clone();
+        self.body.is_visible = parameters.observer_parameters.default_body.is_visible;
 
         self.generate_rays(parameters);
     }
