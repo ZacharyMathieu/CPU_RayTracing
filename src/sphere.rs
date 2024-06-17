@@ -189,33 +189,41 @@ impl Sphere {
     pub fn physics(&mut self, params: &Parameters) {
         self.v_z += params.physics_parameters.g;
 
-        self.pos.x += self.v_x;
-        self.pos.y += self.v_y;
-        self.pos.z += self.v_z;
+        (self.pos.x, self.v_x) = self.move_(
+            self.pos.x,
+            self.v_x,
+            params.physics_parameters.min_x,
+            params.physics_parameters.max_x,
+        );
 
-        // TODO remove the duplicated code
-        if self.pos.x - self.radius < params.physics_parameters.min_x {
-            self.v_x = self.v_x.abs();
-            self.pos.x = params.physics_parameters.min_x + self.radius;
-        } else if self.pos.x + self.radius > params.physics_parameters.max_x {
-            self.v_x = -self.v_x.abs();
-            self.pos.x = params.physics_parameters.max_x - self.radius;
+        (self.pos.y, self.v_y) = self.move_(
+            self.pos.y,
+            self.v_y,
+            params.physics_parameters.min_y,
+            params.physics_parameters.max_y,
+        );
+
+        (self.pos.z, self.v_z) = self.move_(
+            self.pos.z,
+            self.v_z,
+            params.physics_parameters.min_z,
+            params.physics_parameters.max_z,
+        );
+    }
+
+    fn move_(&self, pos: f64, speed: f64, min: f64, max: f64) -> (f64, f64) {
+        let mut new_pos: f64 = pos;
+        let mut new_speed: f64 = speed;
+
+        new_pos += new_speed;
+        if new_pos - self.radius < min {
+            new_speed = new_speed.abs();
+            new_pos = min + self.radius;
+        } else if new_pos + self.radius > max {
+            new_speed = -new_speed.abs();
+            new_pos = max - self.radius;
         }
 
-        if self.pos.y - self.radius < params.physics_parameters.min_y {
-            self.v_y = self.v_y.abs();
-            self.pos.y = params.physics_parameters.min_y + self.radius;
-        } else if self.pos.y + self.radius > params.physics_parameters.max_y {
-            self.v_y = -self.v_y.abs();
-            self.pos.y = params.physics_parameters.max_y - self.radius;
-        }
-
-        if self.pos.z - self.radius < params.physics_parameters.min_z {
-            self.v_z = self.v_z.abs();
-            self.pos.z = params.physics_parameters.min_z + self.radius;
-        } else if self.pos.z + self.radius > params.physics_parameters.max_z {
-            self.v_z = -self.v_z.abs();
-            self.pos.z = params.physics_parameters.max_z - self.radius;
-        }
+        return (new_pos, new_speed);
     }
 }
