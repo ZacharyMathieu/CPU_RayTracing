@@ -21,6 +21,7 @@ pub struct ObserverParameters {
     pub move_left_distance: f64,
     pub move_up_distance: f64,
     pub move_down_distance: f64,
+    pub slow_mode_factor: f64,
 }
 
 pub struct RayParameters {
@@ -76,16 +77,16 @@ pub struct Parameters {
 
 impl Parameters {
     pub fn default() -> Parameters {
-        let width: i32 = 640;
-        let height: i32 = 320;
+        let width: i32 = 256;
+        let height: i32 = 128;
         let look_angle = 0.05;
         let move_distance = 0.25;
         let physics_bounds_value = 20.0;
         let speed_bounds_value = 0.0025;
 
         return Parameters {
-            frame_period_ms: 1,
-            display_scale: 2.,
+            frame_period_ms: 0,
+            display_scale: 5.,
             observer_parameters: ObserverParameters {
                 look_vector_distance: (height / 2) as f64,
                 default_position: Position {
@@ -109,6 +110,7 @@ impl Parameters {
                 move_left_distance: -move_distance,
                 move_up_distance: -move_distance,
                 move_down_distance: move_distance,
+                slow_mode_factor: 0.01,
             },
             ray_parameters: RayParameters {
                 min_hor_value: -width / 2,
@@ -116,25 +118,25 @@ impl Parameters {
                 min_ver_value: -height / 2,
                 max_ver_value: height / 2,
                 min_pixel_factor: 0.,
-                fog_factor: 0.01,
+                fog_factor: 0.005,
                 background_color: Color::RGB(0, 0, 0),
-                reflect_background: false,
+                reflect_background: true,
                 bounce_count: 3,
-                bounce_color_reflection_factor: 0.9,
+                bounce_color_reflection_factor: 1.,
                 min_random_bounce_angle_change: -std::f64::consts::FRAC_PI_2,
                 max_random_bounce_angle_change: std::f64::consts::FRAC_PI_2,
             },
             sphere_parameters: SphereParameters {
-                sphere_count: 100,
+                sphere_count: 25,
                 min_radius: 0.5,
-                max_radius: 5.0,
-                min_light_factor: 0.,
-                max_light_factor: 1.,
-                min_reflexivity_factor: 1.,
-                max_reflexivity_factor: 1.,
+                max_radius: 10.0,
+                min_light_factor: 0.1,
+                max_light_factor: 2.,
+                min_reflexivity_factor: 0.,
+                max_reflexivity_factor: 0.25,
             },
             physics_parameters: PhysicsParameters {
-                g: 0.00002,
+                g: 0.0002,
                 enabled: false,
                 min_x: -physics_bounds_value,
                 max_x: physics_bounds_value,

@@ -5,6 +5,7 @@ use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use std::{thread, time};
 
+mod frame;
 mod observer;
 mod parameters;
 mod position;
@@ -116,6 +117,18 @@ fn main() {
                     keycode: Some(Keycode::R),
                     ..
                 } => observer = Observer::default(&params),
+                Event::KeyDown {
+                    keycode: Some(Keycode::Return),
+                    ..
+                } => observer.switch_accumulation_mode(),
+                Event::KeyDown {
+                    keycode: Some(Keycode::LCtrl),
+                    ..
+                } => observer.slow_speed_mode(),
+                Event::KeyUp {
+                    keycode: Some(Keycode::LCtrl),
+                    ..
+                } => observer.normal_speed_mode(),
                 _ => {} // TODO : issue #1
             }
         }
@@ -129,7 +142,7 @@ fn main() {
 
         // draw and refresh the canvas display
         display(
-            &observer,
+            &mut observer,
             &sphere_vector,
             &params.ray_parameters,
             &mut canvas,
