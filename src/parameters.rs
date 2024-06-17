@@ -150,10 +150,10 @@ impl Parameters {
                 sphere_count: 50,
                 min_radius: 0.5,
                 max_radius: 10.,
-                min_light_factor: 0.,
+                min_light_factor: 0.5,
                 max_light_factor: 1.,
                 min_reflexivity_factor: 0.,
-                max_reflexivity_factor: 0.,
+                max_reflexivity_factor: 0.4,
             },
             physics_parameters: PhysicsParameters {
                 g: 0.002,
