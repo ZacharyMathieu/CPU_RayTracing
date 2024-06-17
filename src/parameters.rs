@@ -79,10 +79,11 @@ impl Parameters {
     pub fn default() -> Parameters {
         let width: i32 = 256;
         let height: i32 = 128;
-        let look_angle = 0.05;
-        let move_distance = 0.25;
+        let look_angle = 0.1;
+        let move_distance = 0.5;
         let physics_bounds_value = 20.0;
         let speed_bounds_value = 0.0025;
+        let random_bounce_angle_change = std::f64::consts::FRAC_PI_2;
 
         return Parameters {
             frame_period_ms: 0,
@@ -121,17 +122,17 @@ impl Parameters {
                 fog_factor: 0.005,
                 background_color: Color::RGB(0, 0, 0),
                 reflect_background: true,
-                bounce_count: 3,
+                bounce_count: 5,
                 bounce_color_reflection_factor: 1.,
-                min_random_bounce_angle_change: -std::f64::consts::FRAC_PI_2,
-                max_random_bounce_angle_change: std::f64::consts::FRAC_PI_2,
+                min_random_bounce_angle_change: -random_bounce_angle_change,
+                max_random_bounce_angle_change: random_bounce_angle_change,
             },
             sphere_parameters: SphereParameters {
-                sphere_count: 25,
+                sphere_count: 50,
                 min_radius: 0.5,
                 max_radius: 10.0,
                 min_light_factor: 0.1,
-                max_light_factor: 2.,
+                max_light_factor: 100.,
                 min_reflexivity_factor: 0.,
                 max_reflexivity_factor: 0.25,
             },
