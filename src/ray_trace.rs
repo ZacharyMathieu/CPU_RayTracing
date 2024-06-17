@@ -55,8 +55,10 @@ impl<'a> RayTrace<'a> {
                     && (remaining_bounces > 0)
                     && (*distance > 0.)
                 {
-                    self.color_vector
-                        .push((ray_parameters.background_color, 1.));
+                    self.color_vector.push((
+                        ray_parameters.background_color,
+                        ray_parameters.background_light_factor,
+                    ));
                 }
             }
             Some((factor, sphere)) => {
@@ -102,9 +104,9 @@ impl<'a> RayTrace<'a> {
         });
 
         return Color::RGB(
-            ((r / total) as u128) as u8,
-            ((g / total) as u128) as u8,
-            ((b / total) as u128) as u8,
+            f64::min(r / total, 255.) as u8,
+            f64::min(g / total, 255.) as u8,
+            f64::min(b / total, 255.) as u8,
         );
     }
 }

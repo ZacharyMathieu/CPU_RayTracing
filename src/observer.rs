@@ -218,6 +218,10 @@ impl Observer {
         }
     }
 
+    pub fn switch_visibility(&mut self) {
+        self.body.is_visible = !self.body.is_visible;
+    }
+
     pub fn slow_speed_mode(&mut self) {
         self.slow_speed_mode = true;
     }

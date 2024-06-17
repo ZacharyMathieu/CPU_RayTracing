@@ -130,6 +130,10 @@ fn main() {
                     keycode: Some(Keycode::LCtrl),
                     ..
                 } => observer.normal_speed_mode(),
+                Event::KeyDown {
+                    keycode: Some(Keycode::V),
+                    ..
+                } => observer.switch_visibility(),
                 _ => {} // TODO : issue #1
             }
         }
