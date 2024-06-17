@@ -1,7 +1,7 @@
 use rand::rngs::ThreadRng;
 use sdl2::pixels::Color;
 
-use crate::{parameters::RayParameters, ray::Ray, sphere::Sphere};
+use crate::{parameters::RayParameters, ray::Ray, spheres::sphere::Sphere};
 
 pub struct RayTrace<'a> {
     pub ray: &'a Ray,

@@ -1,6 +1,6 @@
 use sdl2::pixels::Color;
 
-use crate::{position::Position, speed::Speed, sphere::Sphere};
+use crate::{position::Position, speed::Speed, spheres::sphere::Sphere};
 
 pub struct ObserverParameters {
     pub look_vector_distance: f64,

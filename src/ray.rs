@@ -1,4 +1,4 @@
-use crate::{parameters::RayParameters, position::Position, sphere::Sphere, util};
+use crate::{parameters::RayParameters, position::Position, spheres::sphere::Sphere, util};
 
 fn squared(f: f64) -> f64 {
     return f * f;

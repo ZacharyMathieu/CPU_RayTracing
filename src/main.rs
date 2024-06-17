@@ -12,12 +12,12 @@ mod position;
 mod ray;
 mod ray_trace;
 mod speed;
-mod sphere;
 mod util;
+mod spheres;
 
 use crate::observer::Observer;
 use crate::parameters::Parameters;
-use crate::sphere::Sphere;
+use crate::spheres::sphere::Sphere;
 
 mod display_ray_tracing;
 use display_ray_tracing::display;

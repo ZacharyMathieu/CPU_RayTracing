@@ -5,7 +5,7 @@ use crate::{
     ray::Ray,
     ray_trace::RayTrace,
     speed::Speed,
-    sphere::Sphere,
+    spheres::sphere::Sphere,
 };
 use rayon::prelude::*;
 
