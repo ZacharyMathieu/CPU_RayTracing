@@ -5,7 +5,7 @@ use crate::{
     ray::Ray,
     ray_trace::RayTrace,
     speed::Speed,
-    spheres::sphere::Sphere,
+    sphere::Sphere,
 };
 use rayon::prelude::*;
 
@@ -50,6 +50,7 @@ impl Observer {
                         y: x as f64,
                         z: y as f64,
                     },
+                    1.,
                     x - parameters.ray_parameters.min_hor_value,
                     y - parameters.ray_parameters.min_ver_value,
                     0.,

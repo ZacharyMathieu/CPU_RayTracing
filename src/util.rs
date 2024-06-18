@@ -9,9 +9,9 @@ pub fn rand_range(rng: &mut rand::prelude::ThreadRng, low: f64, high: f64) -> f6
     };
 }
 
-// fn float_to_color(f: f64) -> Color {
-//     return Color::RGB((f * 255.) as u8, 0, ((1. - f) * 255.) as u8);
-// }
+pub fn float_to_color(f: f64) -> Color {
+    return Color::RGB((f * 255.) as u8, 0, ((1. - f) * 255.) as u8);
+}
 
 pub fn rand_color(rng: &mut rand::prelude::ThreadRng) -> Color {
     return Color::RGB(
@@ -19,4 +19,9 @@ pub fn rand_color(rng: &mut rand::prelude::ThreadRng) -> Color {
         rng.gen_range(0, 255),
         rng.gen_range(0, 255),
     );
+}
+
+pub fn round(number: f64, decimals: u32) -> f64 {
+    let mult: f64 = (10 as f64).powf(decimals as f64) as f64;
+    return f64::round(number * mult) / mult;
 }

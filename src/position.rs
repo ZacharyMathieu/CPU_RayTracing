@@ -1,4 +1,4 @@
-use std::ops::{Add, Sub};
+use std::ops::{Add, Mul, Neg, Sub};
 
 #[derive(Clone, Copy)]
 
@@ -83,3 +83,23 @@ impl Sub for Position {
         };
     }
 }
+
+impl Neg for Position {
+    type Output = Position;
+
+    fn neg(self) -> Self::Output {
+        return Position {
+            x: -self.x,
+            y: -self.y,
+            z: -self.z,
+        };
+    }
+}
+
+// impl Mul for Position {
+//     type Output = f64;
+
+//     fn mul(self, p: Position) -> Self::Output {
+//         return self.x * p.x + self.y * p.y + self.z * p.z;
+//     }
+// }

@@ -5,8 +5,15 @@ use crate::{
     parameters::Parameters,
     position::Position,
     speed::Speed,
-    util::{rand_color, rand_range},
+    util::{float_to_color, rand_color, rand_range},
 };
+
+#[derive(Clone, Copy)]
+
+pub enum SphereType {
+    Reflexive,
+    Refractive,
+}
 
 #[derive(Clone, Copy)]
 
@@ -16,74 +23,97 @@ pub struct Sphere {
     pub radius: f64,
     pub color: Color,
     pub light_factor: f64,
+    pub type_: SphereType,
     pub reflexivity_factor: f64,
+    pub refractivity_factor: f64,
     pub is_visible: bool,
 }
 
 impl Sphere {
-    pub fn good_ol_vector(
-        parameters: &Parameters,
-        rng: &mut rand::prelude::ThreadRng,
-    ) -> Vec<Sphere> {
+    pub fn hardcoded_vector() -> Vec<Sphere> {
         let mut v: Vec<Sphere> = vec![];
 
-        // let light_factor: f64 = 0.1;
-        // // Blue
-        // v.push(Sphere {
-        //     pos: Position {
-        //         x: 10.,
-        //         y: 0.,
-        //         z: 0.,
-        //     },
-        //     v_x: 0.,
-        //     v_y: 0.,
-        //     v_z: 0.,
-        //     radius: 6.,
-        //     color: Color::RGB(0, 0, 255),
-        //     light_factor: light_factor,
-        // });
-        // // Red
-        // v.push(Sphere {
-        //     pos: Position {
-        //         x: 10.,
-        //         y: -5.,
-        //         z: 0.,
-        //     },
-        //     v_x: 0.,
-        //     v_y: 0.,
-        //     v_z: 0.,
-        //     radius: 2.,
-        //     color: Color::RGB(255, 0, 0),
-        //     light_factor: light_factor,
-        // });
-        // // Green
-        // v.push(Sphere {
-        //     pos: Position {
-        //         x: 10.,
-        //         y: -4.,
-        //         z: 2.5,
-        //     },
-        //     v_x: 0.,
-        //     v_y: 0.,
-        //     v_z: 0.,
-        //     radius: 3.,
-        //     color: Color::RGB(0, 255, 0),
-        //     light_factor: light_factor,
-        // });
-        // // Yellow
-        // v.push(Sphere {
-        //     pos: Position {
-        //         x: 2.,
-        //         y: 0.,
-        //         z: 0.,
-        //     },
-        //     v_x: 0.,
-        //     v_y: 0.,
-        //     v_z: 0.,
-        //     radius: 1.5,
-        //     color: Color::RGB(255, 255, 0),
-        //     light_factor: light_factor,
-        // });
+        let light_factor: f64 = 1.;
+        // Blue
+        v.push(Sphere {
+            pos: Position {
+                x: 10.,
+                y: 0.,
+                z: 0.,
+            },
+            speed: Speed {
+                x: 0.,
+                y: 0.,
+                z: 0.,
+            },
+            radius: 6.,
+            color: Color::RGB(0, 0, 255),
+            light_factor: light_factor,
+            type_: SphereType::Reflexive,
+            reflexivity_factor: 0.,
+            refractivity_factor: 1.,
+            is_visible: true,
+        });
+        // Red
+        v.push(Sphere {
+            pos: Position {
+                x: 10.,
+                y: -5.,
+                z: 0.,
+            },
+            speed: Speed {
+                x: 0.,
+                y: 0.,
+                z: 0.,
+            },
+            radius: 2.,
+            color: Color::RGB(255, 0, 0),
+            light_factor: light_factor,
+            type_: SphereType::Reflexive,
+            reflexivity_factor: 0.15,
+            refractivity_factor: 1.,
+            is_visible: true,
+        });
+        // Green
+        v.push(Sphere {
+            pos: Position {
+                x: 10.,
+                y: -4.,
+                z: 2.5,
+            },
+            speed: Speed {
+                x: 0.,
+                y: 0.,
+                z: 0.,
+            },
+            radius: 3.,
+            color: Color::RGB(0, 255, 0),
+            light_factor: light_factor,
+            type_: SphereType::Reflexive,
+            reflexivity_factor: 0.02,
+            refractivity_factor: 1.,
+            is_visible: true,
+        });
+        // Yellow
+        v.push(Sphere {
+            pos: Position {
+                x: 2.,
+                y: 0.,
+                z: 0.,
+            },
+            speed: Speed {
+                x: 0.,
+                y: 0.,
+                z: 0.,
+            },
+            radius: 1.5,
+            color: Color::RGB(255, 255, 0),
+            light_factor: 0.1,
+            type_: SphereType::Refractive,
+            reflexivity_factor: 0.,
+            refractivity_factor: 2.,
+            is_visible: true,
+        });
         // // Turquoise
         // v.push(Sphere {
         //     pos: Position {
@@ -91,36 +121,65 @@ impl Sphere {
         //         y: 0.,
         //         z: 0.,
         //     },
-        //     v_x: 0.,
-        //     v_y: 0.,
-        //     v_z: 0.,
+        //     speed: Speed {
+        //         x: 0.,
+        //         y: 0.,
+        //         z: 0.,
+        //     },
         //     radius: 0.25,
         //     color: Color::RGB(0, 255, 255),
         //     light_factor: light_factor,
+        //     type_: SphereType::Reflexive,
+        //     reflexivity_factor: 0.,
+        //     refractivity_factor: 0.,
+        //     is_visible: true,
         // });
-        // // White
-        // v.push(Sphere {
-        //     pos: Position {
-        //         x: -20.,
-        //         y: 20.,
-        //         z: -20.,
-        //     },
-        //     v_x: 0.,
-        //     v_y: 0.,
-        //     v_z: 0.,
-        //     radius: 10.,
-        //     color: Color::RGB(255, 255, 255),
-        //     light_factor: 100.,
-        // });
+        // White
+        v.push(Sphere {
+            pos: Position {
+                x: -20.,
+                y: 20.,
+                z: -20.,
+            },
+            speed: Speed {
+                x: 0.,
+                y: 0.,
+                z: 0.,
+            },
+            radius: 10.,
+            color: Color::RGB(255, 255, 255),
+            light_factor: 2.,
+            type_: SphereType::Refractive,
+            reflexivity_factor: 0.,
+            refractivity_factor: 1.,
+            is_visible: true,
+        });
 
-        // for i in 0..parameters.sphere_parameters.sphere_count {
-        //     let progress = i as f64 / (parameters.sphere_parameters.sphere_count - 1) as f64;
-        //     v.push(Sphere::generate_random(
-        //         parameters,
-        //         rng,
-        //         float_to_color(progress),
-        //     ));
-        // }
+        return v;
+    }
+
+    pub fn in_line_vector(
+        parameters: &Parameters,
+        rng: &mut rand::prelude::ThreadRng,
+    ) -> Vec<Sphere> {
+        let mut v: Vec<Sphere> = vec![];
+
+        for i in 0..parameters.sphere_parameters.sphere_count {
+            let progress = i as f64 / (parameters.sphere_parameters.sphere_count - 1) as f64;
+            v.push(Sphere::generate_random(
+                parameters,
+                rng,
+                float_to_color(progress),
+            ));
+        }
+
+        return v;
+    }
+    pub fn random_vector(
+        parameters: &Parameters,
+        rng: &mut rand::prelude::ThreadRng,
+    ) -> Vec<Sphere> {
+        let mut v: Vec<Sphere> = vec![];
 
         for _ in 0..parameters.sphere_parameters.sphere_count {
             let color: Color = rand_color(rng);
@@ -183,10 +242,16 @@ impl Sphere {
                 parameters.sphere_parameters.min_light_factor,
                 parameters.sphere_parameters.max_light_factor,
             ),
+            type_: SphereType::Reflexive, // TODO - make this random
             reflexivity_factor: rand_range(
                 rng,
                 parameters.sphere_parameters.min_reflexivity_factor,
                 parameters.sphere_parameters.max_reflexivity_factor,
+            ),
+            refractivity_factor: rand_range(
+                rng,
+                parameters.sphere_parameters.min_refractivity_factor,
+                parameters.sphere_parameters.max_refractivity_factor,
             ),
             is_visible: true,
         };

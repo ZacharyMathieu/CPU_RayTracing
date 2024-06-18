@@ -1,6 +1,6 @@
 use sdl2::{pixels::Color, rect::Point, render::Canvas, video::Window};
 
-use crate::{frame::Frame, observer::Observer, parameters::RayParameters, spheres::sphere::Sphere};
+use crate::{frame::Frame, observer::Observer, parameters::RayParameters, sphere::Sphere};
 
 pub fn display(
     observer: &mut Observer,

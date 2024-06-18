@@ -1,6 +1,16 @@
 use sdl2::pixels::Color;
 
-use crate::{position::Position, speed::Speed, spheres::sphere::Sphere};
+use crate::{
+    position::Position,
+    speed::Speed,
+    sphere::{Sphere, SphereType},
+};
+
+pub enum SphereGenerationType {
+    Hardcoded,
+    Random,
+    InLine,
+}
 
 pub struct ObserverParameters {
     pub look_vector_distance: f64,
@@ -38,9 +48,11 @@ pub struct RayParameters {
     pub bounce_color_reflection_factor: f64,
     pub min_random_bounce_angle_change: f64,
     pub max_random_bounce_angle_change: f64,
+    pub reflect_inside_spheres: bool,
 }
 
 pub struct SphereParameters {
+    pub generation_type: SphereGenerationType,
     pub sphere_count: u32,
     pub min_radius: f64,
     pub max_radius: f64,
@@ -48,6 +60,8 @@ pub struct SphereParameters {
     pub max_light_factor: f64,
     pub min_reflexivity_factor: f64,
     pub max_reflexivity_factor: f64,
+    pub min_refractivity_factor: f64,
+    pub max_refractivity_factor: f64,
 }
 
 pub struct PhysicsParameters {
@@ -78,6 +92,8 @@ pub struct Parameters {
 
 impl Parameters {
     pub fn default() -> Parameters {
+        // let width: i32 = 20;
+        // let height: i32 = 20;
         let width: i32 = 256;
         let height: i32 = 128;
         let look_angle = 0.1;
@@ -127,8 +143,10 @@ impl Parameters {
                         a: 255,
                     },
                     light_factor: 1.,
+                    type_: SphereType::Reflexive,
                     reflexivity_factor: 0.,
-                    is_visible: true,
+                    refractivity_factor: 0.,
+                    is_visible: false,
                 },
             },
             ray_parameters: RayParameters {
@@ -140,20 +158,24 @@ impl Parameters {
                 fog_factor: 0.,
                 background_color: Color::RGB(0, 0, 0),
                 background_light_factor: 0.,
-                reflect_background: true,
-                bounce_count: 4,
-                bounce_color_reflection_factor: 0.9,
+                reflect_background: false,
+                bounce_count: 5,
+                bounce_color_reflection_factor: 0.5,
                 min_random_bounce_angle_change: -random_bounce_angle_change,
                 max_random_bounce_angle_change: random_bounce_angle_change,
+                reflect_inside_spheres: false,
             },
             sphere_parameters: SphereParameters {
+                generation_type: SphereGenerationType::Random,
                 sphere_count: 50,
                 min_radius: 0.5,
                 max_radius: 10.,
                 min_light_factor: 0.5,
                 max_light_factor: 1.,
                 min_reflexivity_factor: 0.,
-                max_reflexivity_factor: 0.4,
+                max_reflexivity_factor: 0.2,
+                min_refractivity_factor: 1.,
+                max_refractivity_factor: 3.,
             },
             physics_parameters: PhysicsParameters {
                 g: 0.002,

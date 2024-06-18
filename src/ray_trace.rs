@@ -1,7 +1,7 @@
 use rand::rngs::ThreadRng;
 use sdl2::pixels::Color;
 
-use crate::{parameters::RayParameters, ray::Ray, spheres::sphere::Sphere};
+use crate::{parameters::RayParameters, ray::Ray, sphere::Sphere};
 
 pub struct RayTrace<'a> {
     pub ray: &'a Ray,
@@ -47,7 +47,8 @@ impl<'a> RayTrace<'a> {
         distance: &f64,
         rng: &mut rand::prelude::ThreadRng,
     ) {
-        let collision: Option<(f64, &Sphere)> = ray.find_collision(sphere_vector);
+        let collision: Option<((f64, bool), &Sphere)> =
+            ray.find_collision(sphere_vector, ray_parameters);
 
         match collision {
             None => {
@@ -61,8 +62,8 @@ impl<'a> RayTrace<'a> {
                     ));
                 }
             }
-            Some((factor, sphere)) => {
-                let new_distance: f64 = distance + (ray.length * factor);
+            Some(((factor, is_front), sphere)) => {
+                let new_distance: f64 = distance + (ray.vector.length * factor);
 
                 self.color_vector.push((
                     apply_light_factor(
@@ -73,7 +74,8 @@ impl<'a> RayTrace<'a> {
                 ));
 
                 if remaining_bounces > 0 {
-                    let ray_bounce = ray.get_bounce(factor, sphere, ray_parameters, rng);
+                    let ray_bounce =
+                        ray.get_deviation(factor, !is_front, sphere, ray_parameters, rng);
 
                     self.trace_rec(
                         &ray_bounce,
@@ -85,7 +87,7 @@ impl<'a> RayTrace<'a> {
                     );
                 }
             }
-        };
+        }
     }
 
     fn get_average_color(&self, importance_factor: &f64) -> Color {

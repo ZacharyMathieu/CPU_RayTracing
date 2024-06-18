@@ -1,5 +1,6 @@
 extern crate sdl2;
 
+use parameters::SphereGenerationType;
 use rand::rngs::ThreadRng;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
@@ -12,12 +13,13 @@ mod position;
 mod ray;
 mod ray_trace;
 mod speed;
+mod sphere;
 mod util;
-mod spheres;
+mod vector;
 
 use crate::observer::Observer;
 use crate::parameters::Parameters;
-use crate::spheres::sphere::Sphere;
+use crate::sphere::Sphere;
 
 mod display_ray_tracing;
 use display_ray_tracing::display;
@@ -26,7 +28,7 @@ use display_ray_tracing::display;
 
 fn main() {
     // init params
-    let params: Parameters = Parameters::default();
+    let mut params: Parameters = Parameters::default();
 
     // init RNG
     let mut rng: ThreadRng = rand::thread_rng();
@@ -35,7 +37,18 @@ fn main() {
     let mut observer: Observer = Observer::default(&params);
 
     // init sphere vector
-    let mut sphere_vector: Vec<Sphere> = Sphere::good_ol_vector(&params, &mut rng);
+    let mut sphere_vector: Vec<Sphere>;
+    match params.sphere_parameters.generation_type {
+        SphereGenerationType::Hardcoded => {
+            sphere_vector = Sphere::hardcoded_vector();
+        }
+        SphereGenerationType::InLine => {
+            sphere_vector = Sphere::in_line_vector(&params, &mut rng);
+        }
+        SphereGenerationType::Random => {
+            sphere_vector = Sphere::random_vector(&params, &mut rng);
+        }
+    }
 
     // init video subsystem
     let sdl_context = sdl2::init().unwrap();
@@ -134,6 +147,14 @@ fn main() {
                     keycode: Some(Keycode::V),
                     ..
                 } => observer.switch_visibility(),
+                // TODO - remove this control
+                Event::KeyDown {
+                    keycode: Some(Keycode::P),
+                    ..
+                } => {
+                    params.ray_parameters.reflect_inside_spheres =
+                        !params.ray_parameters.reflect_inside_spheres
+                }
                 _ => {} // TODO : issue #1
             }
         }
