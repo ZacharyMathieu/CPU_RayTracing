@@ -30,18 +30,6 @@ impl Vector {
     pub fn as_position(&self) -> Position {
         return self.v;
     }
-
-    pub fn dot(&self, v: &Vector) -> f64 {
-        return self.v.x * v.v.x + self.v.y * v.v.y + self.v.z * v.v.z;
-    }
-
-    pub fn angle(&self, v: &Vector) -> f64 {
-        return f64::acos(self.dot(v) / (self.length * v.length));
-    }
-
-    pub fn scaled(&self, factor: f64) -> Vector {
-        return Vector::new(self.p1.scaled(factor), self.p2.scaled(factor));
-    }
 }
 
 impl Add for Vector {

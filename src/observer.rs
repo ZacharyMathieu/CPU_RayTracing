@@ -30,29 +30,29 @@ impl Observer {
             slow_speed_mode: false,
             body: parameters.observer_parameters.default_body.clone(),
         };
-        obs.generate_rays(parameters);
+        obs.generate_rays(&parameters.ray_parameters, &parameters.observer_parameters);
         return obs;
     }
 
-    fn generate_rays(&mut self, parameters: &Parameters) {
+    fn generate_rays(
+        &mut self,
+        ray_parameters: &RayParameters,
+        observer_parameters: &ObserverParameters,
+    ) {
         self.rays.clear();
 
-        for x in
-            parameters.ray_parameters.min_hor_value..parameters.ray_parameters.max_hor_value as i32
-        {
-            for y in parameters.ray_parameters.min_ver_value
-                ..parameters.ray_parameters.max_ver_value as i32
-            {
+        for x in ray_parameters.min_hor_value..ray_parameters.max_hor_value as i32 {
+            for y in ray_parameters.min_ver_value..ray_parameters.max_ver_value as i32 {
                 let r = Ray::new_turned(
                     self.body.pos.clone(),
                     Position {
-                        x: parameters.observer_parameters.look_vector_distance,
+                        x: observer_parameters.look_vector_distance,
                         y: x as f64,
                         z: y as f64,
                     },
                     1.,
-                    x - parameters.ray_parameters.min_hor_value,
-                    y - parameters.ray_parameters.min_ver_value,
+                    x - ray_parameters.min_hor_value,
+                    y - ray_parameters.min_ver_value,
                     0.,
                     self.ver_angle,
                     self.hor_angle,
@@ -133,82 +133,111 @@ impl Observer {
         };
     }
 
-    pub fn turn_hor(&mut self, angle: f64, parameters: &Parameters) {
-        self.hor_angle += self.apply_slow_mode(angle, &parameters.observer_parameters);
+    pub fn turn_hor(
+        &mut self,
+        angle: f64,
+        observer_parameters: &ObserverParameters,
+        ray_parameters: &RayParameters,
+    ) {
+        self.hor_angle += self.apply_slow_mode(angle, observer_parameters);
 
         self.hor_angle = Self::limit_angle(
             self.hor_angle,
-            parameters.observer_parameters.min_hor_angle,
-            parameters.observer_parameters.max_hor_angle,
-            parameters.observer_parameters.hor_angle_loop,
+            observer_parameters.min_hor_angle,
+            observer_parameters.max_hor_angle,
+            observer_parameters.hor_angle_loop,
         );
 
-        self.generate_rays(parameters);
+        self.generate_rays(ray_parameters, observer_parameters);
     }
 
-    pub fn turn_ver(&mut self, angle: f64, parameters: &Parameters) {
-        self.ver_angle += self.apply_slow_mode(angle, &parameters.observer_parameters);
+    pub fn turn_ver(
+        &mut self,
+        angle: f64,
+        observer_parameters: &ObserverParameters,
+        ray_parameters: &RayParameters,
+    ) {
+        self.ver_angle += self.apply_slow_mode(angle, observer_parameters);
 
         self.ver_angle = Self::limit_angle(
             self.ver_angle,
-            parameters.observer_parameters.min_ver_angle,
-            parameters.observer_parameters.max_ver_angle,
-            parameters.observer_parameters.ver_angle_loop,
+            observer_parameters.min_ver_angle,
+            observer_parameters.max_ver_angle,
+            observer_parameters.ver_angle_loop,
         );
 
-        self.generate_rays(parameters);
+        self.generate_rays(ray_parameters, observer_parameters);
     }
 
-    pub fn move_forward(&mut self, dist: f64, parameters: &Parameters) {
+    pub fn move_forward(
+        &mut self,
+        dist: f64,
+        observer_parameters: &ObserverParameters,
+        ray_parameters: &RayParameters,
+    ) {
         self.move_(
             Speed {
                 x: self.hor_angle.cos() * self.ver_angle.cos() * dist,
                 y: self.hor_angle.sin() * dist,
                 z: self.ver_angle.sin() * dist,
             },
-            &parameters.observer_parameters,
+            observer_parameters,
         );
 
-        self.generate_rays(parameters);
+        self.generate_rays(ray_parameters, observer_parameters);
     }
 
-    pub fn move_hor(&mut self, dist: f64, parameters: &Parameters) {
+    pub fn move_hor(
+        &mut self,
+        dist: f64,
+        observer_parameters: &ObserverParameters,
+        ray_parameters: &RayParameters,
+    ) {
         self.move_(
             Speed {
                 x: -self.hor_angle.sin() * dist,
                 y: self.hor_angle.cos() * dist,
                 z: 0.,
             },
-            &parameters.observer_parameters,
+            observer_parameters,
         );
 
-        self.generate_rays(parameters);
+        self.generate_rays(ray_parameters, observer_parameters);
     }
 
-    pub fn move_ver(&mut self, dist: f64, parameters: &Parameters) {
+    pub fn move_ver(
+        &mut self,
+        dist: f64,
+        observer_parameters: &ObserverParameters,
+        ray_parameters: &RayParameters,
+    ) {
         self.move_(
             Speed {
                 x: 0.,
                 y: 0.,
                 z: dist,
             },
-            &parameters.observer_parameters,
+            observer_parameters,
         );
 
-        self.generate_rays(parameters);
+        self.generate_rays(ray_parameters, observer_parameters);
     }
 
     fn move_(&mut self, speed: Speed, observer_parameters: &ObserverParameters) {
-        self.body.pos.x += self.apply_slow_mode(speed.x, &observer_parameters);
-        self.body.pos.y += self.apply_slow_mode(speed.y, &observer_parameters);
-        self.body.pos.z += self.apply_slow_mode(speed.z, &observer_parameters);
+        self.body.pos.x += self.apply_slow_mode(speed.x, observer_parameters);
+        self.body.pos.y += self.apply_slow_mode(speed.y, observer_parameters);
+        self.body.pos.z += self.apply_slow_mode(speed.z, observer_parameters);
     }
 
-    pub fn reset_position(&mut self, parameters: &Parameters) {
-        self.body.pos = parameters.observer_parameters.default_body.pos.clone();
-        self.body.is_visible = parameters.observer_parameters.default_body.is_visible;
+    pub fn reset_position(
+        &mut self,
+        observer_parameters: &ObserverParameters,
+        ray_parameters: &RayParameters,
+    ) {
+        self.body.pos = observer_parameters.default_body.pos.clone();
+        self.body.is_visible = observer_parameters.default_body.is_visible;
 
-        self.generate_rays(parameters);
+        self.generate_rays(ray_parameters, observer_parameters);
     }
 
     pub fn switch_accumulation_mode(&mut self) {

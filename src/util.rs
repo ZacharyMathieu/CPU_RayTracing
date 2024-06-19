@@ -28,3 +28,12 @@ pub fn round(number: f64, decimals: u32) -> f64 {
     let mult: f64 = (10 as f64).powf(decimals as f64) as f64;
     return f64::round(number * mult) / mult;
 }
+
+pub fn at_ratio<T>(ratio: f64, min: T, max: T) -> f64
+where
+    T: Into<f64> + std::ops::Sub + std::ops::Add + std::marker::Copy,
+    f64: From<<T as std::ops::Sub>::Output>,
+{
+    let diff: f64 = (max - min).into();
+    return (diff * ratio) + min.into();
+}

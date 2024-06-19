@@ -2,10 +2,10 @@ use rand::Rng;
 use sdl2::pixels::Color;
 
 use crate::{
-    parameters::Parameters,
+    parameters::{PhysicsParameters, SphereParameters},
     position::Position,
     speed::Speed,
-    util::{float_to_color, rand_color, rand_range},
+    util::{at_ratio, float_to_color, rand_color, rand_range},
 };
 
 #[derive(Clone, Copy)]
@@ -24,8 +24,8 @@ pub struct Sphere {
     pub color: Color,
     pub light_factor: f64,
     pub type_: SphereType,
-    pub reflexivity_factor: f64,
-    pub refractivity_factor: f64,
+    pub smoothness: f64,
+    pub refractivity_index: f64,
     pub is_visible: bool,
 }
 
@@ -50,8 +50,8 @@ impl Sphere {
             color: Color::RGB(0, 0, 255),
             light_factor: light_factor,
             type_: SphereType::Reflexive,
-            reflexivity_factor: 0.,
-            refractivity_factor: 1.,
+            smoothness: 1.,
+            refractivity_index: 1.,
             is_visible: true,
         });
         // Red
@@ -70,8 +70,8 @@ impl Sphere {
             color: Color::RGB(255, 0, 0),
             light_factor: light_factor,
             type_: SphereType::Reflexive,
-            reflexivity_factor: 0.15,
-            refractivity_factor: 1.,
+            smoothness: 0.85,
+            refractivity_index: 1.,
             is_visible: true,
         });
         // Green
@@ -90,8 +90,8 @@ impl Sphere {
             color: Color::RGB(0, 255, 0),
             light_factor: light_factor,
             type_: SphereType::Reflexive,
-            reflexivity_factor: 0.02,
-            refractivity_factor: 1.,
+            smoothness: 0.92,
+            refractivity_index: 1.,
             is_visible: true,
         });
         // White Refractive
@@ -107,11 +107,11 @@ impl Sphere {
                 z: 0.,
             },
             radius: 1.5,
-            color: Color::RGB(255, 255, 255),
+            color: Color::RGB(255, 0, 255),
             light_factor: 0.,
             type_: SphereType::Refractive,
-            reflexivity_factor: 0.,
-            refractivity_factor: 1.2,
+            smoothness: 1.,
+            refractivity_index: 10.,
             is_visible: true,
         });
         // Turquoise
@@ -130,8 +130,8 @@ impl Sphere {
             color: Color::RGB(0, 255, 255),
             light_factor: light_factor,
             type_: SphereType::Reflexive,
-            reflexivity_factor: 0.,
-            refractivity_factor: 0.,
+            smoothness: 1.,
+            refractivity_index: 0.,
             is_visible: true,
         });
         // White
@@ -150,8 +150,8 @@ impl Sphere {
             color: Color::RGB(255, 255, 255),
             light_factor: 2.,
             type_: SphereType::Refractive,
-            reflexivity_factor: 0.,
-            refractivity_factor: 1.,
+            smoothness: 1.,
+            refractivity_index: 1.,
             is_visible: true,
         });
 
@@ -159,131 +159,144 @@ impl Sphere {
     }
 
     pub fn in_line_vector(
-        parameters: &Parameters,
-        rng: &mut rand::prelude::ThreadRng,
+        sphere_parameters: &SphereParameters,
+        physics_parameters: &PhysicsParameters,
     ) -> Vec<Sphere> {
         let mut v: Vec<Sphere> = vec![];
 
-        for i in 0..parameters.sphere_parameters.sphere_count {
-            let progress = i as f64 / (parameters.sphere_parameters.sphere_count - 1) as f64;
-            v.push(Sphere::generate_random(
-                parameters,
-                rng,
-                float_to_color(progress),
+        for i in 0..sphere_parameters.sphere_count {
+            let progress = i as f64 / (sphere_parameters.sphere_count - 1) as f64;
+            v.push(Sphere::from_float(
+                progress,
+                &sphere_parameters,
+                &physics_parameters,
             ));
         }
 
         return v;
     }
+
     pub fn random_vector(
-        parameters: &Parameters,
+        sphere_parameters: &SphereParameters,
+        physics_parameters: &PhysicsParameters,
         rng: &mut rand::prelude::ThreadRng,
     ) -> Vec<Sphere> {
         let mut v: Vec<Sphere> = vec![];
 
-        for _ in 0..parameters.sphere_parameters.sphere_count {
-            let color: Color = rand_color(rng);
-            let new_sphere: Sphere = Sphere::generate_random(parameters, rng, color);
+        for _ in 0..sphere_parameters.sphere_count {
+            let new_sphere: Sphere = Sphere::random(&sphere_parameters, &physics_parameters, rng);
             v.push(new_sphere);
         }
 
         return v;
     }
 
-    pub fn generate_random(
-        parameters: &Parameters,
+    pub fn random(
+        sphere_parameters: &SphereParameters,
+        physics_parameters: &PhysicsParameters,
         rng: &mut rand::prelude::ThreadRng,
-        color: Color,
     ) -> Sphere {
         let radius_factor: f64 = rng.gen();
 
-        let new_sphere: Sphere = Sphere {
+        return Sphere {
             pos: Position {
-                x: rand_range(
-                    rng,
-                    parameters.physics_parameters.min_x,
-                    parameters.physics_parameters.max_x,
-                ),
-                y: rand_range(
-                    rng,
-                    parameters.physics_parameters.min_y,
-                    parameters.physics_parameters.max_y,
-                ),
-                z: rand_range(
-                    rng,
-                    parameters.physics_parameters.min_z,
-                    parameters.physics_parameters.max_z,
-                ),
+                x: rand_range(rng, physics_parameters.min_x, physics_parameters.max_x),
+                y: rand_range(rng, physics_parameters.min_y, physics_parameters.max_y),
+                z: rand_range(rng, physics_parameters.min_z, physics_parameters.max_z),
             },
             speed: Speed {
-                x: rand_range(
-                    rng,
-                    parameters.physics_parameters.min_vx,
-                    parameters.physics_parameters.max_vx,
-                ),
-                y: rand_range(
-                    rng,
-                    parameters.physics_parameters.min_vy,
-                    parameters.physics_parameters.max_vy,
-                ),
-                z: rand_range(
-                    rng,
-                    parameters.physics_parameters.min_vz,
-                    parameters.physics_parameters.max_vz,
-                ),
+                x: rand_range(rng, physics_parameters.min_vx, physics_parameters.max_vx),
+                y: rand_range(rng, physics_parameters.min_vy, physics_parameters.max_vy),
+                z: rand_range(rng, physics_parameters.min_vz, physics_parameters.max_vz),
             },
             radius: ((radius_factor
-                * (parameters.sphere_parameters.max_radius
-                    - parameters.sphere_parameters.min_radius))
-                + parameters.sphere_parameters.min_radius),
-            color: color,
+                * (sphere_parameters.max_radius - sphere_parameters.min_radius))
+                + sphere_parameters.min_radius),
+            color: rand_color(rng),
             light_factor: rand_range(
                 rng,
-                parameters.sphere_parameters.min_light_factor,
-                parameters.sphere_parameters.max_light_factor,
+                sphere_parameters.min_light_factor,
+                sphere_parameters.max_light_factor,
             ),
-            type_: parameters.sphere_parameters.sphere_types[rand_range(
+            type_: sphere_parameters.sphere_type,
+            smoothness: rand_range(
                 rng,
-                0 as usize,
-                parameters.sphere_parameters.sphere_types.len(),
-            ) as usize],
-            reflexivity_factor: rand_range(
-                rng,
-                parameters.sphere_parameters.min_reflexivity_factor,
-                parameters.sphere_parameters.max_reflexivity_factor,
+                sphere_parameters.min_smoothness,
+                sphere_parameters.max_smoothness,
             ),
-            refractivity_factor: rand_range(
+            refractivity_index: rand_range(
                 rng,
-                parameters.sphere_parameters.min_refractivity_factor,
-                parameters.sphere_parameters.max_refractivity_factor,
+                sphere_parameters.min_refractivity_index,
+                sphere_parameters.max_refractivity_index,
             ),
             is_visible: true,
         };
-        return new_sphere;
     }
 
-    pub fn physics(&mut self, params: &Parameters) {
-        self.speed.z += params.physics_parameters.g;
+    fn from_float(
+        f: f64,
+        sphere_parameters: &SphereParameters,
+        physics_parameters: &PhysicsParameters,
+    ) -> Sphere {
+        return Sphere {
+            pos: Position {
+                x: at_ratio(f, physics_parameters.min_x, physics_parameters.max_x),
+                y: at_ratio(f, physics_parameters.min_y, physics_parameters.max_y),
+                z: at_ratio(f, physics_parameters.min_z, physics_parameters.max_z),
+            },
+            speed: Speed {
+                x: at_ratio(f, physics_parameters.min_vx, physics_parameters.max_vx),
+                y: at_ratio(f, physics_parameters.min_vy, physics_parameters.max_vy),
+                z: at_ratio(f, physics_parameters.min_vz, physics_parameters.max_vz),
+            },
+            radius: at_ratio(
+                f,
+                sphere_parameters.min_radius,
+                sphere_parameters.max_radius,
+            ),
+            color: float_to_color(f),
+            light_factor: at_ratio(
+                f,
+                sphere_parameters.min_light_factor,
+                sphere_parameters.max_light_factor,
+            ),
+            type_: sphere_parameters.sphere_type,
+            smoothness: at_ratio(
+                f,
+                sphere_parameters.min_smoothness,
+                sphere_parameters.max_smoothness,
+            ),
+            refractivity_index: at_ratio(
+                f,
+                sphere_parameters.min_refractivity_index,
+                sphere_parameters.max_refractivity_index,
+            ),
+            is_visible: true,
+        };
+    }
+
+    pub fn physics(&mut self, physics_parameters: &PhysicsParameters) {
+        self.speed.z += physics_parameters.g;
 
         (self.pos.x, self.speed.x) = self.move_(
             self.pos.x,
             self.speed.x,
-            params.physics_parameters.min_x,
-            params.physics_parameters.max_x,
+            physics_parameters.min_x,
+            physics_parameters.max_x,
         );
 
         (self.pos.y, self.speed.y) = self.move_(
             self.pos.y,
             self.speed.y,
-            params.physics_parameters.min_y,
-            params.physics_parameters.max_y,
+            physics_parameters.min_y,
+            physics_parameters.max_y,
         );
 
         (self.pos.z, self.speed.z) = self.move_(
             self.pos.z,
             self.speed.z,
-            params.physics_parameters.min_z,
-            params.physics_parameters.max_z,
+            physics_parameters.min_z,
+            physics_parameters.max_z,
         );
     }
 

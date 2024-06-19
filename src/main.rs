@@ -37,16 +37,25 @@ fn main() {
     let mut observer: Observer = Observer::default(&params);
 
     // init sphere vector
-    let mut sphere_vector: Vec<Sphere>;
-    match params.sphere_parameters.generation_mode {
-        SphereGenerationMode::Hardcoded => {
-            sphere_vector = Sphere::hardcoded_vector();
-        }
-        SphereGenerationMode::InLine => {
-            sphere_vector = Sphere::in_line_vector(&params, &mut rng);
-        }
-        SphereGenerationMode::Random => {
-            sphere_vector = Sphere::random_vector(&params, &mut rng);
+    let mut sphere_vector: Vec<Sphere> = vec![];
+    for sphere_parameters in params.sphere_parameters {
+        match sphere_parameters.generation_mode {
+            SphereGenerationMode::Hardcoded => {
+                sphere_vector.extend(Sphere::hardcoded_vector());
+            }
+            SphereGenerationMode::InLine => {
+                sphere_vector.extend(Sphere::in_line_vector(
+                    &sphere_parameters,
+                    &params.physics_parameters,
+                ));
+            }
+            SphereGenerationMode::Random => {
+                sphere_vector.extend(Sphere::random_vector(
+                    &sphere_parameters,
+                    &params.physics_parameters,
+                    &mut rng,
+                ));
+            }
         }
     }
 
@@ -87,50 +96,87 @@ fn main() {
                 Event::KeyDown {
                     keycode: Some(Keycode::Up),
                     ..
-                } => observer.turn_ver(params.observer_parameters.look_up_angle, &params),
+                } => observer.turn_ver(
+                    params.observer_parameters.look_up_angle,
+                    &params.observer_parameters,
+                    &params.ray_parameters,
+                ),
                 Event::KeyDown {
                     keycode: Some(Keycode::Down),
                     ..
-                } => observer.turn_ver(params.observer_parameters.look_down_angle, &params),
+                } => observer.turn_ver(
+                    params.observer_parameters.look_down_angle,
+                    &params.observer_parameters,
+                    &params.ray_parameters,
+                ),
                 Event::KeyDown {
                     keycode: Some(Keycode::Left),
                     ..
-                } => observer.turn_hor(params.observer_parameters.look_left_angle, &params),
+                } => observer.turn_hor(
+                    params.observer_parameters.look_left_angle,
+                    &params.observer_parameters,
+                    &params.ray_parameters,
+                ),
                 Event::KeyDown {
                     keycode: Some(Keycode::Right),
                     ..
-                } => observer.turn_hor(params.observer_parameters.look_right_angle, &params),
+                } => observer.turn_hor(
+                    params.observer_parameters.look_right_angle,
+                    &params.observer_parameters,
+                    &params.ray_parameters,
+                ),
                 Event::KeyDown {
                     keycode: Some(Keycode::W),
                     ..
-                } => {
-                    observer.move_forward(params.observer_parameters.move_forward_distance, &params)
-                }
+                } => observer.move_forward(
+                    params.observer_parameters.move_forward_distance,
+                    &params.observer_parameters,
+                    &params.ray_parameters,
+                ),
                 Event::KeyDown {
                     keycode: Some(Keycode::S),
                     ..
-                } => observer
-                    .move_forward(params.observer_parameters.move_backward_distance, &params),
+                } => observer.move_forward(
+                    params.observer_parameters.move_backward_distance,
+                    &params.observer_parameters,
+                    &params.ray_parameters,
+                ),
                 Event::KeyDown {
                     keycode: Some(Keycode::A),
                     ..
-                } => observer.move_hor(params.observer_parameters.move_left_distance, &params),
+                } => observer.move_hor(
+                    params.observer_parameters.move_left_distance,
+                    &params.observer_parameters,
+                    &params.ray_parameters,
+                ),
                 Event::KeyDown {
                     keycode: Some(Keycode::D),
                     ..
-                } => observer.move_hor(params.observer_parameters.move_right_distance, &params),
+                } => observer.move_hor(
+                    params.observer_parameters.move_right_distance,
+                    &params.observer_parameters,
+                    &params.ray_parameters,
+                ),
                 Event::KeyDown {
                     keycode: Some(Keycode::Space),
                     ..
-                } => observer.move_ver(params.observer_parameters.move_up_distance, &params),
+                } => observer.move_ver(
+                    params.observer_parameters.move_up_distance,
+                    &params.observer_parameters,
+                    &params.ray_parameters,
+                ),
                 Event::KeyDown {
                     keycode: Some(Keycode::LShift),
                     ..
-                } => observer.move_ver(params.observer_parameters.move_down_distance, &params),
+                } => observer.move_ver(
+                    params.observer_parameters.move_down_distance,
+                    &params.observer_parameters,
+                    &params.ray_parameters,
+                ),
                 Event::KeyDown {
                     keycode: Some(Keycode::R),
                     ..
-                } => observer.reset_position(&params),
+                } => observer.reset_position(&params.observer_parameters, &params.ray_parameters),
                 Event::KeyDown {
                     keycode: Some(Keycode::Return),
                     ..
@@ -162,7 +208,7 @@ fn main() {
         // physics
         if params.physics_parameters.enabled {
             for s in sphere_vector.iter_mut() {
-                s.physics(&params);
+                s.physics(&params.physics_parameters);
             }
         }
 

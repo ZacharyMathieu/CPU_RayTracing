@@ -101,7 +101,7 @@ impl<'a> RayTrace<'a> {
             r += c.r as f64 * f * ratio;
             g += c.g as f64 * f * ratio;
             b += c.b as f64 * f * ratio;
-            total += ratio;
+            total += f * ratio;
             ratio *= importance_factor;
         });
 

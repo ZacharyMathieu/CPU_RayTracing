@@ -1,4 +1,4 @@
-use std::ops::{Add, Mul, Neg, Sub};
+use std::ops::{Add, Neg, Sub};
 
 #[derive(Clone, Copy)]
 
@@ -67,18 +67,18 @@ impl Position {
         });
     }
 
+    pub fn normalized(&self) -> Position {
+        return self.scaled(1. / self.length());
+    }
+
     pub fn angle(&self, v: &Position) -> f64 {
         return f64::acos(
             self.dot(v)
-                / (self.length() * v.length()),
+                / (f64::sqrt(
+                    (self.x * self.x + self.y * self.y + self.z * self.z)
+                        * (v.x * v.x + v.y * v.y + v.z * v.z),
+                )),
         );
-        // return f64::acos(
-        //     self.dot(v)
-        //         / (f64::sqrt(
-        //             (self.x * self.x + self.y * self.y + self.z * self.z)
-        //                 * (v.x * v.x + v.y * v.y + v.z * v.z),
-        //         )),
-        // );
     }
 }
 
@@ -117,11 +117,3 @@ impl Neg for Position {
         };
     }
 }
-
-// impl Mul for Position {
-//     type Output = f64;
-
-//     fn mul(self, p: Position) -> Self::Output {
-//         return self.x * p.x + self.y * p.y + self.z * p.z;
-//     }
-// }

@@ -164,45 +164,48 @@ impl Ray {
         ray_parameters: &RayParameters,
         rng: &mut rand::prelude::ThreadRng,
     ) -> Ray {
-        match sphere.type_ {
-            SphereType::Reflexive => {
-                return self.get_reflection(intersection_factor, sphere, ray_parameters, rng);
-            }
-            SphereType::Refractive => {
-                return self.get_refraction(intersection_factor, is_entering, sphere);
-            }
-        }
+        return self.apply_smoothness(
+            match sphere.type_ {
+                SphereType::Reflexive => self.get_reflection(intersection_factor, sphere),
+                SphereType::Refractive => {
+                    self.get_refraction(intersection_factor, is_entering, sphere)
+                }
+            },
+            sphere,
+            ray_parameters,
+            rng,
+        );
     }
 
-    fn get_reflection(
+    fn apply_smoothness(
         &self,
-        intersection_factor: f64,
+        mut ray: Ray,
         sphere: &Sphere,
         ray_parameters: &RayParameters,
         rng: &mut rand::prelude::ThreadRng,
     ) -> Ray {
-        let mut bounced_ray = self.get_perfect_reflection(intersection_factor, sphere);
+        let smoothness_factor: f64 = 1. - sphere.smoothness;
 
-        bounced_ray.turn_x(util::rand_range(
+        ray.turn_x(util::rand_range(
             rng,
-            ray_parameters.min_random_bounce_angle_change * sphere.reflexivity_factor,
-            ray_parameters.max_random_bounce_angle_change * sphere.reflexivity_factor,
+            ray_parameters.min_random_bounce_angle_change * smoothness_factor,
+            ray_parameters.max_random_bounce_angle_change * smoothness_factor,
         ));
-        bounced_ray.turn_y(util::rand_range(
+        ray.turn_y(util::rand_range(
             rng,
-            ray_parameters.min_random_bounce_angle_change * sphere.reflexivity_factor,
-            ray_parameters.max_random_bounce_angle_change * sphere.reflexivity_factor,
+            ray_parameters.min_random_bounce_angle_change * smoothness_factor,
+            ray_parameters.max_random_bounce_angle_change * smoothness_factor,
         ));
-        bounced_ray.turn_z(util::rand_range(
+        ray.turn_z(util::rand_range(
             rng,
-            ray_parameters.min_random_bounce_angle_change * sphere.reflexivity_factor,
-            ray_parameters.max_random_bounce_angle_change * sphere.reflexivity_factor,
+            ray_parameters.min_random_bounce_angle_change * smoothness_factor,
+            ray_parameters.max_random_bounce_angle_change * smoothness_factor,
         ));
 
-        return bounced_ray;
+        return ray;
     }
 
-    fn get_perfect_reflection(&self, intersection_factor: f64, sphere: &Sphere) -> Ray {
+    fn get_reflection(&self, intersection_factor: f64, sphere: &Sphere) -> Ray {
         let intersection = self.get_position_from_factor(intersection_factor);
         let u = intersection - sphere.pos;
         let v = intersection - self.vector.p1;
@@ -218,44 +221,46 @@ impl Ray {
         );
     }
 
+    // I hope I never have to debug this...
     fn get_refraction(&self, intersection_factor: f64, is_entering: bool, sphere: &Sphere) -> Ray {
         let (n1, n2) = if is_entering {
-            (self.refraction_factor, sphere.refractivity_factor)
+            (self.refraction_factor, sphere.refractivity_index)
         } else {
-            (sphere.refractivity_factor, self.refraction_factor)
+            (sphere.refractivity_index, self.refraction_factor)
         };
 
         let intersection: Position = self.get_position_from_factor(intersection_factor);
-        let normal_sphere: Position = intersection - sphere.pos;
+        let normal_sphere: Position =
+            (self.get_position_from_factor(intersection_factor) - sphere.pos).normalized();
         let (normal, normal2) = if is_entering {
             (-normal_sphere, normal_sphere)
         } else {
             (normal_sphere, -normal_sphere)
         };
 
-        let incident: Position = -self.vector.as_position();
+        let incident: Position = -self.vector.as_position().normalized();
 
-        let A1 = incident.angle(&normal);
+        let angle_incident = incident.angle(&normal);
 
-        if A1.sin() > n2 / n1 {
-            return self.get_perfect_reflection(intersection_factor, sphere);
+        if angle_incident.sin() > n2 / n1 {
+            return self.get_reflection(intersection_factor, sphere);
         }
 
-        let A2: f64 = f64::asin((n1 * f64::sin(A1)) / n2);
+        let angle_exit: f64 = f64::asin((n1 * f64::sin(angle_incident)) / n2);
 
         let a: f64 = f64::sqrt(
             1. / (incident.dot(&incident) - (incident.dot(&normal).powf(2.) / normal.dot(&normal))),
         );
-        let b: f64 = -(a * incident.dot(&normal));
-
-        let U = incident.scaled(a) + normal.scaled(b);
-        let V2 = -(normal2.scaled(f64::cos(A2)) + U.scaled(f64::sin(A2)));
+        
+        let exit = -(normal2.scaled(f64::cos(angle_exit))
+            + (incident.scaled(a) + normal.scaled(-(a * incident.dot(&normal))))
+                .scaled(f64::sin(angle_exit)));
 
         return Ray::new(
             intersection,
-            intersection + V2,
+            intersection + exit,
             if is_entering {
-                sphere.refractivity_factor
+                sphere.refractivity_index
             } else {
                 1.
             },
