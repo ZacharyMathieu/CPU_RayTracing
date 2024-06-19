@@ -219,9 +219,6 @@ impl Ray {
     }
 
     fn get_refraction(&self, intersection_factor: f64, is_entering: bool, sphere: &Sphere) -> Ray {
-        // sin(t1) / sin(t2) = n2 / n1
-        // sin(t2) = sin(t1) * (n1 / n2)
-
         let (n1, n2) = if is_entering {
             (self.refraction_factor, sphere.refractivity_factor)
         } else {
