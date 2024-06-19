@@ -218,7 +218,6 @@ impl Ray {
         );
     }
 
-    // TODO - doesnt work :(
     fn get_refraction(&self, intersection_factor: f64, is_entering: bool, sphere: &Sphere) -> Ray {
         // sin(t1) / sin(t2) = n2 / n1
         // sin(t2) = sin(t1) * (n1 / n2)
