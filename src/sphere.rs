@@ -94,7 +94,7 @@ impl Sphere {
             refractivity_factor: 1.,
             is_visible: true,
         });
-        // Yellow
+        // White Refractive
         v.push(Sphere {
             pos: Position {
                 x: 2.,
@@ -107,33 +107,33 @@ impl Sphere {
                 z: 0.,
             },
             radius: 1.5,
-            color: Color::RGB(255, 255, 0),
-            light_factor: 0.1,
+            color: Color::RGB(255, 255, 255),
+            light_factor: 0.,
             type_: SphereType::Refractive,
             reflexivity_factor: 0.,
-            refractivity_factor: 2.,
+            refractivity_factor: 1.2,
             is_visible: true,
         });
-        // // Turquoise
-        // v.push(Sphere {
-        //     pos: Position {
-        //         x: 4.,
-        //         y: 0.,
-        //         z: 0.,
-        //     },
-        //     speed: Speed {
-        //         x: 0.,
-        //         y: 0.,
-        //         z: 0.,
-        //     },
-        //     radius: 0.25,
-        //     color: Color::RGB(0, 255, 255),
-        //     light_factor: light_factor,
-        //     type_: SphereType::Reflexive,
-        //     reflexivity_factor: 0.,
-        //     refractivity_factor: 0.,
-        //     is_visible: true,
-        // });
+        // Turquoise
+        v.push(Sphere {
+            pos: Position {
+                x: 4.,
+                y: 0.,
+                z: 0.,
+            },
+            speed: Speed {
+                x: 0.,
+                y: 0.,
+                z: 0.,
+            },
+            radius: 0.25,
+            color: Color::RGB(0, 255, 255),
+            light_factor: light_factor,
+            type_: SphereType::Reflexive,
+            reflexivity_factor: 0.,
+            refractivity_factor: 0.,
+            is_visible: true,
+        });
         // White
         v.push(Sphere {
             pos: Position {
@@ -242,7 +242,11 @@ impl Sphere {
                 parameters.sphere_parameters.min_light_factor,
                 parameters.sphere_parameters.max_light_factor,
             ),
-            type_: SphereType::Reflexive, // TODO - make this random
+            type_: parameters.sphere_parameters.sphere_types[rand_range(
+                rng,
+                0 as usize,
+                parameters.sphere_parameters.sphere_types.len(),
+            ) as usize],
             reflexivity_factor: rand_range(
                 rng,
                 parameters.sphere_parameters.min_reflexivity_factor,

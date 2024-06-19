@@ -39,30 +39,8 @@ impl Vector {
         return f64::acos(self.dot(v) / (self.length * v.length));
     }
 
-    pub fn from_angle(&self, a: f64, v: &Vector) -> Vector {
-        // cos(a) * (self.length * v.length) = self.dot(v)
-        let base: f64 = f64::cos(a) * (self.length * v.length);
-        let x: f64 = base - (self.v.y * v.v.y + self.v.z * v.v.z);
-        let y: f64 = base - (self.v.x * v.v.x + self.v.z * v.v.z);
-        let z: f64 = base - (self.v.x * v.v.x + self.v.y * v.v.y);
-
-        return Vector::new(
-            Position {
-                x: 0.,
-                y: 0.,
-                z: 0.,
-            },
-            Position { x, y, z },
-        );
-    }
-
     pub fn scaled(&self, factor: f64) -> Vector {
         return Vector::new(self.p1.scaled(factor), self.p2.scaled(factor));
-    }
-
-    pub fn set_origin(&mut self, pos: &Position) {
-        self.p2 = self.p2 - self.p1 + *pos;
-        self.p1 = *pos;
     }
 }
 
@@ -86,6 +64,11 @@ impl Neg for Vector {
     type Output = Vector;
 
     fn neg(self) -> Self::Output {
-        return Vector::new(-self.p1, -self.p2);
+        return Vector {
+            p1: -self.p1,
+            p2: -self.p2,
+            v: -self.v,
+            length: self.length,
+        };
     }
 }

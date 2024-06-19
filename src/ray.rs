@@ -169,13 +169,7 @@ impl Ray {
                 return self.get_reflection(intersection_factor, sphere, ray_parameters, rng);
             }
             SphereType::Refractive => {
-                return self.get_refraction(
-                    intersection_factor,
-                    is_entering,
-                    sphere,
-                    ray_parameters,
-                    rng,
-                );
+                return self.get_refraction(intersection_factor, is_entering, sphere);
             }
         }
     }
@@ -212,7 +206,7 @@ impl Ray {
         let intersection = self.get_position_from_factor(intersection_factor);
         let u = intersection - sphere.pos;
         let v = intersection - self.vector.p1;
-        let w = u.scaled(-(v.dot_product(&u) / u.dot_product(&u)));
+        let w = u.scaled(-(v.dot(&u) / u.dot(&u)));
         let direction = (intersection + w).scaled(2.) - self.vector.p1;
 
         return Ray::new(
@@ -224,42 +218,46 @@ impl Ray {
         );
     }
 
-    fn get_refraction(
-        &self,
-        intersection_factor: f64,
-        is_entering: bool,
-        sphere: &Sphere,
-        ray_parameters: &RayParameters,
-        rng: &mut rand::prelude::ThreadRng,
-    ) -> Ray {
+    // TODO - doesnt work :(
+    fn get_refraction(&self, intersection_factor: f64, is_entering: bool, sphere: &Sphere) -> Ray {
         // sin(t1) / sin(t2) = n2 / n1
         // sin(t2) = sin(t1) * (n1 / n2)
 
+        let (n1, n2) = if is_entering {
+            (self.refraction_factor, sphere.refractivity_factor)
+        } else {
+            (sphere.refractivity_factor, self.refraction_factor)
+        };
+
         let intersection: Position = self.get_position_from_factor(intersection_factor);
-        let straight = Vector::new(intersection, intersection + self.vector.as_position());
+        let normal_sphere: Position = intersection - sphere.pos;
+        let (normal, normal2) = if is_entering {
+            (-normal_sphere, normal_sphere)
+        } else {
+            (normal_sphere, -normal_sphere)
+        };
 
-        let normal: Vector = Vector::new(sphere.pos, intersection);
-        let incident: Vector = self.vector;
+        let incident: Position = -self.vector.as_position();
 
-        // let T = (incident + normal.scaled(incident.dot(&normal)))
-        //     .scaled(self.refraction_factor / sphere.refractivity_factor)
-        //     - normal.scaled(
-        //         1. - ((self.refraction_factor / sphere.refractivity_factor).powf(2.)
-        //             * (1. - (incident.dot(&normal).powf(2.)))),
-        //     );
+        let A1 = incident.angle(&normal);
 
-        let ratio = self.refraction_factor / sphere.refractivity_factor;
+        if A1.sin() > n2 / n1 {
+            return self.get_perfect_reflection(intersection_factor, sphere);
+        }
 
-        let a1 = incident.angle(&normal);
-        let a2 = f64::asin(f64::sin(a1) * (ratio));
+        let A2: f64 = f64::asin((n1 * f64::sin(A1)) / n2);
 
-        let angle_ratio = a2 / a1;
-        let mut merged = (straight).scaled(angle_ratio) + (-normal).scaled(1. - angle_ratio);
-        merged.set_origin(&intersection);
+        let a: f64 = f64::sqrt(
+            1. / (incident.dot(&incident) - (incident.dot(&normal).powf(2.) / normal.dot(&normal))),
+        );
+        let b: f64 = -(a * incident.dot(&normal));
+
+        let U = incident.scaled(a) + normal.scaled(b);
+        let V2 = -(normal2.scaled(f64::cos(A2)) + U.scaled(f64::sin(A2)));
 
         return Ray::new(
-            merged.p1,
-            merged.p2,
+            intersection,
+            intersection + V2,
             if is_entering {
                 sphere.refractivity_factor
             } else {

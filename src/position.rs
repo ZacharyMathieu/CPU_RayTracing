@@ -17,10 +17,6 @@ impl Position {
         return self.dist_squared(p).sqrt();
     }
 
-    pub fn dot_product(&self, p: &Position) -> f64 {
-        return (self.x * p.x) + (self.y * p.y) + (self.z * p.z);
-    }
-
     pub fn turn_x_around(&mut self, angle: f64, center: &Position) {
         let dy = self.y - center.y;
         let dz = self.z - center.z;
@@ -57,6 +53,32 @@ impl Position {
             y: self.y * factor,
             z: self.z * factor,
         };
+    }
+
+    pub fn dot(&self, p: &Position) -> f64 {
+        return (self.x * p.x) + (self.y * p.y) + (self.z * p.z);
+    }
+
+    fn length(&self) -> f64 {
+        return self.dist(&Position {
+            x: 0.,
+            y: 0.,
+            z: 0.,
+        });
+    }
+
+    pub fn angle(&self, v: &Position) -> f64 {
+        return f64::acos(
+            self.dot(v)
+                / (self.length() * v.length()),
+        );
+        // return f64::acos(
+        //     self.dot(v)
+        //         / (f64::sqrt(
+        //             (self.x * self.x + self.y * self.y + self.z * self.z)
+        //                 * (v.x * v.x + v.y * v.y + v.z * v.z),
+        //         )),
+        // );
     }
 }
 

@@ -75,7 +75,7 @@ impl<'a> RayTrace<'a> {
 
                 if remaining_bounces > 0 {
                     let ray_bounce =
-                        ray.get_deviation(factor, !is_front, sphere, ray_parameters, rng);
+                        ray.get_deviation(factor, is_front, sphere, ray_parameters, rng);
 
                     self.trace_rec(
                         &ray_bounce,

@@ -1,6 +1,6 @@
 extern crate sdl2;
 
-use parameters::SphereGenerationType;
+use parameters::SphereGenerationMode;
 use rand::rngs::ThreadRng;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
@@ -38,14 +38,14 @@ fn main() {
 
     // init sphere vector
     let mut sphere_vector: Vec<Sphere>;
-    match params.sphere_parameters.generation_type {
-        SphereGenerationType::Hardcoded => {
+    match params.sphere_parameters.generation_mode {
+        SphereGenerationMode::Hardcoded => {
             sphere_vector = Sphere::hardcoded_vector();
         }
-        SphereGenerationType::InLine => {
+        SphereGenerationMode::InLine => {
             sphere_vector = Sphere::in_line_vector(&params, &mut rng);
         }
-        SphereGenerationType::Random => {
+        SphereGenerationMode::Random => {
             sphere_vector = Sphere::random_vector(&params, &mut rng);
         }
     }

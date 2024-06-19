@@ -1,7 +1,10 @@
-use rand::Rng;
+use rand::{distributions::uniform::SampleBorrow, Rng};
 use sdl2::pixels::Color;
 
-pub fn rand_range(rng: &mut rand::prelude::ThreadRng, low: f64, high: f64) -> f64 {
+pub fn rand_range<T>(rng: &mut rand::prelude::ThreadRng, low: T, high: T) -> T
+where
+    T: std::cmp::PartialEq + SampleBorrow<T> + rand::distributions::uniform::SampleUniform,
+{
     return if low == high {
         low
     } else {
