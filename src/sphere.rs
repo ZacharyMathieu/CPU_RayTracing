@@ -9,14 +9,12 @@ use crate::{
 };
 
 #[derive(Clone, Copy)]
-
 pub enum SphereType {
     Reflexive,
     Refractive,
 }
 
 #[derive(Clone, Copy)]
-
 pub struct Sphere {
     pub pos: Position,
     pub speed: Speed,

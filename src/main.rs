@@ -197,10 +197,7 @@ fn main() {
                 Event::KeyDown {
                     keycode: Some(Keycode::P),
                     ..
-                } => {
-                    params.ray_parameters.reflect_inside_spheres =
-                        !params.ray_parameters.reflect_inside_spheres
-                }
+                } => params.physics_parameters.enabled = !params.physics_parameters.enabled,
                 _ => {} // TODO : issue #1
             }
         }
