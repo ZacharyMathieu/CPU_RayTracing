@@ -1,0 +1,60 @@
+{
+    "frame_period_ms": 0,
+    "display_scale": 5.0,
+    "observer_parameters": {
+        "look_vector_distance": 64.0,
+        "look_up_angle": -0.1,
+        "look_down_angle": 0.1,
+        "look_left_angle": -0.1,
+        "look_right_angle": 0.1,
+        "min_hor_angle": 0.0,
+        "max_hor_angle": 6.283,
+        "hor_angle_loop": true,
+        "min_ver_angle": -1.57075,
+        "max_ver_angle": 1.57075,
+        "ver_angle_loop": false,
+        "move_forward_distance": 0.5,
+        "move_backward_distance": -0.5,
+        "move_right_distance": 0.5,
+        "move_left_distance": -0.5,
+        "move_up_distance": -0.5,
+        "move_down_distance": 0.5,
+        "slow_mode_factor": 0.05
+    },
+    "ray_parameters": {
+        "min_hor_value": -64,
+        "max_hor_value": 64,
+        "min_ver_value": -64,
+        "max_ver_value": 64,
+        "min_pixel_factor": 0.1,
+        "fog_factor": 0.0,
+        "background_color": [
+            0,
+            0,
+            0
+        ],
+        "background_light_factor": 1.0,
+        "reflect_background": false,
+        "bounce_count": 10,
+        "bounce_color_reflection_factor": 0.5,
+        "min_random_bounce_angle_change": -1.57075,
+        "max_random_bounce_angle_change": 1.57075,
+        "reflect_inside_spheres": false
+    },
+    "physics_parameters": {
+        "g": 0.002,
+        "enabled": false,
+        "min_x": -20.0,
+        "max_x": 20.0,
+        "min_y": -20.0,
+        "max_y": 20.0,
+        "min_z": -20.0,
+        "max_z": 20.0,
+        "min_vx": -0.0025,
+        "max_vx": 0.0025,
+        "min_vy": -0.0025,
+        "max_vy": 0.0025,
+        "min_vz": -0.0025,
+        "max_vz": 0.0025
+    }
+}

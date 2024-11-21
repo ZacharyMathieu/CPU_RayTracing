@@ -27,18 +27,18 @@ use display_ray_tracing::display;
 // use display_2d::display;
 
 fn main() {
-    // init params
-    let mut params: Parameters = Parameters::default();
-
     // init RNG
     let mut rng: ThreadRng = rand::thread_rng();
+
+    // init params
+    let mut params: Parameters = Parameters::default();
 
     // init observer
     let mut observer: Observer = Observer::default(&params);
 
     // init sphere vector
     let mut sphere_vector: Vec<Sphere> = vec![];
-    for sphere_parameters in params.sphere_parameters {
+    for sphere_parameters in &params.sphere_parameters {
         match sphere_parameters.generation_mode {
             SphereGenerationMode::Hardcoded => {
                 sphere_vector.extend(Sphere::hardcoded_vector());
@@ -67,9 +67,9 @@ fn main() {
     let window = video_subsystem
         .window(
             "Example",
-            ((params.ray_parameters.max_hor_value - params.ray_parameters.min_hor_value) as f32
+            ((params.ray_parameters.max_hor_value - params.ray_parameters.min_hor_value) as f64
                 * params.display_scale) as u32,
-            ((params.ray_parameters.max_ver_value - params.ray_parameters.min_ver_value) as f32
+            ((params.ray_parameters.max_ver_value - params.ray_parameters.min_ver_value) as f64
                 * params.display_scale) as u32,
         )
         .build()
@@ -78,7 +78,7 @@ fn main() {
 
     // scale and viewport of the canvas
     canvas
-        .set_scale(params.display_scale, params.display_scale)
+        .set_scale(params.display_scale as f32, params.display_scale as f32)
         .unwrap();
 
     let mut event_pump = sdl_context.event_pump().unwrap();
@@ -198,6 +198,12 @@ fn main() {
                     keycode: Some(Keycode::P),
                     ..
                 } => params.physics_parameters.enabled = !params.physics_parameters.enabled,
+                Event::KeyDown {
+                    keycode: Some(Keycode::Tab),
+                    ..
+                } => {
+                    params.reload();
+                }
                 _ => {} // TODO : issue #1
             }
         }

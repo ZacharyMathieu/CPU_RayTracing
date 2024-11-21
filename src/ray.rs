@@ -15,8 +15,8 @@ fn squared(f: f64) -> f64 {
 pub struct Ray {
     pub vector: Vector,
     pub refraction_factor: f64,
-    pub x_value: i32,
-    pub y_value: i32,
+    pub x_value: i64,
+    pub y_value: i64,
 }
 
 impl Ray {
@@ -24,8 +24,8 @@ impl Ray {
         p1: Position,
         p2: Position,
         refraction_factor: f64,
-        x_value: i32,
-        y_value: i32,
+        x_value: i64,
+        y_value: i64,
     ) -> Ray {
         return Ray {
             vector: Vector::new(p1, p2),
@@ -39,8 +39,8 @@ impl Ray {
         p: Position,
         d: Position,
         refraction_factor: f64,
-        x_value: i32,
-        y_value: i32,
+        x_value: i64,
+        y_value: i64,
         x_angle: f64,
         y_angle: f64,
         z_angle: f64,
@@ -251,7 +251,7 @@ impl Ray {
         let a: f64 = f64::sqrt(
             1. / (incident.dot(&incident) - (incident.dot(&normal).powf(2.) / normal.dot(&normal))),
         );
-        
+
         let exit = -(normal2.scaled(f64::cos(angle_exit))
             + (incident.scaled(a) + normal.scaled(-(a * incident.dot(&normal))))
                 .scaled(f64::sin(angle_exit)));

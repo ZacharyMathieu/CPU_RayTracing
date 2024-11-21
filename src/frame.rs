@@ -24,12 +24,12 @@ impl PixelAccumulator {
 }
 
 pub struct Frame {
-    pub colors: HashMap<(i32, i32), Color>,
+    pub colors: HashMap<(i64, i64), Color>,
 }
 
 impl Frame {
     pub fn create_from_ray_trace(traces: Vec<RayTrace>) -> Frame {
-        let mut colors: HashMap<(i32, i32), Color> = HashMap::new();
+        let mut colors: HashMap<(i64, i64), Color> = HashMap::new();
 
         traces.iter().for_each(|trace: &RayTrace| {
             colors.insert((trace.ray.x_value, trace.ray.y_value), trace.color);
@@ -45,13 +45,13 @@ impl Frame {
     }
 
     pub fn accumulate_frames(frames: &Vec<Frame>) -> Frame {
-        let pixels: &mut HashMap<(i32, i32), PixelAccumulator> = &mut HashMap::new();
+        let pixels: &mut HashMap<(i64, i64), PixelAccumulator> = &mut HashMap::new();
 
         frames.iter().for_each(|frame: &Frame| {
             frame
                 .colors
                 .iter()
-                .for_each(|(position, color): (&(i32, i32), &Color)| {
+                .for_each(|(position, color): (&(i64, i64), &Color)| {
                     if pixels.contains_key(&position) {
                         let accumulator: &mut PixelAccumulator = pixels.get_mut(position).unwrap();
 
@@ -78,7 +78,7 @@ impl Frame {
         let mut new_frame: Frame = Frame::create_empty();
 
         pixels.iter().for_each(
-            |(position, accumulator): (&(i32, i32), &PixelAccumulator)| {
+            |(position, accumulator): (&(i64, i64), &PixelAccumulator)| {
                 new_frame.colors.insert(*position, accumulator.get_color());
             },
         );

@@ -43,7 +43,7 @@ impl<'a> RayTrace<'a> {
         ray: &Ray,
         sphere_vector: &Vec<&Sphere>,
         ray_parameters: &RayParameters,
-        remaining_bounces: u32,
+        remaining_bounces: u64,
         distance: &f64,
         rng: &mut rand::prelude::ThreadRng,
     ) {

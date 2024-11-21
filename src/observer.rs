@@ -41,8 +41,8 @@ impl Observer {
     ) {
         self.rays.clear();
 
-        for x in ray_parameters.min_hor_value..ray_parameters.max_hor_value as i32 {
-            for y in ray_parameters.min_ver_value..ray_parameters.max_ver_value as i32 {
+        for x in ray_parameters.min_hor_value..ray_parameters.max_hor_value {
+            for y in ray_parameters.min_ver_value..ray_parameters.max_ver_value {
                 let r = Ray::new_turned(
                     self.body.pos.clone(),
                     Position {
