@@ -1,17 +1,103 @@
 use sdl2::pixels::Color;
+use serde::de::value;
+use serde_json::Value;
 use std::env;
 use std::fs;
 
+use crate::observer::Observer;
 use crate::{
     position::Position,
     speed::Speed,
     sphere::{Sphere, SphereType},
 };
 
+fn get_parameter_file_path() -> String {
+    return env::current_dir()
+        .expect("Current path is invalid")
+        .to_str()
+        .expect("to string failed on current path")
+        .to_owned()
+        + "\\src\\parameters.json";
+}
+
+fn position_from_json(data: &Value, default: &Position) -> Position {
+    return Position {
+        x: *data["x"].as_f64().get_or_insert(default.x),
+        y: *data["y"].as_f64().get_or_insert(default.y),
+        z: *data["z"].as_f64().get_or_insert(default.z),
+    };
+}
+
+fn speed_from_json(data: &Value, default: &Speed) -> Speed {
+    return Speed {
+        x: *data["x"].as_f64().get_or_insert(default.x),
+        y: *data["y"].as_f64().get_or_insert(default.y),
+        z: *data["z"].as_f64().get_or_insert(default.z),
+    };
+}
+
+fn color_from_json(data: &Value, default: &Color) -> Color {
+    return Color {
+        r: *data["r"].as_u64().get_or_insert(default.r as u64) as u8,
+        g: *data["g"].as_u64().get_or_insert(default.g as u64) as u8,
+        b: *data["b"].as_u64().get_or_insert(default.b as u64) as u8,
+        a: *data["a"].as_u64().get_or_insert(default.a as u64) as u8,
+    };
+}
+
+fn type_from_json(data: &Value, default: &SphereType) -> SphereType {
+    return SphereType::from_string(data.as_str().get_or_insert(default.to_string()));
+}
+
+fn sphere_from_json(data: &Value, default: &Sphere) -> Sphere {
+    return Sphere {
+        pos: position_from_json(&data["pos"], &default.pos),
+        speed: speed_from_json(&data["speed"], &default.speed),
+        radius: *data["radius"].as_f64().get_or_insert(default.radius),
+        color: color_from_json(&data["color"], &default.color),
+        light_factor: *data["light_factor"]
+            .as_f64()
+            .get_or_insert(default.light_factor),
+        type_: type_from_json(&data["type_"], &default.type_),
+        smoothness: *data["smoothness"]
+            .as_f64()
+            .get_or_insert(default.smoothness),
+        refractivity_index: *data["refractivity_index"]
+            .as_f64()
+            .get_or_insert(default.refractivity_index),
+        is_visible: *data["is_visible"]
+            .as_bool()
+            .get_or_insert(default.is_visible),
+    };
+}
+
+fn generation_mode_from_json(data: &Value, default: &SphereGenerationMode) -> SphereGenerationMode {
+    return SphereGenerationMode::from_string(data.as_str().get_or_insert(default.to_string()));
+}
+
 pub enum SphereGenerationMode {
     Hardcoded,
     Random,
     InLine,
+}
+
+impl SphereGenerationMode {
+    pub fn to_string(&self) -> &str {
+        return match *self {
+            Self::Hardcoded => "Hardcoded",
+            Self::Random => "Random",
+            Self::InLine => "InLine",
+        };
+    }
+
+    pub fn from_string(string: &str) -> Self {
+        return match string {
+            "Reflexive" => Self::Hardcoded,
+            "Random" => Self::Random,
+            "InLine" => Self::InLine,
+            _ => Self::Hardcoded,
+        };
+    }
 }
 
 pub struct ObserverParameters {
@@ -37,64 +123,64 @@ pub struct ObserverParameters {
 }
 
 impl ObserverParameters {
-    fn update_from_json(&mut self, data: &serde_json::Value) {
-        self.look_vector_distance = *data["look_vector_distance"]
-            .as_f64()
-            .get_or_insert(self.look_vector_distance);
-        self.look_up_angle = *data["look_up_angle"]
-            .as_f64()
-            .get_or_insert(self.look_up_angle);
-        self.look_up_angle = *data["look_up_angle"]
-            .as_f64()
-            .get_or_insert(self.look_up_angle);
-        self.look_down_angle = *data["look_down_angle"]
-            .as_f64()
-            .get_or_insert(self.look_down_angle);
-        self.look_left_angle = *data["look_left_angle"]
-            .as_f64()
-            .get_or_insert(self.look_left_angle);
-        self.look_right_angle = *data["look_right_angle"]
-            .as_f64()
-            .get_or_insert(self.look_right_angle);
-        self.min_hor_angle = *data["min_hor_angle"]
-            .as_f64()
-            .get_or_insert(self.min_hor_angle);
-        self.max_hor_angle = *data["max_hor_angle"]
-            .as_f64()
-            .get_or_insert(self.max_hor_angle);
-        self.hor_angle_loop = *data["hor_angle_loop"]
-            .as_bool()
-            .get_or_insert(self.hor_angle_loop);
-        self.min_ver_angle = *data["min_ver_angle"]
-            .as_f64()
-            .get_or_insert(self.min_ver_angle);
-        self.max_ver_angle = *data["max_ver_angle"]
-            .as_f64()
-            .get_or_insert(self.max_ver_angle);
-        self.ver_angle_loop = *data["ver_angle_loop"]
-            .as_bool()
-            .get_or_insert(self.ver_angle_loop);
-        self.move_forward_distance = *data["move_forward_distance"]
-            .as_f64()
-            .get_or_insert(self.move_forward_distance);
-        self.move_backward_distance = *data["move_backward_distance"]
-            .as_f64()
-            .get_or_insert(self.move_backward_distance);
-        self.move_right_distance = *data["move_right_distance"]
-            .as_f64()
-            .get_or_insert(self.move_right_distance);
-        self.move_left_distance = *data["move_left_distance"]
-            .as_f64()
-            .get_or_insert(self.move_left_distance);
-        self.move_up_distance = *data["move_up_distance"]
-            .as_f64()
-            .get_or_insert(self.move_up_distance);
-        self.move_down_distance = *data["move_down_distance"]
-            .as_f64()
-            .get_or_insert(self.move_down_distance);
-        self.slow_mode_factor = *data["slow_mode_factor"]
-            .as_f64()
-            .get_or_insert(self.slow_mode_factor);
+    fn get_from_json(data: &Value, default: &Self) -> Self {
+        return ObserverParameters {
+            look_vector_distance: *data["look_vector_distance"]
+                .as_f64()
+                .get_or_insert(default.look_vector_distance),
+            look_up_angle: *data["look_up_angle"]
+                .as_f64()
+                .get_or_insert(default.look_up_angle),
+            look_down_angle: *data["look_down_angle"]
+                .as_f64()
+                .get_or_insert(default.look_down_angle),
+            look_left_angle: *data["look_left_angle"]
+                .as_f64()
+                .get_or_insert(default.look_left_angle),
+            look_right_angle: *data["look_right_angle"]
+                .as_f64()
+                .get_or_insert(default.look_right_angle),
+            min_hor_angle: *data["min_hor_angle"]
+                .as_f64()
+                .get_or_insert(default.min_hor_angle),
+            max_hor_angle: *data["max_hor_angle"]
+                .as_f64()
+                .get_or_insert(default.max_hor_angle),
+            hor_angle_loop: *data["hor_angle_loop"]
+                .as_bool()
+                .get_or_insert(default.hor_angle_loop),
+            min_ver_angle: *data["min_ver_angle"]
+                .as_f64()
+                .get_or_insert(default.min_ver_angle),
+            max_ver_angle: *data["max_ver_angle"]
+                .as_f64()
+                .get_or_insert(default.max_ver_angle),
+            ver_angle_loop: *data["ver_angle_loop"]
+                .as_bool()
+                .get_or_insert(default.ver_angle_loop),
+            move_forward_distance: *data["move_forward_distance"]
+                .as_f64()
+                .get_or_insert(default.move_forward_distance),
+            move_backward_distance: *data["move_backward_distance"]
+                .as_f64()
+                .get_or_insert(default.move_backward_distance),
+            move_right_distance: *data["move_right_distance"]
+                .as_f64()
+                .get_or_insert(default.move_right_distance),
+            move_left_distance: *data["move_left_distance"]
+                .as_f64()
+                .get_or_insert(default.move_left_distance),
+            move_up_distance: *data["move_up_distance"]
+                .as_f64()
+                .get_or_insert(default.move_up_distance),
+            move_down_distance: *data["move_down_distance"]
+                .as_f64()
+                .get_or_insert(default.move_down_distance),
+            slow_mode_factor: *data["slow_mode_factor"]
+                .as_f64()
+                .get_or_insert(default.slow_mode_factor),
+            default_body: sphere_from_json(&data["default_body"], &default.default_body),
+        };
     }
 }
 
@@ -116,61 +202,49 @@ pub struct RayParameters {
 }
 
 impl RayParameters {
-    fn update_from_json(&mut self, data: &serde_json::Value) {
-        self.min_hor_value = *data["min_hor_value"]
-            .as_i64()
-            .get_or_insert(self.min_hor_value);
-        self.max_hor_value = *data["max_hor_value"]
-            .as_i64()
-            .get_or_insert(self.max_hor_value);
-        self.min_ver_value = *data["min_ver_value"]
-            .as_i64()
-            .get_or_insert(self.min_ver_value);
-        self.max_ver_value = *data["max_ver_value"]
-            .as_i64()
-            .get_or_insert(self.max_ver_value);
-        self.min_pixel_factor = *data["min_pixel_factor"]
-            .as_f64()
-            .get_or_insert(self.min_pixel_factor);
-        self.fog_factor = *data["fog_factor"].as_f64().get_or_insert(self.fog_factor);
-        let background_color: &Vec<serde_json::Value> = data["background_color"]
-            .as_array()
-            .expect("Invalid background color");
-        self.background_color = Color::RGB(
-            *background_color[0]
+    fn get_from_json(data: &Value, default: &Self) -> Self {
+        return RayParameters {
+            min_hor_value: *data["min_hor_value"]
+                .as_i64()
+                .get_or_insert(default.min_hor_value),
+            max_hor_value: *data["max_hor_value"]
+                .as_i64()
+                .get_or_insert(default.max_hor_value),
+            min_ver_value: *data["min_ver_value"]
+                .as_i64()
+                .get_or_insert(default.min_ver_value),
+            max_ver_value: *data["max_ver_value"]
+                .as_i64()
+                .get_or_insert(default.max_ver_value),
+            min_pixel_factor: *data["min_pixel_factor"]
+                .as_f64()
+                .get_or_insert(default.min_pixel_factor),
+            fog_factor: *data["fog_factor"]
+                .as_f64()
+                .get_or_insert(default.fog_factor),
+            background_color: color_from_json(&data["background_color"], &default.background_color),
+            background_light_factor: *data["background_light_factor"]
+                .as_f64()
+                .get_or_insert(default.background_light_factor),
+            reflect_background: *data["reflect_background"]
+                .as_bool()
+                .get_or_insert(default.reflect_background),
+            bounce_count: *data["bounce_count"]
                 .as_u64()
-                .get_or_insert(self.background_color.r as u64) as u8,
-            *background_color[1]
-                .as_u64()
-                .get_or_insert(self.background_color.g as u64) as u8,
-            *background_color[2]
-                .as_u64()
-                .get_or_insert(self.background_color.b as u64) as u8,
-        );
-        println!("bg color r: {}", self.background_color.r);
-        println!("bg color g: {}", self.background_color.g);
-        println!("bg color b: {}", self.background_color.b);
-        self.background_light_factor = *data["background_light_factor"]
-            .as_f64()
-            .get_or_insert(self.background_light_factor);
-        self.reflect_background = *data["reflect_background"]
-            .as_bool()
-            .get_or_insert(self.reflect_background);
-        self.bounce_count = *data["bounce_count"]
-            .as_u64()
-            .get_or_insert(self.bounce_count);
-        self.bounce_color_reflection_factor = *data["bounce_color_reflection_factor"]
-            .as_f64()
-            .get_or_insert(self.bounce_color_reflection_factor);
-        self.min_random_bounce_angle_change = *data["min_random_bounce_angle_change"]
-            .as_f64()
-            .get_or_insert(self.min_random_bounce_angle_change);
-        self.max_random_bounce_angle_change = *data["max_random_bounce_angle_change"]
-            .as_f64()
-            .get_or_insert(self.max_random_bounce_angle_change);
-        self.reflect_inside_spheres = *data["reflect_inside_spheres"]
-            .as_bool()
-            .get_or_insert(self.reflect_inside_spheres);
+                .get_or_insert(default.bounce_count),
+            bounce_color_reflection_factor: *data["bounce_color_reflection_factor"]
+                .as_f64()
+                .get_or_insert(default.bounce_color_reflection_factor),
+            min_random_bounce_angle_change: *data["min_random_bounce_angle_change"]
+                .as_f64()
+                .get_or_insert(default.min_random_bounce_angle_change),
+            max_random_bounce_angle_change: *data["max_random_bounce_angle_change"]
+                .as_f64()
+                .get_or_insert(default.max_random_bounce_angle_change),
+            reflect_inside_spheres: *data["reflect_inside_spheres"]
+                .as_bool()
+                .get_or_insert(default.reflect_inside_spheres),
+        };
     }
 }
 
@@ -186,6 +260,58 @@ pub struct SphereParameters {
     pub max_smoothness: f64,
     pub min_refractivity_index: f64,
     pub max_refractivity_index: f64,
+}
+
+impl SphereParameters {
+    fn get_vec_from_json(data: &Value, default: &Self) -> Vec<Self> {
+        let value_array_opt: Option<&Vec<Value>> = data.as_array();
+        return match value_array_opt {
+            Some(value_array) => value_array
+                .iter()
+                .map(|value: &Value| {
+                    return SphereParameters::get_from_json(value, default);
+                })
+                .collect(),
+            None => vec![],
+        };
+    }
+
+    fn get_from_json(data: &Value, default: &Self) -> Self {
+        return SphereParameters {
+            generation_mode: generation_mode_from_json(
+                &data["generation_mode"],
+                &default.generation_mode,
+            ),
+            sphere_type: type_from_json(&data["sphere_type"], &default.sphere_type),
+            sphere_count: *data["sphere_count"]
+                .as_u64()
+                .get_or_insert(default.sphere_count),
+            min_radius: *data["min_radius"]
+                .as_f64()
+                .get_or_insert(default.min_radius),
+            max_radius: *data["max_radius"]
+                .as_f64()
+                .get_or_insert(default.max_radius),
+            min_light_factor: *data["min_light_factor"]
+                .as_f64()
+                .get_or_insert(default.min_light_factor),
+            max_light_factor: *data["max_light_factor"]
+                .as_f64()
+                .get_or_insert(default.max_light_factor),
+            min_smoothness: *data["min_smoothness"]
+                .as_f64()
+                .get_or_insert(default.min_smoothness),
+            max_smoothness: *data["max_smoothness"]
+                .as_f64()
+                .get_or_insert(default.max_smoothness),
+            min_refractivity_index: *data["min_refractivity_index"]
+                .as_f64()
+                .get_or_insert(default.min_refractivity_index),
+            max_refractivity_index: *data["max_refractivity_index"]
+                .as_f64()
+                .get_or_insert(default.max_refractivity_index),
+        };
+    }
 }
 
 pub struct PhysicsParameters {
@@ -206,26 +332,27 @@ pub struct PhysicsParameters {
 }
 
 impl PhysicsParameters {
-    fn update_from_json(&mut self, data: &serde_json::Value) {
-        self.g = *data["g"].as_f64().get_or_insert(self.g);
-        self.enabled = *data["enabled"].as_bool().get_or_insert(self.enabled);
-        self.min_x = *data["min_x"].as_f64().get_or_insert(self.min_x);
-        self.max_x = *data["max_x"].as_f64().get_or_insert(self.max_x);
-        self.min_y = *data["min_y"].as_f64().get_or_insert(self.min_y);
-        self.max_y = *data["max_y"].as_f64().get_or_insert(self.max_y);
-        self.min_z = *data["min_z"].as_f64().get_or_insert(self.min_z);
-        self.max_z = *data["max_z"].as_f64().get_or_insert(self.max_z);
-        self.min_vx = *data["min_vx"].as_f64().get_or_insert(self.min_vx);
-        self.max_vx = *data["max_vx"].as_f64().get_or_insert(self.max_vx);
-        self.min_vy = *data["min_vy"].as_f64().get_or_insert(self.min_vy);
-        self.max_vy = *data["max_vy"].as_f64().get_or_insert(self.max_vy);
-        self.min_vz = *data["min_vz"].as_f64().get_or_insert(self.min_vz);
-        self.max_vz = *data["max_vz"].as_f64().get_or_insert(self.max_vz);
+    fn get_from_json(data: &Value, default: &Self) -> Self {
+        return PhysicsParameters {
+            g: *data["g"].as_f64().get_or_insert(default.g),
+            enabled: *data["enabled"].as_bool().get_or_insert(default.enabled),
+            min_x: *data["min_x"].as_f64().get_or_insert(default.min_x),
+            max_x: *data["max_x"].as_f64().get_or_insert(default.max_x),
+            min_y: *data["min_y"].as_f64().get_or_insert(default.min_y),
+            max_y: *data["max_y"].as_f64().get_or_insert(default.max_y),
+            min_z: *data["min_z"].as_f64().get_or_insert(default.min_z),
+            max_z: *data["max_z"].as_f64().get_or_insert(default.max_z),
+            min_vx: *data["min_vx"].as_f64().get_or_insert(default.min_vx),
+            max_vx: *data["max_vx"].as_f64().get_or_insert(default.max_vx),
+            min_vy: *data["min_vy"].as_f64().get_or_insert(default.min_vy),
+            max_vy: *data["max_vy"].as_f64().get_or_insert(default.max_vy),
+            min_vz: *data["min_vz"].as_f64().get_or_insert(default.min_vz),
+            max_vz: *data["max_vz"].as_f64().get_or_insert(default.max_vz),
+        };
     }
 }
 
 pub struct Parameters {
-    pub parameter_file_path: String,
     pub frame_period_ms: u64,
     pub display_scale: f64,
     pub observer_parameters: ObserverParameters,
@@ -245,12 +372,6 @@ impl Parameters {
         let random_bounce_angle_change = std::f64::consts::FRAC_PI_2;
 
         return Parameters {
-            parameter_file_path: env::current_dir()
-                .expect("Current path is invalid")
-                .to_str()
-                .expect("to string failed on current path")
-                .to_owned()
-                + "\\src\\parameters.json",
             frame_period_ms: 0,
             display_scale: 5.,
             observer_parameters: ObserverParameters {
@@ -360,31 +481,41 @@ impl Parameters {
         };
     }
 
-    fn update_from_json(&mut self, data: &serde_json::Value) {
-        self.frame_period_ms = *data["frame_period_ms"]
-            .as_u64()
-            .get_or_insert(self.frame_period_ms);
-        self.display_scale = *data["display_scale"]
-            .as_f64()
-            .get_or_insert(self.display_scale);
-        self.observer_parameters
-            .update_from_json(&data["observer_parameters"]);
-        self.ray_parameters
-            .update_from_json(&data["ray_parameters"]);
-        self.physics_parameters
-            .update_from_json(&data["physics_parameters"]);
-    }
-
-    pub fn reload(&mut self) {
-        println!("Reloading parameters...");
-        let str: String = fs::read_to_string(self.parameter_file_path.to_string())
+    pub fn get_from_json(default_params: Option<Self>) -> Self {
+        println!("Reading parameters file...");
+        let str: String = fs::read_to_string(get_parameter_file_path().to_string())
             .expect("Unable to read parameter file");
 
-        let json: serde_json::Value =
-            serde_json::from_str(&str).expect("JSON was not well-formatted");
+        let data: Value = serde_json::from_str(&str).expect("JSON was not well-formatted");
 
-        self.update_from_json(&json);
+        let default_params: Parameters = match default_params {
+            Some(params) => params,
+            None => Parameters::default(),
+        };
 
-        println!("Parameters reloaded!");
+        return Parameters {
+            frame_period_ms: *data["frame_period_ms"]
+                .as_u64()
+                .get_or_insert(default_params.frame_period_ms),
+            display_scale: *data["display_scale"]
+                .as_f64()
+                .get_or_insert(default_params.display_scale),
+            observer_parameters: ObserverParameters::get_from_json(
+                &data["observer_parameters"],
+                &default_params.observer_parameters,
+            ),
+            ray_parameters: RayParameters::get_from_json(
+                &data["ray_parameters"],
+                &default_params.ray_parameters,
+            ),
+            sphere_parameters: SphereParameters::get_vec_from_json(
+                &data["sphere_parameters"],
+                &default_params.sphere_parameters[0],
+            ),
+            physics_parameters: PhysicsParameters::get_from_json(
+                &data["physics_parameters"],
+                &default_params.physics_parameters,
+            ),
+        };
     }
 }

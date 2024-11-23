@@ -1,8 +1,8 @@
-use rand::Rng;
+use rand::{rngs::ThreadRng, Rng};
 use sdl2::pixels::Color;
 
 use crate::{
-    parameters::{PhysicsParameters, SphereParameters},
+    parameters::{PhysicsParameters, SphereGenerationMode, SphereParameters},
     position::Position,
     speed::Speed,
     util::{at_ratio, float_to_color, rand_color, rand_range},
@@ -12,6 +12,23 @@ use crate::{
 pub enum SphereType {
     Reflexive,
     Refractive,
+}
+
+impl SphereType {
+    pub fn to_string(&self) -> &str {
+        return match *self {
+            Self::Reflexive => "Reflexive",
+            Self::Refractive => "Refractive",
+        };
+    }
+
+    pub fn from_string(string: &str) -> Self {
+        return match string {
+            "Reflexive" => Self::Reflexive,
+            "Refractive" => Self::Refractive,
+            _ => Self::Reflexive,
+        };
+    }
 }
 
 #[derive(Clone, Copy)]
@@ -271,6 +288,43 @@ impl Sphere {
             ),
             is_visible: true,
         };
+    }
+
+    pub fn fill_vector(
+        sphere_vector: &mut Vec<Sphere>,
+        sphere_parameters: &SphereParameters,
+        physics_parameters: &PhysicsParameters,
+        rng: &mut ThreadRng,
+    ) {
+        match sphere_parameters.generation_mode {
+            SphereGenerationMode::Hardcoded => {
+                sphere_vector.extend(Sphere::hardcoded_vector());
+            }
+            SphereGenerationMode::InLine => {
+                sphere_vector.extend(Sphere::in_line_vector(
+                    &sphere_parameters,
+                    &physics_parameters,
+                ));
+            }
+            SphereGenerationMode::Random => {
+                sphere_vector.extend(Sphere::random_vector(
+                    &sphere_parameters,
+                    &physics_parameters,
+                    rng,
+                ));
+            }
+        }
+    }
+
+    pub fn fill_vector_multiple_parameters(
+        sphere_vector: &mut Vec<Sphere>,
+        sphere_parameters_vec: &Vec<SphereParameters>,
+        physics_parameters: &PhysicsParameters,
+        rng: &mut ThreadRng,
+    ) {
+        for sphere_parameters in sphere_parameters_vec {
+            Sphere::fill_vector(sphere_vector, sphere_parameters, &physics_parameters, rng);
+        }
     }
 
     pub fn physics(&mut self, physics_parameters: &PhysicsParameters) {

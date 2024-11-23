@@ -3,8 +3,8 @@
     "display_scale": 5.0,
     "observer_parameters": {
         "look_vector_distance": 64.0,
-        "look_up_angle": -0.1,
-        "look_down_angle": 0.1,
+        "look_up_angle": -0.08,
+        "look_down_angle": 0.08,
         "look_left_angle": -0.1,
         "look_right_angle": 0.1,
         "min_hor_angle": 0.0,
@@ -19,28 +19,81 @@
         "move_left_distance": -0.5,
         "move_up_distance": -0.5,
         "move_down_distance": 0.5,
-        "slow_mode_factor": 0.05
+        "slow_mode_factor": 0.1,
+        "default_body": {
+            "pos": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "speed": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "radius": 1.0,
+            "color": {
+                "r": 0,
+                "g": 0,
+                "b": 255,
+                "a": 255
+            },
+            "light_factor": 1.0,
+            "type_": "Reflexive",
+            "smoothness": 1.0,
+            "refractivity_index": 1.0,
+            "is_visible": true
+        }
     },
     "ray_parameters": {
-        "min_hor_value": -64,
-        "max_hor_value": 64,
+        "min_hor_value": -128,
+        "max_hor_value": 128,
         "min_ver_value": -64,
         "max_ver_value": 64,
         "min_pixel_factor": 0.1,
         "fog_factor": 0.0,
-        "background_color": [
-            0,
-            0,
-            0
-        ],
+        "background_color": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 255
+        },
         "background_light_factor": 1.0,
         "reflect_background": false,
         "bounce_count": 10,
-        "bounce_color_reflection_factor": 0.5,
+        "bounce_color_reflection_factor": 1,
         "min_random_bounce_angle_change": -1.57075,
         "max_random_bounce_angle_change": 1.57075,
         "reflect_inside_spheres": false
     },
+    "sphere_parameters": [
+        {
+            "sphere_type": "Reflexive",
+            "generation_mode": "Random",
+            "sphere_count": 10,
+            "min_radius": 1.0,
+            "max_radius": 5.0,
+            "min_light_factor": 0.8,
+            "max_light_factor": 1.0,
+            "min_smoothness": 1.0,
+            "max_smoothness": 1.0,
+            "min_refractivity_index": 1.0,
+            "max_refractivity_index": 1.0
+        },
+        {
+            "sphere_type": "Refractive",
+            "generation_mode": "Random",
+            "sphere_count": 20,
+            "min_radius": 5.0,
+            "max_radius": 5.0,
+            "min_light_factor": 0.25,
+            "max_light_factor": 0.5,
+            "min_smoothness": 1.0,
+            "max_smoothness": 1.0,
+            "min_refractivity_index": 1.05,
+            "max_refractivity_index": 3.0
+        }
+    ],
     "physics_parameters": {
         "g": 0.002,
         "enabled": false,

@@ -1,6 +1,5 @@
 extern crate sdl2;
 
-use parameters::SphereGenerationMode;
 use rand::rngs::ThreadRng;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
@@ -26,38 +25,46 @@ use display_ray_tracing::display;
 // mod display_2d;
 // use display_2d::display;
 
+fn reload_params(
+    default: Option<Parameters>,
+    default_observer: Option<Observer>,
+) -> (Parameters, Observer) {
+    let params: Parameters = Parameters::get_from_json(default);
+
+    let mut observer: Observer = Observer::default(&params);
+    match default_observer {
+        Some(obs) => {
+            observer.body.pos = obs.body.pos;
+            observer.hor_angle = obs.hor_angle;
+            observer.ver_angle = obs.ver_angle;
+        }
+        _ => {}
+    };
+
+    return (params, observer);
+}
+
+fn generate_sphere_vector(params: &Parameters, rng: &mut ThreadRng) -> Vec<Sphere> {
+    let mut sphere_vector: Vec<Sphere> = vec![];
+    Sphere::fill_vector_multiple_parameters(
+        &mut sphere_vector,
+        &params.sphere_parameters,
+        &params.physics_parameters,
+        rng,
+    );
+    return sphere_vector;
+}
+
 fn main() {
     // init RNG
     let mut rng: ThreadRng = rand::thread_rng();
 
-    // init params
-    let mut params: Parameters = Parameters::default();
+    // init params, observer and sphere_vector
+    let mut params: Parameters;
+    let mut observer: Observer;
+    (params, observer) = reload_params(Option::None, Option::None);
 
-    // init observer
-    let mut observer: Observer = Observer::default(&params);
-
-    // init sphere vector
-    let mut sphere_vector: Vec<Sphere> = vec![];
-    for sphere_parameters in &params.sphere_parameters {
-        match sphere_parameters.generation_mode {
-            SphereGenerationMode::Hardcoded => {
-                sphere_vector.extend(Sphere::hardcoded_vector());
-            }
-            SphereGenerationMode::InLine => {
-                sphere_vector.extend(Sphere::in_line_vector(
-                    &sphere_parameters,
-                    &params.physics_parameters,
-                ));
-            }
-            SphereGenerationMode::Random => {
-                sphere_vector.extend(Sphere::random_vector(
-                    &sphere_parameters,
-                    &params.physics_parameters,
-                    &mut rng,
-                ));
-            }
-        }
-    }
+    let mut sphere_vector = generate_sphere_vector(&params, &mut rng);
 
     // init video subsystem
     let sdl_context = sdl2::init().unwrap();
@@ -66,7 +73,7 @@ fn main() {
     // open window and convert to canvas
     let window = video_subsystem
         .window(
-            "Example",
+            "CPU Raytracing",
             ((params.ray_parameters.max_hor_value - params.ray_parameters.min_hor_value) as f64
                 * params.display_scale) as u32,
             ((params.ray_parameters.max_ver_value - params.ray_parameters.min_ver_value) as f64
@@ -193,7 +200,6 @@ fn main() {
                     keycode: Some(Keycode::V),
                     ..
                 } => observer.switch_visibility(),
-                // TODO - remove this control
                 Event::KeyDown {
                     keycode: Some(Keycode::P),
                     ..
@@ -202,9 +208,13 @@ fn main() {
                     keycode: Some(Keycode::Tab),
                     ..
                 } => {
-                    params.reload();
+                    (params, observer) = reload_params(Option::Some(params), Option::Some(observer))
                 }
-                _ => {} // TODO : issue #1
+                Event::KeyDown {
+                    keycode: Some(Keycode::G),
+                    ..
+                } => sphere_vector = generate_sphere_vector(&params, &mut rng),
+                _ => {}
             }
         }
 
