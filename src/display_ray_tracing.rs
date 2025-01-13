@@ -1,10 +1,13 @@
 use sdl2::{pixels::Color, rect::Point, render::Canvas, video::Window};
 
-use crate::{frame::Frame, observer::Observer, parameters::RayParameters, sphere::Sphere};
+use crate::{
+    frame::Frame, observer::Observer, parameters::RayParameters, polygon::Polygon, sphere::Sphere,
+};
 
 pub fn display(
     observer: &mut Observer,
     sphere_vector: &Vec<Sphere>,
+    polygon_vector: &Vec<Polygon>,
     ray_parameters: &RayParameters,
     canvas: &mut Canvas<Window>,
 ) {
@@ -16,7 +19,9 @@ pub fn display(
 
     let frame: Frame = observer.get_next_frame(
         ray_parameters,
-        &sphere_vector.iter().chain(observer_bodies.iter()).collect(),
+        &sphere_vector,
+        &polygon_vector,
+        &observer_bodies,
     );
 
     // Displaying the colors

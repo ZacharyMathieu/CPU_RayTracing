@@ -1,6 +1,7 @@
 use crate::{
     frame::Frame,
     parameters::{ObserverParameters, Parameters, RayParameters},
+    polygon::Polygon,
     position::Position,
     ray::Ray,
     ray_trace::RayTrace,
@@ -75,7 +76,9 @@ impl Observer {
     fn trace_parallel(
         &self,
         ray_parameters: &RayParameters,
-        sphere_vector: &Vec<&Sphere>,
+        sphere_vector: &Vec<Sphere>,
+        polygon_vector: &Vec<Polygon>,
+        observer_bodies: &Vec<Sphere>,
     ) -> Vec<RayTrace> {
         let mut ray_traces: Vec<RayTrace> = self.generate_ray_traces(ray_parameters);
 
@@ -83,7 +86,12 @@ impl Observer {
         ray_traces
             .par_iter_mut()
             .for_each(|trace: &mut RayTrace<'_>| {
-                trace.trace(sphere_vector, ray_parameters);
+                trace.trace(
+                    ray_parameters,
+                    sphere_vector,
+                    polygon_vector,
+                    observer_bodies,
+                );
             });
 
         return ray_traces;
@@ -92,9 +100,16 @@ impl Observer {
     pub fn get_next_frame(
         &mut self,
         ray_parameters: &RayParameters,
-        sphere_vector: &Vec<&Sphere>,
+        sphere_vector: &Vec<Sphere>,
+        polygon_vector: &Vec<Polygon>,
+        observer_bodies: &Vec<Sphere>,
     ) -> Frame {
-        let traces: Vec<RayTrace> = self.trace_parallel(ray_parameters, sphere_vector);
+        let traces: Vec<RayTrace> = self.trace_parallel(
+            ray_parameters,
+            sphere_vector,
+            polygon_vector,
+            observer_bodies,
+        );
 
         let frame: Frame = Frame::create_from_ray_trace(traces);
 

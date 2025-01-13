@@ -2,7 +2,10 @@ use rand::{rngs::ThreadRng, Rng};
 use sdl2::pixels::Color;
 
 use crate::{
-    parameters::{PhysicsParameters, SphereGenerationMode, SphereParameters},
+    parameters::{
+        PhysicsParameters, SphereGenerationMode,
+        SphereParameters,
+    },
     position::Position,
     speed::Speed,
     util::{at_ratio, float_to_color, rand_color, rand_range},
@@ -179,8 +182,8 @@ impl Sphere {
     ) -> Vec<Sphere> {
         let mut v: Vec<Sphere> = vec![];
 
-        for i in 0..sphere_parameters.sphere_count {
-            let progress = i as f64 / (sphere_parameters.sphere_count - 1) as f64;
+        for i in 0..sphere_parameters.count {
+            let progress = i as f64 / (sphere_parameters.count - 1) as f64;
             v.push(Sphere::from_float(
                 progress,
                 &sphere_parameters,
@@ -198,7 +201,7 @@ impl Sphere {
     ) -> Vec<Sphere> {
         let mut v: Vec<Sphere> = vec![];
 
-        for _ in 0..sphere_parameters.sphere_count {
+        for _ in 0..sphere_parameters.count {
             let new_sphere: Sphere = Sphere::random(&sphere_parameters, &physics_parameters, rng);
             v.push(new_sphere);
         }
@@ -233,7 +236,7 @@ impl Sphere {
                 sphere_parameters.min_light_factor,
                 sphere_parameters.max_light_factor,
             ),
-            type_: sphere_parameters.sphere_type,
+            type_: sphere_parameters.type_,
             smoothness: rand_range(
                 rng,
                 sphere_parameters.min_smoothness,
@@ -275,7 +278,7 @@ impl Sphere {
                 sphere_parameters.min_light_factor,
                 sphere_parameters.max_light_factor,
             ),
-            type_: sphere_parameters.sphere_type,
+            type_: sphere_parameters.type_,
             smoothness: at_ratio(
                 f,
                 sphere_parameters.min_smoothness,
@@ -290,7 +293,7 @@ impl Sphere {
         };
     }
 
-    pub fn fill_vector(
+    pub fn fill_sphere_vector(
         sphere_vector: &mut Vec<Sphere>,
         sphere_parameters: &SphereParameters,
         physics_parameters: &PhysicsParameters,
@@ -316,14 +319,14 @@ impl Sphere {
         }
     }
 
-    pub fn fill_vector_multiple_parameters(
+    pub fn fill_sphere_vector_multiple_parameters(
         sphere_vector: &mut Vec<Sphere>,
         sphere_parameters_vec: &Vec<SphereParameters>,
         physics_parameters: &PhysicsParameters,
         rng: &mut ThreadRng,
     ) {
         for sphere_parameters in sphere_parameters_vec {
-            Sphere::fill_vector(sphere_vector, sphere_parameters, &physics_parameters, rng);
+            Sphere::fill_sphere_vector(sphere_vector, sphere_parameters, &physics_parameters, rng);
         }
     }
 

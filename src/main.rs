@@ -1,13 +1,16 @@
 extern crate sdl2;
 
+use polygon::Polygon;
 use rand::rngs::ThreadRng;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use std::{thread, time};
 
 mod frame;
+mod object;
 mod observer;
 mod parameters;
+mod polygon;
 mod position;
 mod ray;
 mod ray_trace;
@@ -43,13 +46,24 @@ fn reload_params(default_observer: Option<Observer>) -> (Parameters, Observer) {
 
 fn generate_sphere_vector(params: &Parameters, rng: &mut ThreadRng) -> Vec<Sphere> {
     let mut sphere_vector: Vec<Sphere> = vec![];
-    Sphere::fill_vector_multiple_parameters(
+    Sphere::fill_sphere_vector_multiple_parameters(
         &mut sphere_vector,
         &params.sphere_parameters,
         &params.physics_parameters,
         rng,
     );
     return sphere_vector;
+}
+
+fn generate_polygon_vector(params: &Parameters, rng: &mut ThreadRng) -> Vec<Polygon> {
+    let mut polygon_vector: Vec<Polygon> = vec![];
+    Polygon::fill_polygon_vector_multiple_parameters(
+        &mut polygon_vector,
+        &params.polygon_parameters,
+        &params.physics_parameters,
+        rng,
+    );
+    return polygon_vector;
 }
 
 fn main() {
@@ -62,6 +76,7 @@ fn main() {
     (params, observer) = reload_params(Option::None);
 
     let mut sphere_vector = generate_sphere_vector(&params, &mut rng);
+    let mut polygon_vector = generate_polygon_vector(&params, &mut rng);
 
     // init video subsystem
     let sdl_context = sdl2::init().unwrap();
@@ -208,7 +223,10 @@ fn main() {
                 Event::KeyDown {
                     keycode: Some(Keycode::G),
                     ..
-                } => sphere_vector = generate_sphere_vector(&params, &mut rng),
+                } => {
+                    sphere_vector = generate_sphere_vector(&params, &mut rng);
+                    polygon_vector = generate_polygon_vector(&params, &mut rng);
+                }
                 _ => {}
             }
         }
@@ -224,6 +242,7 @@ fn main() {
         display(
             &mut observer,
             &sphere_vector,
+            &polygon_vector,
             &params.ray_parameters,
             &mut canvas,
         );

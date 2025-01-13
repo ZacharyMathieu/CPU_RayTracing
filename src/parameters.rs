@@ -3,6 +3,7 @@ use serde_json::Value;
 use std::env;
 use std::fs;
 
+use crate::polygon::PolygonType;
 use crate::{
     position::Position,
     speed::Speed,
@@ -43,61 +44,6 @@ fn color_from_json(data: &Value, default: &Color) -> Color {
     };
 }
 
-fn type_from_json(data: &Value, default: &SphereType) -> SphereType {
-    return SphereType::from_string(data.as_str().get_or_insert(default.to_string()));
-}
-
-fn sphere_from_json(data: &Value, default: &Sphere) -> Sphere {
-    return Sphere {
-        pos: position_from_json(&data["pos"], &default.pos),
-        speed: speed_from_json(&data["speed"], &default.speed),
-        radius: *data["radius"].as_f64().get_or_insert(default.radius),
-        color: color_from_json(&data["color"], &default.color),
-        light_factor: *data["light_factor"]
-            .as_f64()
-            .get_or_insert(default.light_factor),
-        type_: type_from_json(&data["type_"], &default.type_),
-        smoothness: *data["smoothness"]
-            .as_f64()
-            .get_or_insert(default.smoothness),
-        refractivity_index: *data["refractivity_index"]
-            .as_f64()
-            .get_or_insert(default.refractivity_index),
-        is_visible: *data["is_visible"]
-            .as_bool()
-            .get_or_insert(default.is_visible),
-    };
-}
-
-fn generation_mode_from_json(data: &Value, default: &SphereGenerationMode) -> SphereGenerationMode {
-    return SphereGenerationMode::from_string(data.as_str().get_or_insert(default.to_string()));
-}
-
-pub enum SphereGenerationMode {
-    Hardcoded,
-    Random,
-    InLine,
-}
-
-impl SphereGenerationMode {
-    pub fn to_string(&self) -> &str {
-        return match *self {
-            Self::Hardcoded => "Hardcoded",
-            Self::Random => "Random",
-            Self::InLine => "InLine",
-        };
-    }
-
-    pub fn from_string(string: &str) -> Self {
-        return match string {
-            "Reflexive" => Self::Hardcoded,
-            "Random" => Self::Random,
-            "InLine" => Self::InLine,
-            _ => Self::Hardcoded,
-        };
-    }
-}
-
 pub struct ObserverParameters {
     pub look_vector_distance: f64,
     pub look_up_angle: f64,
@@ -121,6 +67,28 @@ pub struct ObserverParameters {
 }
 
 impl ObserverParameters {
+    fn sphere_from_json(data: &Value, default: &Sphere) -> Sphere {
+        return Sphere {
+            pos: position_from_json(&data["pos"], &default.pos),
+            speed: speed_from_json(&data["speed"], &default.speed),
+            radius: *data["radius"].as_f64().get_or_insert(default.radius),
+            color: color_from_json(&data["color"], &default.color),
+            light_factor: *data["light_factor"]
+                .as_f64()
+                .get_or_insert(default.light_factor),
+            type_: SphereParameters::type_from_json(&data["type"], &default.type_),
+            smoothness: *data["smoothness"]
+                .as_f64()
+                .get_or_insert(default.smoothness),
+            refractivity_index: *data["refractivity_index"]
+                .as_f64()
+                .get_or_insert(default.refractivity_index),
+            is_visible: *data["is_visible"]
+                .as_bool()
+                .get_or_insert(default.is_visible),
+        };
+    }
+
     fn get_from_json(data: &Value) -> Self {
         return ObserverParameters {
             look_vector_distance: *data["look_vector_distance"].as_f64().get_or_insert(64.),
@@ -147,7 +115,7 @@ impl ObserverParameters {
             move_up_distance: *data["move_up_distance"].as_f64().get_or_insert(0.5),
             move_down_distance: *data["move_down_distance"].as_f64().get_or_insert(-0.5),
             slow_mode_factor: *data["slow_mode_factor"].as_f64().get_or_insert(0.05),
-            default_body: sphere_from_json(
+            default_body: ObserverParameters::sphere_from_json(
                 &data["default_body"],
                 &Sphere {
                     pos: Position {
@@ -224,10 +192,35 @@ impl RayParameters {
     }
 }
 
+pub enum SphereGenerationMode {
+    Hardcoded,
+    Random,
+    InLine,
+}
+
+impl SphereGenerationMode {
+    pub fn to_string(&self) -> &str {
+        return match *self {
+            Self::Hardcoded => "Hardcoded",
+            Self::Random => "Random",
+            Self::InLine => "InLine",
+        };
+    }
+
+    pub fn from_string(string: &str) -> Self {
+        return match string {
+            "Reflexive" => Self::Hardcoded,
+            "Random" => Self::Random,
+            "InLine" => Self::InLine,
+            _ => Self::Hardcoded,
+        };
+    }
+}
+
 pub struct SphereParameters {
     pub generation_mode: SphereGenerationMode,
-    pub sphere_type: SphereType,
-    pub sphere_count: u64,
+    pub type_: SphereType,
+    pub count: u64,
     pub min_radius: f64,
     pub max_radius: f64,
     pub min_light_factor: f64,
@@ -239,53 +232,125 @@ pub struct SphereParameters {
 }
 
 impl SphereParameters {
-    fn get_vec_from_json(data: &Value, default: &Self) -> Vec<Self> {
+    fn get_vec_from_json(data: &Value) -> Vec<Self> {
         let value_array_opt: Option<&Vec<Value>> = data.as_array();
         return match value_array_opt {
             Some(value_array) => value_array
                 .iter()
                 .map(|value: &Value| {
-                    return SphereParameters::get_from_json(value, default);
+                    return SphereParameters::get_from_json(value);
                 })
                 .collect(),
             None => vec![],
         };
     }
 
-    fn get_from_json(data: &Value, default: &Self) -> Self {
+    fn generation_mode_from_json(
+        data: &Value,
+        default: &SphereGenerationMode,
+    ) -> SphereGenerationMode {
+        return SphereGenerationMode::from_string(data.as_str().get_or_insert(default.to_string()));
+    }
+
+    fn type_from_json(data: &Value, default: &SphereType) -> SphereType {
+        return SphereType::from_string(data.as_str().get_or_insert(default.to_string()));
+    }
+
+    fn get_from_json(data: &Value) -> Self {
         return SphereParameters {
-            generation_mode: generation_mode_from_json(
+            type_: SphereParameters::type_from_json(&data["type"], &SphereType::Reflexive),
+            generation_mode: SphereParameters::generation_mode_from_json(
                 &data["generation_mode"],
-                &default.generation_mode,
+                &SphereGenerationMode::Random,
             ),
-            sphere_type: type_from_json(&data["sphere_type"], &default.sphere_type),
-            sphere_count: *data["sphere_count"]
-                .as_u64()
-                .get_or_insert(default.sphere_count),
-            min_radius: *data["min_radius"]
-                .as_f64()
-                .get_or_insert(default.min_radius),
-            max_radius: *data["max_radius"]
-                .as_f64()
-                .get_or_insert(default.max_radius),
-            min_light_factor: *data["min_light_factor"]
-                .as_f64()
-                .get_or_insert(default.min_light_factor),
-            max_light_factor: *data["max_light_factor"]
-                .as_f64()
-                .get_or_insert(default.max_light_factor),
-            min_smoothness: *data["min_smoothness"]
-                .as_f64()
-                .get_or_insert(default.min_smoothness),
-            max_smoothness: *data["max_smoothness"]
-                .as_f64()
-                .get_or_insert(default.max_smoothness),
-            min_refractivity_index: *data["min_refractivity_index"]
-                .as_f64()
-                .get_or_insert(default.min_refractivity_index),
-            max_refractivity_index: *data["max_refractivity_index"]
-                .as_f64()
-                .get_or_insert(default.max_refractivity_index),
+            count: *data["count"].as_u64().get_or_insert(10),
+            min_radius: *data["min_radius"].as_f64().get_or_insert(1.),
+            max_radius: *data["max_radius"].as_f64().get_or_insert(5.),
+            min_light_factor: *data["min_light_factor"].as_f64().get_or_insert(0.8),
+            max_light_factor: *data["max_light_factor"].as_f64().get_or_insert(1.),
+            min_smoothness: *data["min_smoothness"].as_f64().get_or_insert(0.),
+            max_smoothness: *data["max_smoothness"].as_f64().get_or_insert(1.),
+            min_refractivity_index: *data["min_refractivity_index"].as_f64().get_or_insert(1.),
+            max_refractivity_index: *data["max_refractivity_index"].as_f64().get_or_insert(3.),
+        };
+    }
+}
+
+pub enum PolygonGenerationMode {
+    Hardcoded,
+    Random,
+}
+
+impl PolygonGenerationMode {
+    pub fn to_string(&self) -> &str {
+        return match *self {
+            Self::Hardcoded => "Hardcoded",
+            Self::Random => "Random",
+        };
+    }
+
+    pub fn from_string(string: &str) -> Self {
+        return match string {
+            "Reflexive" => Self::Hardcoded,
+            "Random" => Self::Random,
+            _ => Self::Hardcoded,
+        };
+    }
+}
+
+pub struct PolygonParameters {
+    pub generation_mode: PolygonGenerationMode,
+    pub _type: PolygonType,
+    pub count: u64,
+    pub min_radius: f64,
+    pub max_radius: f64,
+    pub min_light_factor: f64,
+    pub max_light_factor: f64,
+    pub min_smoothness: f64,
+    pub max_smoothness: f64,
+}
+
+impl PolygonParameters {
+    fn get_vec_from_json(data: &Value) -> Vec<Self> {
+        let value_array_opt: Option<&Vec<Value>> = data.as_array();
+        return match value_array_opt {
+            Some(value_array) => value_array
+                .iter()
+                .map(|value: &Value| {
+                    return PolygonParameters::get_from_json(value);
+                })
+                .collect(),
+            None => vec![],
+        };
+    }
+
+    fn generation_mode_from_json(
+        data: &Value,
+        default: &PolygonGenerationMode,
+    ) -> PolygonGenerationMode {
+        return PolygonGenerationMode::from_string(
+            data.as_str().get_or_insert(default.to_string()),
+        );
+    }
+
+    fn type_from_json(data: &Value, default: &PolygonType) -> PolygonType {
+        return PolygonType::from_string(data.as_str().get_or_insert(default.to_string()));
+    }
+
+    fn get_from_json(data: &Value) -> Self {
+        return PolygonParameters {
+            generation_mode: PolygonParameters::generation_mode_from_json(
+                &data["generation_mode"],
+                &PolygonGenerationMode::Random,
+            ),
+            _type: PolygonParameters::type_from_json(&data["type"], &PolygonType::Reflexive),
+            count: *data["count"].as_u64().get_or_insert(10),
+            min_radius: *data["min_radius"].as_f64().get_or_insert(1.),
+            max_radius: *data["max_radius"].as_f64().get_or_insert(5.),
+            min_light_factor: *data["min_light_factor"].as_f64().get_or_insert(0.8),
+            max_light_factor: *data["max_light_factor"].as_f64().get_or_insert(1.),
+            min_smoothness: *data["min_smoothness"].as_f64().get_or_insert(0.),
+            max_smoothness: *data["max_smoothness"].as_f64().get_or_insert(1.),
         };
     }
 }
@@ -334,6 +399,7 @@ pub struct Parameters {
     pub observer_parameters: ObserverParameters,
     pub ray_parameters: RayParameters,
     pub sphere_parameters: Vec<SphereParameters>,
+    pub polygon_parameters: Vec<PolygonParameters>,
     pub physics_parameters: PhysicsParameters,
 }
 
@@ -350,22 +416,8 @@ impl Parameters {
             display_scale: *data["display_scale"].as_f64().get_or_insert(5.),
             observer_parameters: ObserverParameters::get_from_json(&data["observer_parameters"]),
             ray_parameters: RayParameters::get_from_json(&data["ray_parameters"]),
-            sphere_parameters: SphereParameters::get_vec_from_json(
-                &data["sphere_parameters"],
-                &SphereParameters {
-                    sphere_type: SphereType::Reflexive,
-                    generation_mode: SphereGenerationMode::Random,
-                    sphere_count: 10,
-                    min_radius: 1.,
-                    max_radius: 5.,
-                    min_light_factor: 0.8,
-                    max_light_factor: 1.,
-                    min_smoothness: 0.,
-                    max_smoothness: 1.,
-                    min_refractivity_index: 1.,
-                    max_refractivity_index: 1.,
-                },
-            ),
+            sphere_parameters: SphereParameters::get_vec_from_json(&data["sphere_parameters"]),
+            polygon_parameters: PolygonParameters::get_vec_from_json(&data["polygon_parameters"]),
             physics_parameters: PhysicsParameters::get_from_json(&data["physics_parameters"]),
         };
     }

@@ -1,5 +1,7 @@
 use crate::{
+    object::Object,
     parameters::RayParameters,
+    polygon::Polygon,
     position::Position,
     sphere::{Sphere, SphereType},
     util::{self, round},
@@ -10,8 +12,13 @@ fn squared(f: f64) -> f64 {
     return f * f;
 }
 
-#[derive(Clone, Copy)]
+pub struct Collision<'a> {
+    pub ray_factor: f64,
+    pub is_front: bool,
+    pub object: Object<'a>,
+}
 
+#[derive(Clone, Copy)]
 pub struct Ray {
     pub vector: Vector,
     pub refraction_factor: f64,
@@ -75,7 +82,7 @@ impl Ray {
         return self.vector.p1 + (self.vector.as_position()).scaled(factor);
     }
 
-    pub fn factor_distance_from_point(
+    pub fn factor_distance_from_sphere(
         &self,
         s: &Sphere,
         ray_parameters: &RayParameters,
@@ -125,53 +132,118 @@ impl Ray {
         return (f64::NAN, false);
     }
 
+    pub fn factor_distance_from_polygon(
+        &self,
+        p: &Polygon,
+        ray_parameters: &RayParameters,
+    ) -> (f64, bool) {
+        todo!();
+    }
+
     pub fn find_collision<'a>(
         &self,
-        sphere_vector: &'a Vec<&Sphere>,
+        sphere_vector: &'a Vec<Sphere>,
+        polygon_vector: &'a Vec<Polygon>,
+        observer_bodies: &'a Vec<Sphere>,
         ray_parameters: &RayParameters,
-    ) -> Option<((f64, bool), &'a Sphere)> {
-        let mut result: Option<((f64, bool), &Sphere)> = Option::None;
+        result: &mut Option<Collision<'a>>,
+    ) {
+        self.collide_sphere(sphere_vector, ray_parameters, result);
+        self.collide_polygon(polygon_vector, ray_parameters, result);
+        self.collide_sphere(&observer_bodies, ray_parameters, result);
+    }
 
-        for sphere in sphere_vector.iter() {
+    fn collide_sphere<'a>(
+        &self,
+        vector: &'a Vec<Sphere>,
+        ray_parameters: &RayParameters,
+        result: &mut Option<Collision<'a>>,
+    ) {
+        for sphere in vector.iter() {
             if sphere.is_visible {
                 let (ray_factor, is_front): (f64, bool) =
-                    self.factor_distance_from_point(&sphere, ray_parameters);
+                    self.factor_distance_from_sphere(&sphere, ray_parameters);
 
                 if !ray_factor.is_nan() {
                     // Check if result is already assigned and if so, override the value if the new factor is smaller
                     match result {
                         None => {
-                            result = Option::Some(((ray_factor, is_front), sphere));
+                            result.replace(Collision {
+                                ray_factor: ray_factor,
+                                is_front: is_front,
+                                object: Object::Sphere(sphere),
+                            });
                         }
-                        Some(((factor, _), _)) => {
-                            if ray_factor < factor {
-                                result = Option::Some(((ray_factor, is_front), sphere));
+                        Some(collision) => {
+                            if ray_factor < collision.ray_factor {
+                                result.replace(Collision {
+                                    ray_factor: ray_factor,
+                                    is_front: is_front,
+                                    object: Object::Sphere(sphere),
+                                });
                             }
                         }
                     };
                 }
             }
         }
+    }
 
-        return result;
+    fn collide_polygon<'a>(
+        &self,
+        vector: &'a Vec<Polygon>,
+        ray_parameters: &RayParameters,
+        result: &mut Option<Collision<'a>>,
+    ) {
+        for polygon in vector.iter() {
+            if polygon.is_visible {
+                let (ray_factor, is_front): (f64, bool) =
+                    self.factor_distance_from_polygon(&polygon, ray_parameters);
+
+                if !ray_factor.is_nan() {
+                    // Check if result is already assigned and if so, override the value if the new factor is smaller
+                    match result {
+                        None => {
+                            result.replace(Collision {
+                                ray_factor: ray_factor,
+                                is_front: is_front,
+                                object: Object::Polygon(polygon),
+                            });
+                        }
+                        Some(collision) => {
+                            if ray_factor < collision.ray_factor {
+                                result.replace(Collision {
+                                    ray_factor: ray_factor,
+                                    is_front: is_front,
+                                    object: Object::Polygon(polygon),
+                                });
+                            }
+                        }
+                    };
+                }
+            }
+        }
     }
 
     pub fn get_deviation(
         &self,
         intersection_factor: f64,
         is_entering: bool,
-        sphere: &Sphere,
+        object: &Object,
         ray_parameters: &RayParameters,
         rng: &mut rand::prelude::ThreadRng,
     ) -> Ray {
         return self.apply_smoothness(
-            match sphere.type_ {
-                SphereType::Reflexive => self.get_reflection(intersection_factor, sphere),
-                SphereType::Refractive => {
-                    self.get_refraction(intersection_factor, is_entering, sphere)
-                }
+            match object {
+                Object::Sphere(sphere) => match sphere.type_ {
+                    SphereType::Reflexive => self.get_reflection(intersection_factor, sphere),
+                    SphereType::Refractive => {
+                        self.get_refraction(intersection_factor, is_entering, sphere)
+                    }
+                },
+                Object::Polygon(polygon) => todo!(),
             },
-            sphere,
+            object,
             ray_parameters,
             rng,
         );
@@ -180,11 +252,11 @@ impl Ray {
     fn apply_smoothness(
         &self,
         mut ray: Ray,
-        sphere: &Sphere,
+        object: &Object,
         ray_parameters: &RayParameters,
         rng: &mut rand::prelude::ThreadRng,
     ) -> Ray {
-        let smoothness_factor: f64 = 1. - sphere.smoothness;
+        let smoothness_factor: f64 = 1. - object.get_smoothness();
 
         ray.turn_x(util::rand_range(
             rng,
