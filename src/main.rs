@@ -25,11 +25,8 @@ use display_ray_tracing::display;
 // mod display_2d;
 // use display_2d::display;
 
-fn reload_params(
-    default: Option<Parameters>,
-    default_observer: Option<Observer>,
-) -> (Parameters, Observer) {
-    let params: Parameters = Parameters::get_from_json(default);
+fn reload_params(default_observer: Option<Observer>) -> (Parameters, Observer) {
+    let params: Parameters = Parameters::get_from_json();
 
     let mut observer: Observer = Observer::default(&params);
     match default_observer {
@@ -62,7 +59,7 @@ fn main() {
     // init params, observer and sphere_vector
     let mut params: Parameters;
     let mut observer: Observer;
-    (params, observer) = reload_params(Option::None, Option::None);
+    (params, observer) = reload_params(Option::None);
 
     let mut sphere_vector = generate_sphere_vector(&params, &mut rng);
 
@@ -207,9 +204,7 @@ fn main() {
                 Event::KeyDown {
                     keycode: Some(Keycode::Tab),
                     ..
-                } => {
-                    (params, observer) = reload_params(Option::Some(params), Option::Some(observer))
-                }
+                } => (params, observer) = reload_params(Option::Some(observer)),
                 Event::KeyDown {
                     keycode: Some(Keycode::G),
                     ..

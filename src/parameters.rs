@@ -1,10 +1,8 @@
 use sdl2::pixels::Color;
-use serde::de::value;
 use serde_json::Value;
 use std::env;
 use std::fs;
 
-use crate::observer::Observer;
 use crate::{
     position::Position,
     speed::Speed,
@@ -123,63 +121,59 @@ pub struct ObserverParameters {
 }
 
 impl ObserverParameters {
-    fn get_from_json(data: &Value, default: &Self) -> Self {
+    fn get_from_json(data: &Value) -> Self {
         return ObserverParameters {
-            look_vector_distance: *data["look_vector_distance"]
-                .as_f64()
-                .get_or_insert(default.look_vector_distance),
-            look_up_angle: *data["look_up_angle"]
-                .as_f64()
-                .get_or_insert(default.look_up_angle),
-            look_down_angle: *data["look_down_angle"]
-                .as_f64()
-                .get_or_insert(default.look_down_angle),
-            look_left_angle: *data["look_left_angle"]
-                .as_f64()
-                .get_or_insert(default.look_left_angle),
-            look_right_angle: *data["look_right_angle"]
-                .as_f64()
-                .get_or_insert(default.look_right_angle),
-            min_hor_angle: *data["min_hor_angle"]
-                .as_f64()
-                .get_or_insert(default.min_hor_angle),
+            look_vector_distance: *data["look_vector_distance"].as_f64().get_or_insert(64.),
+            look_up_angle: *data["look_up_angle"].as_f64().get_or_insert(-0.1),
+            look_down_angle: *data["look_down_angle"].as_f64().get_or_insert(0.1),
+            look_left_angle: *data["look_left_angle"].as_f64().get_or_insert(-0.1),
+            look_right_angle: *data["look_right_angle"].as_f64().get_or_insert(0.1),
+            min_hor_angle: *data["min_hor_angle"].as_f64().get_or_insert(0.),
             max_hor_angle: *data["max_hor_angle"]
                 .as_f64()
-                .get_or_insert(default.max_hor_angle),
-            hor_angle_loop: *data["hor_angle_loop"]
-                .as_bool()
-                .get_or_insert(default.hor_angle_loop),
+                .get_or_insert(2. * std::f64::consts::PI),
+            hor_angle_loop: *data["hor_angle_loop"].as_bool().get_or_insert(true),
             min_ver_angle: *data["min_ver_angle"]
                 .as_f64()
-                .get_or_insert(default.min_ver_angle),
+                .get_or_insert(-std::f64::consts::FRAC_PI_2),
             max_ver_angle: *data["max_ver_angle"]
                 .as_f64()
-                .get_or_insert(default.max_ver_angle),
-            ver_angle_loop: *data["ver_angle_loop"]
-                .as_bool()
-                .get_or_insert(default.ver_angle_loop),
-            move_forward_distance: *data["move_forward_distance"]
-                .as_f64()
-                .get_or_insert(default.move_forward_distance),
-            move_backward_distance: *data["move_backward_distance"]
-                .as_f64()
-                .get_or_insert(default.move_backward_distance),
-            move_right_distance: *data["move_right_distance"]
-                .as_f64()
-                .get_or_insert(default.move_right_distance),
-            move_left_distance: *data["move_left_distance"]
-                .as_f64()
-                .get_or_insert(default.move_left_distance),
-            move_up_distance: *data["move_up_distance"]
-                .as_f64()
-                .get_or_insert(default.move_up_distance),
-            move_down_distance: *data["move_down_distance"]
-                .as_f64()
-                .get_or_insert(default.move_down_distance),
-            slow_mode_factor: *data["slow_mode_factor"]
-                .as_f64()
-                .get_or_insert(default.slow_mode_factor),
-            default_body: sphere_from_json(&data["default_body"], &default.default_body),
+                .get_or_insert(std::f64::consts::FRAC_PI_2),
+            ver_angle_loop: *data["ver_angle_loop"].as_bool().get_or_insert(false),
+            move_forward_distance: *data["move_forward_distance"].as_f64().get_or_insert(0.5),
+            move_backward_distance: *data["move_backward_distance"].as_f64().get_or_insert(-0.5),
+            move_right_distance: *data["move_right_distance"].as_f64().get_or_insert(0.5),
+            move_left_distance: *data["move_left_distance"].as_f64().get_or_insert(-0.5),
+            move_up_distance: *data["move_up_distance"].as_f64().get_or_insert(0.5),
+            move_down_distance: *data["move_down_distance"].as_f64().get_or_insert(-0.5),
+            slow_mode_factor: *data["slow_mode_factor"].as_f64().get_or_insert(0.05),
+            default_body: sphere_from_json(
+                &data["default_body"],
+                &Sphere {
+                    pos: Position {
+                        x: 0.,
+                        y: 0.,
+                        z: 0.,
+                    },
+                    speed: Speed {
+                        x: 0.,
+                        y: 0.,
+                        z: 0.,
+                    },
+                    radius: 1.,
+                    color: Color {
+                        r: 0,
+                        g: 0,
+                        b: 255,
+                        a: 255,
+                    },
+                    light_factor: 100.,
+                    type_: SphereType::Reflexive,
+                    smoothness: 1.,
+                    refractivity_index: 1.,
+                    is_visible: true,
+                },
+            ),
         };
     }
 }
@@ -202,48 +196,30 @@ pub struct RayParameters {
 }
 
 impl RayParameters {
-    fn get_from_json(data: &Value, default: &Self) -> Self {
+    fn get_from_json(data: &Value) -> Self {
         return RayParameters {
-            min_hor_value: *data["min_hor_value"]
-                .as_i64()
-                .get_or_insert(default.min_hor_value),
-            max_hor_value: *data["max_hor_value"]
-                .as_i64()
-                .get_or_insert(default.max_hor_value),
-            min_ver_value: *data["min_ver_value"]
-                .as_i64()
-                .get_or_insert(default.min_ver_value),
-            max_ver_value: *data["max_ver_value"]
-                .as_i64()
-                .get_or_insert(default.max_ver_value),
-            min_pixel_factor: *data["min_pixel_factor"]
-                .as_f64()
-                .get_or_insert(default.min_pixel_factor),
-            fog_factor: *data["fog_factor"]
-                .as_f64()
-                .get_or_insert(default.fog_factor),
-            background_color: color_from_json(&data["background_color"], &default.background_color),
-            background_light_factor: *data["background_light_factor"]
-                .as_f64()
-                .get_or_insert(default.background_light_factor),
-            reflect_background: *data["reflect_background"]
-                .as_bool()
-                .get_or_insert(default.reflect_background),
-            bounce_count: *data["bounce_count"]
-                .as_u64()
-                .get_or_insert(default.bounce_count),
+            min_hor_value: *data["min_hor_value"].as_i64().get_or_insert(-64),
+            max_hor_value: *data["max_hor_value"].as_i64().get_or_insert(64),
+            min_ver_value: *data["min_ver_value"].as_i64().get_or_insert(-64),
+            max_ver_value: *data["max_ver_value"].as_i64().get_or_insert(64),
+            min_pixel_factor: *data["min_pixel_factor"].as_f64().get_or_insert(0.1),
+            fog_factor: *data["fog_factor"].as_f64().get_or_insert(0.1),
+            background_color: color_from_json(&data["background_color"], &Color::RGB(0, 0, 0)),
+            background_light_factor: *data["background_light_factor"].as_f64().get_or_insert(1.),
+            reflect_background: *data["reflect_background"].as_bool().get_or_insert(true),
+            bounce_count: *data["bounce_count"].as_u64().get_or_insert(5),
             bounce_color_reflection_factor: *data["bounce_color_reflection_factor"]
                 .as_f64()
-                .get_or_insert(default.bounce_color_reflection_factor),
+                .get_or_insert(1.),
             min_random_bounce_angle_change: *data["min_random_bounce_angle_change"]
                 .as_f64()
-                .get_or_insert(default.min_random_bounce_angle_change),
+                .get_or_insert(-std::f64::consts::FRAC_PI_2),
             max_random_bounce_angle_change: *data["max_random_bounce_angle_change"]
                 .as_f64()
-                .get_or_insert(default.max_random_bounce_angle_change),
+                .get_or_insert(std::f64::consts::FRAC_PI_2),
             reflect_inside_spheres: *data["reflect_inside_spheres"]
                 .as_bool()
-                .get_or_insert(default.reflect_inside_spheres),
+                .get_or_insert(false),
         };
     }
 }
@@ -332,22 +308,22 @@ pub struct PhysicsParameters {
 }
 
 impl PhysicsParameters {
-    fn get_from_json(data: &Value, default: &Self) -> Self {
+    fn get_from_json(data: &Value) -> Self {
         return PhysicsParameters {
-            g: *data["g"].as_f64().get_or_insert(default.g),
-            enabled: *data["enabled"].as_bool().get_or_insert(default.enabled),
-            min_x: *data["min_x"].as_f64().get_or_insert(default.min_x),
-            max_x: *data["max_x"].as_f64().get_or_insert(default.max_x),
-            min_y: *data["min_y"].as_f64().get_or_insert(default.min_y),
-            max_y: *data["max_y"].as_f64().get_or_insert(default.max_y),
-            min_z: *data["min_z"].as_f64().get_or_insert(default.min_z),
-            max_z: *data["max_z"].as_f64().get_or_insert(default.max_z),
-            min_vx: *data["min_vx"].as_f64().get_or_insert(default.min_vx),
-            max_vx: *data["max_vx"].as_f64().get_or_insert(default.max_vx),
-            min_vy: *data["min_vy"].as_f64().get_or_insert(default.min_vy),
-            max_vy: *data["max_vy"].as_f64().get_or_insert(default.max_vy),
-            min_vz: *data["min_vz"].as_f64().get_or_insert(default.min_vz),
-            max_vz: *data["max_vz"].as_f64().get_or_insert(default.max_vz),
+            g: *data["g"].as_f64().get_or_insert(0.002),
+            enabled: *data["enabled"].as_bool().get_or_insert(false),
+            min_x: *data["min_x"].as_f64().get_or_insert(-20.),
+            max_x: *data["max_x"].as_f64().get_or_insert(20.),
+            min_y: *data["min_y"].as_f64().get_or_insert(-20.),
+            max_y: *data["max_y"].as_f64().get_or_insert(20.),
+            min_z: *data["min_z"].as_f64().get_or_insert(-20.),
+            max_z: *data["max_z"].as_f64().get_or_insert(20.),
+            min_vx: *data["min_vx"].as_f64().get_or_insert(-0.0025),
+            max_vx: *data["max_vx"].as_f64().get_or_insert(0.0025),
+            min_vy: *data["min_vy"].as_f64().get_or_insert(-0.0025),
+            max_vy: *data["max_vy"].as_f64().get_or_insert(0.0025),
+            min_vz: *data["min_vz"].as_f64().get_or_insert(-0.0025),
+            max_vz: *data["max_vz"].as_f64().get_or_insert(0.0025),
         };
     }
 }
@@ -362,80 +338,21 @@ pub struct Parameters {
 }
 
 impl Parameters {
-    pub fn default() -> Parameters {
-        let width: i64 = 128;
-        let height: i64 = 128;
-        let look_angle = 0.1;
-        let move_distance = 0.5;
-        let physics_bounds_value = 20.;
-        let speed_bounds_value = 0.0025;
-        let random_bounce_angle_change = std::f64::consts::FRAC_PI_2;
+    pub fn get_from_json() -> Self {
+        println!("Reading parameters file...");
+        let str: String = fs::read_to_string(get_parameter_file_path().to_string())
+            .expect("Unable to read parameter file");
+
+        let data: Value = serde_json::from_str(&str).expect("JSON was not well-formatted");
 
         return Parameters {
-            frame_period_ms: 0,
-            display_scale: 5.,
-            observer_parameters: ObserverParameters {
-                look_vector_distance: (height / 2) as f64,
-                look_up_angle: -look_angle,
-                look_down_angle: look_angle,
-                look_left_angle: -look_angle,
-                look_right_angle: look_angle,
-                min_hor_angle: 0.,
-                max_hor_angle: 2. * std::f64::consts::PI,
-                hor_angle_loop: true,
-                min_ver_angle: -std::f64::consts::FRAC_PI_2,
-                max_ver_angle: std::f64::consts::FRAC_PI_2,
-                ver_angle_loop: false,
-                move_forward_distance: move_distance,
-                move_backward_distance: -move_distance,
-                move_right_distance: move_distance,
-                move_left_distance: -move_distance,
-                move_up_distance: -move_distance,
-                move_down_distance: move_distance,
-                slow_mode_factor: 0.05,
-                default_body: Sphere {
-                    pos: Position {
-                        x: 0.,
-                        y: 0.,
-                        z: 0.,
-                    },
-                    speed: Speed {
-                        x: 0.,
-                        y: 0.,
-                        z: 0.,
-                    },
-                    radius: 1.,
-                    color: Color {
-                        r: 0,
-                        g: 0,
-                        b: 255,
-                        a: 255,
-                    },
-                    light_factor: 100.,
-                    type_: SphereType::Reflexive,
-                    smoothness: 1.,
-                    refractivity_index: 1.,
-                    is_visible: true,
-                },
-            },
-            ray_parameters: RayParameters {
-                min_hor_value: -width / 2,
-                max_hor_value: width / 2,
-                min_ver_value: -height / 2,
-                max_ver_value: height / 2,
-                min_pixel_factor: 0.1,
-                fog_factor: 0.,
-                background_color: Color::RGB(0, 0, 0),
-                background_light_factor: 1.,
-                reflect_background: true,
-                bounce_count: 5,
-                bounce_color_reflection_factor: 1.,
-                min_random_bounce_angle_change: -random_bounce_angle_change,
-                max_random_bounce_angle_change: random_bounce_angle_change,
-                reflect_inside_spheres: false,
-            },
-            sphere_parameters: vec![
-                SphereParameters {
+            frame_period_ms: *data["frame_period_ms"].as_u64().get_or_insert(0),
+            display_scale: *data["display_scale"].as_f64().get_or_insert(5.),
+            observer_parameters: ObserverParameters::get_from_json(&data["observer_parameters"]),
+            ray_parameters: RayParameters::get_from_json(&data["ray_parameters"]),
+            sphere_parameters: SphereParameters::get_vec_from_json(
+                &data["sphere_parameters"],
+                &SphereParameters {
                     sphere_type: SphereType::Reflexive,
                     generation_mode: SphereGenerationMode::Random,
                     sphere_count: 10,
@@ -448,74 +365,8 @@ impl Parameters {
                     min_refractivity_index: 1.,
                     max_refractivity_index: 1.,
                 },
-                SphereParameters {
-                    sphere_type: SphereType::Refractive,
-                    generation_mode: SphereGenerationMode::Random,
-                    sphere_count: 10,
-                    min_radius: 1.,
-                    max_radius: 5.,
-                    min_light_factor: 0.25,
-                    max_light_factor: 1.,
-                    min_smoothness: 1.,
-                    max_smoothness: 1.,
-                    min_refractivity_index: 1.05,
-                    max_refractivity_index: 2.,
-                },
-            ],
-            physics_parameters: PhysicsParameters {
-                g: 0.002,
-                enabled: false,
-                min_x: -physics_bounds_value,
-                max_x: physics_bounds_value,
-                min_y: -physics_bounds_value,
-                max_y: physics_bounds_value,
-                min_z: -physics_bounds_value,
-                max_z: physics_bounds_value,
-                min_vx: -speed_bounds_value,
-                max_vx: speed_bounds_value,
-                min_vy: -speed_bounds_value,
-                max_vy: speed_bounds_value,
-                min_vz: -speed_bounds_value,
-                max_vz: speed_bounds_value,
-            },
-        };
-    }
-
-    pub fn get_from_json(default_params: Option<Self>) -> Self {
-        println!("Reading parameters file...");
-        let str: String = fs::read_to_string(get_parameter_file_path().to_string())
-            .expect("Unable to read parameter file");
-
-        let data: Value = serde_json::from_str(&str).expect("JSON was not well-formatted");
-
-        let default_params: Parameters = match default_params {
-            Some(params) => params,
-            None => Parameters::default(),
-        };
-
-        return Parameters {
-            frame_period_ms: *data["frame_period_ms"]
-                .as_u64()
-                .get_or_insert(default_params.frame_period_ms),
-            display_scale: *data["display_scale"]
-                .as_f64()
-                .get_or_insert(default_params.display_scale),
-            observer_parameters: ObserverParameters::get_from_json(
-                &data["observer_parameters"],
-                &default_params.observer_parameters,
             ),
-            ray_parameters: RayParameters::get_from_json(
-                &data["ray_parameters"],
-                &default_params.ray_parameters,
-            ),
-            sphere_parameters: SphereParameters::get_vec_from_json(
-                &data["sphere_parameters"],
-                &default_params.sphere_parameters[0],
-            ),
-            physics_parameters: PhysicsParameters::get_from_json(
-                &data["physics_parameters"],
-                &default_params.physics_parameters,
-            ),
+            physics_parameters: PhysicsParameters::get_from_json(&data["physics_parameters"]),
         };
     }
 }
