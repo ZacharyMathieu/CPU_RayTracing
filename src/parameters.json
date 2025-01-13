@@ -39,7 +39,7 @@
                 "a": 255
             },
             "light_factor": 1.0,
-            "type_": "Reflexive",
+            "type": "Reflexive",
             "smoothness": 1.0,
             "refractivity_index": 1.0,
             "is_visible": true
@@ -68,9 +68,9 @@
     },
     "sphere_parameters": [
         {
-            "sphere_type": "Reflexive",
+            "type": "Reflexive",
             "generation_mode": "Random",
-            "sphere_count": 10,
+            "count": 10,
             "min_radius": 1.0,
             "max_radius": 5.0,
             "min_light_factor": 0.8,
@@ -81,9 +81,9 @@
             "max_refractivity_index": 1.0
         },
         {
-            "sphere_type": "Refractive",
+            "type": "Refractive",
             "generation_mode": "Random",
-            "sphere_count": 20,
+            "count": 20,
             "min_radius": 5.0,
             "max_radius": 5.0,
             "min_light_factor": 0.25,
