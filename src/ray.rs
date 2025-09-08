@@ -127,7 +127,7 @@ impl Ray {
                 return (f64::NAN, false);
             }
             Object::Polygon(p) => {
-                return (1., false);
+                return (1., false); // TODO
             }
         }
     }

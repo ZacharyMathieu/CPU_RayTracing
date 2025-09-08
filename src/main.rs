@@ -22,6 +22,7 @@ mod vector;
 use crate::object::Object;
 use crate::observer::Observer;
 use crate::parameters::Parameters;
+use crate::polygon::Polygon;
 use crate::sphere::Sphere;
 
 mod display_ray_tracing;
@@ -56,6 +57,7 @@ fn generate_object_vector(params: &Parameters, rng: &mut ThreadRng) -> Vec<Objec
         &params.physics_parameters,
         rng,
     );
+    Polygon::fill_vector_multiple_parameters(&mut object_vector);
     return object_vector;
 }
 

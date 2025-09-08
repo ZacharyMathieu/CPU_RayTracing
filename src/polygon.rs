@@ -56,4 +56,14 @@ impl Polygon {
 
         return v.iter().map(|p| Object::Polygon(*p)).collect();
     }
+
+    pub fn fill_vector(object_vector: &mut Vec<Object>) {
+        object_vector.extend(Polygon::hardcoded_vector());
+    }
+
+    pub fn fill_vector_multiple_parameters(object_vector: &mut Vec<Object>) {
+        // for sphere_parameters in sphere_parameters_vec {
+        Polygon::fill_vector(object_vector);
+        // }
+    }
 }
