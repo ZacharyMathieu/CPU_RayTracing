@@ -1,6 +1,5 @@
 extern crate sdl2;
 
-use polygon::Polygon;
 use rand::rngs::ThreadRng;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
@@ -16,9 +15,11 @@ mod ray;
 mod ray_trace;
 mod speed;
 mod sphere;
+mod surface_type;
 mod util;
 mod vector;
 
+use crate::object::Object;
 use crate::observer::Observer;
 use crate::parameters::Parameters;
 use crate::sphere::Sphere;
@@ -28,8 +29,11 @@ use display_ray_tracing::display;
 // mod display_2d;
 // use display_2d::display;
 
-fn reload_params(default_observer: Option<Observer>) -> (Parameters, Observer) {
-    let params: Parameters = Parameters::get_from_json();
+fn reload_params(
+    default: Option<Parameters>,
+    default_observer: Option<Observer>,
+) -> (Parameters, Observer) {
+    let params: Parameters = Parameters::get_from_json(default);
 
     let mut observer: Observer = Observer::default(&params);
     match default_observer {
@@ -44,26 +48,15 @@ fn reload_params(default_observer: Option<Observer>) -> (Parameters, Observer) {
     return (params, observer);
 }
 
-fn generate_sphere_vector(params: &Parameters, rng: &mut ThreadRng) -> Vec<Sphere> {
-    let mut sphere_vector: Vec<Sphere> = vec![];
-    Sphere::fill_sphere_vector_multiple_parameters(
-        &mut sphere_vector,
+fn generate_object_vector(params: &Parameters, rng: &mut ThreadRng) -> Vec<Object> {
+    let mut object_vector: Vec<Object> = vec![];
+    Sphere::fill_vector_multiple_parameters(
+        &mut object_vector,
         &params.sphere_parameters,
         &params.physics_parameters,
         rng,
     );
-    return sphere_vector;
-}
-
-fn generate_polygon_vector(params: &Parameters, rng: &mut ThreadRng) -> Vec<Polygon> {
-    let mut polygon_vector: Vec<Polygon> = vec![];
-    Polygon::fill_polygon_vector_multiple_parameters(
-        &mut polygon_vector,
-        &params.polygon_parameters,
-        &params.physics_parameters,
-        rng,
-    );
-    return polygon_vector;
+    return object_vector;
 }
 
 fn main() {
@@ -73,10 +66,9 @@ fn main() {
     // init params, observer and sphere_vector
     let mut params: Parameters;
     let mut observer: Observer;
-    (params, observer) = reload_params(Option::None);
+    (params, observer) = reload_params(Option::None, Option::None);
 
-    let mut sphere_vector = generate_sphere_vector(&params, &mut rng);
-    let mut polygon_vector = generate_polygon_vector(&params, &mut rng);
+    let mut object_vector = generate_object_vector(&params, &mut rng);
 
     // init video subsystem
     let sdl_context = sdl2::init().unwrap();
@@ -219,30 +211,31 @@ fn main() {
                 Event::KeyDown {
                     keycode: Some(Keycode::Tab),
                     ..
-                } => (params, observer) = reload_params(Option::Some(observer)),
+                } => {
+                    (params, observer) = reload_params(Option::Some(params), Option::Some(observer))
+                }
                 Event::KeyDown {
                     keycode: Some(Keycode::G),
                     ..
-                } => {
-                    sphere_vector = generate_sphere_vector(&params, &mut rng);
-                    polygon_vector = generate_polygon_vector(&params, &mut rng);
-                }
+                } => object_vector = generate_object_vector(&params, &mut rng),
                 _ => {}
             }
         }
 
         // physics
         if params.physics_parameters.enabled {
-            for s in sphere_vector.iter_mut() {
-                s.physics(&params.physics_parameters);
+            for s in object_vector.iter_mut() {
+                match s {
+                    Object::Sphere(s) => s.physics(&params.physics_parameters),
+                    Object::Polygon(p) => {}
+                }
             }
         }
 
         // draw and refresh the canvas display
         display(
             &mut observer,
-            &sphere_vector,
-            &polygon_vector,
+            &object_vector,
             &params.ray_parameters,
             &mut canvas,
         );

@@ -2,37 +2,8 @@ use rand::{rngs::ThreadRng, Rng};
 use sdl2::pixels::Color;
 
 use crate::{
-    parameters::{
-        PhysicsParameters, SphereGenerationMode,
-        SphereParameters,
-    },
-    position::Position,
-    speed::Speed,
-    util::{at_ratio, float_to_color, rand_color, rand_range},
+    object::Object, parameters::{PhysicsParameters, SphereGenerationMode, SphereParameters}, position::Position, speed::Speed, surface_type::SurfaceType, util::{at_ratio, float_to_color, rand_color, rand_range}
 };
-
-#[derive(Clone, Copy)]
-pub enum SphereType {
-    Reflexive,
-    Refractive,
-}
-
-impl SphereType {
-    pub fn to_string(&self) -> &str {
-        return match *self {
-            Self::Reflexive => "Reflexive",
-            Self::Refractive => "Refractive",
-        };
-    }
-
-    pub fn from_string(string: &str) -> Self {
-        return match string {
-            "Reflexive" => Self::Reflexive,
-            "Refractive" => Self::Refractive,
-            _ => Self::Reflexive,
-        };
-    }
-}
 
 #[derive(Clone, Copy)]
 pub struct Sphere {
@@ -41,17 +12,18 @@ pub struct Sphere {
     pub radius: f64,
     pub color: Color,
     pub light_factor: f64,
-    pub type_: SphereType,
+    pub type_: SurfaceType,
     pub smoothness: f64,
     pub refractivity_index: f64,
     pub is_visible: bool,
 }
 
 impl Sphere {
-    pub fn hardcoded_vector() -> Vec<Sphere> {
+    pub fn hardcoded_vector() -> Vec<Object> {
         let mut v: Vec<Sphere> = vec![];
 
         let light_factor: f64 = 1.;
+        let size: f64 = 1.;
         // Blue
         v.push(Sphere {
             pos: Position {
@@ -64,10 +36,10 @@ impl Sphere {
                 y: 0.,
                 z: 0.,
             },
-            radius: 6.,
+            radius: size,
             color: Color::RGB(0, 0, 255),
             light_factor: light_factor,
-            type_: SphereType::Reflexive,
+            type_: SurfaceType::Reflexive,
             smoothness: 1.,
             refractivity_index: 1.,
             is_visible: true,
@@ -76,7 +48,7 @@ impl Sphere {
         v.push(Sphere {
             pos: Position {
                 x: 10.,
-                y: -5.,
+                y: 10.,
                 z: 0.,
             },
             speed: Speed {
@@ -84,106 +56,46 @@ impl Sphere {
                 y: 0.,
                 z: 0.,
             },
-            radius: 2.,
+            radius: size,
             color: Color::RGB(255, 0, 0),
             light_factor: light_factor,
-            type_: SphereType::Reflexive,
-            smoothness: 0.85,
+            type_: SurfaceType::Reflexive,
+            smoothness: 1.,
             refractivity_index: 1.,
             is_visible: true,
         });
         // Green
         v.push(Sphere {
             pos: Position {
-                x: 10.,
-                y: -4.,
-                z: 2.5,
+                x: 5.,
+                y: 0.,
+                z: 5.,
             },
             speed: Speed {
                 x: 0.,
                 y: 0.,
                 z: 0.,
             },
-            radius: 3.,
+            radius: size,
             color: Color::RGB(0, 255, 0),
             light_factor: light_factor,
-            type_: SphereType::Reflexive,
-            smoothness: 0.92,
-            refractivity_index: 1.,
-            is_visible: true,
-        });
-        // White Refractive
-        v.push(Sphere {
-            pos: Position {
-                x: 2.,
-                y: 0.,
-                z: 0.,
-            },
-            speed: Speed {
-                x: 0.,
-                y: 0.,
-                z: 0.,
-            },
-            radius: 1.5,
-            color: Color::RGB(255, 0, 255),
-            light_factor: 0.,
-            type_: SphereType::Refractive,
-            smoothness: 1.,
-            refractivity_index: 10.,
-            is_visible: true,
-        });
-        // Turquoise
-        v.push(Sphere {
-            pos: Position {
-                x: 4.,
-                y: 0.,
-                z: 0.,
-            },
-            speed: Speed {
-                x: 0.,
-                y: 0.,
-                z: 0.,
-            },
-            radius: 0.25,
-            color: Color::RGB(0, 255, 255),
-            light_factor: light_factor,
-            type_: SphereType::Reflexive,
-            smoothness: 1.,
-            refractivity_index: 0.,
-            is_visible: true,
-        });
-        // White
-        v.push(Sphere {
-            pos: Position {
-                x: -20.,
-                y: 20.,
-                z: -20.,
-            },
-            speed: Speed {
-                x: 0.,
-                y: 0.,
-                z: 0.,
-            },
-            radius: 10.,
-            color: Color::RGB(255, 255, 255),
-            light_factor: 2.,
-            type_: SphereType::Refractive,
+            type_: SurfaceType::Reflexive,
             smoothness: 1.,
             refractivity_index: 1.,
             is_visible: true,
         });
 
-        return v;
+        return v.iter().map(|s| Object::Sphere(*s)).collect();
     }
 
     pub fn in_line_vector(
         sphere_parameters: &SphereParameters,
         physics_parameters: &PhysicsParameters,
-    ) -> Vec<Sphere> {
+    ) -> Vec<Object> {
         let mut v: Vec<Sphere> = vec![];
 
-        for i in 0..sphere_parameters.count {
-            let progress = i as f64 / (sphere_parameters.count - 1) as f64;
+        for i in 0..sphere_parameters.sphere_count {
+            let progress = i as f64 / (sphere_parameters.sphere_count - 1) as f64;
             v.push(Sphere::from_float(
                 progress,
                 &sphere_parameters,
@@ -191,22 +103,22 @@ impl Sphere {
             ));
         }
 
-        return v;
+        return v.iter().map(|s| Object::Sphere(*s)).collect();
     }
 
     pub fn random_vector(
         sphere_parameters: &SphereParameters,
         physics_parameters: &PhysicsParameters,
         rng: &mut rand::prelude::ThreadRng,
-    ) -> Vec<Sphere> {
+    ) -> Vec<Object> {
         let mut v: Vec<Sphere> = vec![];
 
-        for _ in 0..sphere_parameters.count {
+        for _ in 0..sphere_parameters.sphere_count {
             let new_sphere: Sphere = Sphere::random(&sphere_parameters, &physics_parameters, rng);
             v.push(new_sphere);
         }
 
-        return v;
+        return v.iter().map(|s| Object::Sphere(*s)).collect();
     }
 
     pub fn random(
@@ -236,7 +148,7 @@ impl Sphere {
                 sphere_parameters.min_light_factor,
                 sphere_parameters.max_light_factor,
             ),
-            type_: sphere_parameters.type_,
+            type_: sphere_parameters.sphere_type,
             smoothness: rand_range(
                 rng,
                 sphere_parameters.min_smoothness,
@@ -278,7 +190,7 @@ impl Sphere {
                 sphere_parameters.min_light_factor,
                 sphere_parameters.max_light_factor,
             ),
-            type_: sphere_parameters.type_,
+            type_: sphere_parameters.sphere_type,
             smoothness: at_ratio(
                 f,
                 sphere_parameters.min_smoothness,
@@ -293,24 +205,24 @@ impl Sphere {
         };
     }
 
-    pub fn fill_sphere_vector(
-        sphere_vector: &mut Vec<Sphere>,
+    pub fn fill_vector(
+        object_vector: &mut Vec<Object>,
         sphere_parameters: &SphereParameters,
         physics_parameters: &PhysicsParameters,
         rng: &mut ThreadRng,
     ) {
         match sphere_parameters.generation_mode {
             SphereGenerationMode::Hardcoded => {
-                sphere_vector.extend(Sphere::hardcoded_vector());
+                object_vector.extend(Sphere::hardcoded_vector());
             }
             SphereGenerationMode::InLine => {
-                sphere_vector.extend(Sphere::in_line_vector(
+                object_vector.extend(Sphere::in_line_vector(
                     &sphere_parameters,
                     &physics_parameters,
                 ));
             }
             SphereGenerationMode::Random => {
-                sphere_vector.extend(Sphere::random_vector(
+                object_vector.extend(Sphere::random_vector(
                     &sphere_parameters,
                     &physics_parameters,
                     rng,
@@ -319,14 +231,14 @@ impl Sphere {
         }
     }
 
-    pub fn fill_sphere_vector_multiple_parameters(
-        sphere_vector: &mut Vec<Sphere>,
+    pub fn fill_vector_multiple_parameters(
+        object_vector: &mut Vec<Object>,
         sphere_parameters_vec: &Vec<SphereParameters>,
         physics_parameters: &PhysicsParameters,
         rng: &mut ThreadRng,
     ) {
         for sphere_parameters in sphere_parameters_vec {
-            Sphere::fill_sphere_vector(sphere_vector, sphere_parameters, &physics_parameters, rng);
+            Sphere::fill_vector(object_vector, sphere_parameters, &physics_parameters, rng);
         }
     }
 

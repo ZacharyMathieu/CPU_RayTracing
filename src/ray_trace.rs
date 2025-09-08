@@ -1,12 +1,7 @@
 use rand::rngs::ThreadRng;
 use sdl2::pixels::Color;
 
-use crate::{
-    parameters::RayParameters,
-    polygon::Polygon,
-    ray::{Collision, Ray},
-    sphere::Sphere,
-};
+use crate::{object::Object, parameters::RayParameters, ray::Ray};
 
 pub struct RayTrace<'a> {
     pub ray: &'a Ray,
@@ -23,20 +18,12 @@ impl<'a> RayTrace<'a> {
         };
     }
 
-    pub fn trace(
-        &mut self,
-        ray_parameters: &RayParameters,
-        sphere_vector: &Vec<Sphere>,
-        polygon_vector: &Vec<Polygon>,
-        observer_bodies: &Vec<Sphere>,
-    ) {
+    pub fn trace(&mut self, object_vector: &Vec<&Object>, ray_parameters: &RayParameters) {
         let mut rng: ThreadRng = rand::thread_rng();
         self.trace_rec(
             self.ray,
+            object_vector,
             ray_parameters,
-            sphere_vector,
-            polygon_vector,
-            observer_bodies,
             ray_parameters.bounce_count,
             &0.,
             &mut rng,
@@ -54,25 +41,14 @@ impl<'a> RayTrace<'a> {
     fn trace_rec(
         &mut self,
         ray: &Ray,
+        object_vector: &Vec<&Object>,
         ray_parameters: &RayParameters,
-        sphere_vector: &Vec<Sphere>,
-        polygon_vector: &Vec<Polygon>,
-        observer_bodies: &Vec<Sphere>,
         remaining_bounces: u64,
         distance: &f64,
         rng: &mut rand::prelude::ThreadRng,
     ) {
-        let result: &mut Option<Collision> = &mut Option::None;
-
-        ray.find_collision(
-            sphere_vector,
-            polygon_vector,
-            observer_bodies,
-            ray_parameters,
-            result,
-        );
-
-        let collision: &Option<Collision> = result;
+        let collision: Option<((f64, bool), &Object)> =
+            ray.find_collision(object_vector, ray_parameters);
 
         match collision {
             None => {
@@ -86,36 +62,25 @@ impl<'a> RayTrace<'a> {
                     ));
                 }
             }
-            Some(collision) => {
-                let new_distance: f64 = distance + (ray.vector.length * collision.ray_factor);
+            Some(((factor, is_front), object)) => {
+                let new_distance: f64 = distance + (ray.vector.length * factor);
 
                 self.color_vector.push((
                     apply_light_factor(
-                        &collision.object.get_color(),
-                        &get_light_factor(
-                            &new_distance,
-                            &collision.object.get_light_factor(),
-                            ray_parameters,
-                        ),
+                        &object.color(),
+                        &get_light_factor(&new_distance, &object.light_factor(), ray_parameters),
                     ),
-                    *collision.object.get_light_factor(),
+                    object.light_factor(),
                 ));
 
                 if remaining_bounces > 0 {
-                    let ray_bounce = ray.get_deviation(
-                        *collision.object.get_light_factor(),
-                        collision.is_front,
-                        &collision.object,
-                        ray_parameters,
-                        rng,
-                    );
+                    let ray_bounce =
+                        ray.get_deviation(factor, is_front, object, ray_parameters, rng);
 
                     self.trace_rec(
                         &ray_bounce,
+                        object_vector,
                         ray_parameters,
-                        sphere_vector,
-                        polygon_vector,
-                        observer_bodies,
                         remaining_bounces - 1,
                         &new_distance,
                         rng,
