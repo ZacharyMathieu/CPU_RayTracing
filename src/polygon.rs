@@ -23,22 +23,22 @@ impl Polygon {
 
         let light_factor: f64 = 1.;
         let size: f64 = 1.;
-        // Blue
+        // Gold
         v.push(Polygon {
             pos: Position {
-                x: 10.,
+                x: 0.,
                 y: 0.,
                 z: 0.,
             },
             v1: Position {
-                x: 10.,
+                x: 1.,
                 y: 0.,
-                z: 0.,
+                z: 1.,
             },
             v2: Position {
-                x: 10.,
-                y: 0.,
-                z: 0.,
+                x: 0.,
+                y: 1.,
+                z: 1.,
             },
             speed: Speed {
                 x: 0.,
@@ -46,7 +46,7 @@ impl Polygon {
                 z: 0.,
             },
             radius: size,
-            color: Color::RGB(0, 0, 255),
+            color: Color::RGB(255, 200, 0),
             light_factor: light_factor,
             type_: SurfaceType::Reflexive,
             smoothness: 1.,

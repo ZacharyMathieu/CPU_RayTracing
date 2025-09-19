@@ -101,6 +101,7 @@ fn main() {
         // check for key presses... Without this the window is unresponsive
         for event in event_pump.poll_iter() {
             match event {
+                // TODO - Make this cleaner
                 Event::Quit { .. }
                 | Event::KeyDown {
                     keycode: Some(Keycode::Escape),

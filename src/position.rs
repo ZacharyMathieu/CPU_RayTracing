@@ -1,4 +1,4 @@
-use std::ops::{Add, Neg, Sub};
+use std::ops::{Add, Mul, Neg, Sub};
 
 #[derive(Clone, Copy)]
 
@@ -80,6 +80,14 @@ impl Position {
                 )),
         );
     }
+
+    pub fn cross(&self, p: &Position) -> Position {
+        return Position {
+            x: self.y * p.z - self.z * p.y,
+            y: self.z * p.x - self.x * p.z,
+            z: self.x * p.y - self.y * p.x,
+        };
+    }
 }
 
 impl Add for Position {
@@ -114,6 +122,26 @@ impl Neg for Position {
             x: -self.x,
             y: -self.y,
             z: -self.z,
+        };
+    }
+}
+
+impl Mul<Position> for Position {
+    type Output = f64;
+
+    fn mul(self, p: Position) -> Self::Output {
+        return (self.x * p.x) + (self.y * p.y) + (self.z * p.z);
+    }
+}
+
+impl Mul<f64> for Position {
+    type Output = Position;
+
+    fn mul(self, f: f64) -> Self::Output {
+        return Position {
+            x: self.x * f,
+            y: self.y * f,
+            z: self.z * f,
         };
     }
 }

@@ -60,7 +60,7 @@
         },
         "background_light_factor": 1.0,
         "reflect_background": false,
-        "bounce_count": 10,
+        "bounce_count": 2,
         "bounce_color_reflection_factor": 1,
         "min_random_bounce_angle_change": -1.57075,
         "max_random_bounce_angle_change": 1.57075,

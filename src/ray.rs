@@ -127,7 +127,32 @@ impl Ray {
                 return (f64::NAN, false);
             }
             Object::Polygon(p) => {
-                return (1., false); // TODO
+                let p0: Position = p.pos;
+                let p1: Position = p.v1;
+                let p2: Position = p.v2;
+                let r0: Position = self.vector.p1;
+                let r1: Position = self.vector.p2;
+
+                let n: Position = p1.cross(&p2);
+                let det = n * r1;
+                if det == 0. {
+                    return (f64::NAN, false);
+                }
+
+                let r: f64 = (n * (p0 - r0)) / det;
+                if r <= 0. {
+                    return (f64::NAN, false);
+                }
+
+                let i = r0 + r1 * r;
+
+                let f2 = (i.y * p1.x - i.x * p1.y + p0.x * p1.y - p0.y * p1.x)
+                    / (p1.y * p2.x + p1.x * p2.y);
+                let f1 = (i.x - p0.x - f2 * p2.x) / p1.x;
+                if 0. <= f1 && 0. <= f2 && f1 + f2 <= 1. {
+                    return (r, false);
+                }
+                return (f64::NAN, false);
             }
         }
     }
@@ -239,10 +264,11 @@ impl Ray {
     fn get_refraction(&self, intersection_factor: f64, is_entering: bool, object: &Object) -> Ray {
         match object {
             Object::Sphere(sphere) => {
+                let refractivity_index = object.refractivity_index();
                 let (n1, n2) = if is_entering {
-                    (self.refraction_factor, sphere.refractivity_index)
+                    (self.refraction_factor, refractivity_index)
                 } else {
-                    (sphere.refractivity_index, self.refraction_factor)
+                    (refractivity_index, self.refraction_factor)
                 };
 
                 let intersection: Position = self.get_position_from_factor(intersection_factor);
@@ -276,11 +302,7 @@ impl Ray {
                 return Ray::new(
                     intersection,
                     intersection + exit,
-                    if is_entering {
-                        sphere.refractivity_index
-                    } else {
-                        1.
-                    },
+                    if is_entering { refractivity_index } else { 1. },
                     self.x_value,
                     self.y_value,
                 );

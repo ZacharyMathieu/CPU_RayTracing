@@ -24,10 +24,10 @@ impl Sphere {
 
         let light_factor: f64 = 1.;
         let size: f64 = 1.;
-        // Blue
+        // While
         v.push(Sphere {
             pos: Position {
-                x: 10.,
+                x: 0.,
                 y: 0.,
                 z: 0.,
             },
@@ -36,8 +36,8 @@ impl Sphere {
                 y: 0.,
                 z: 0.,
             },
-            radius: size,
-            color: Color::RGB(0, 0, 255),
+            radius: size / 10.,
+            color: Color::RGB(255, 255, 255),
             light_factor: light_factor,
             type_: SurfaceType::Reflexive,
             smoothness: 1.,
@@ -48,7 +48,7 @@ impl Sphere {
         v.push(Sphere {
             pos: Position {
                 x: 10.,
-                y: 10.,
+                y: 0.,
                 z: 0.,
             },
             speed: Speed {
@@ -67,9 +67,9 @@ impl Sphere {
         // Green
         v.push(Sphere {
             pos: Position {
-                x: 5.,
-                y: 0.,
-                z: 5.,
+                x: 0.,
+                y: 10.,
+                z: 0.,
             },
             speed: Speed {
                 x: 0.,
@@ -78,6 +78,26 @@ impl Sphere {
             },
             radius: size,
             color: Color::RGB(0, 255, 0),
+            light_factor: light_factor,
+            type_: SurfaceType::Reflexive,
+            smoothness: 1.,
+            refractivity_index: 1.,
+            is_visible: true,
+        });
+        // Blue
+        v.push(Sphere {
+            pos: Position {
+                x: 0.,
+                y: 0.,
+                z: 10.,
+            },
+            speed: Speed {
+                x: 0.,
+                y: 0.,
+                z: 0.,
+            },
+            radius: size,
+            color: Color::RGB(0, 0, 255),
             light_factor: light_factor,
             type_: SurfaceType::Reflexive,
             smoothness: 1.,
