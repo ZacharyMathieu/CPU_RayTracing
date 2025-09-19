@@ -230,7 +230,7 @@ fn main() {
             for s in object_vector.iter_mut() {
                 match s {
                     Object::Sphere(s) => s.physics(&params.physics_parameters),
-                    Object::Polygon(p) => {}
+                    Object::Polygon(_p) => {}
                 }
             }
         }

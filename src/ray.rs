@@ -1,6 +1,7 @@
 use crate::{
     object::Object,
     parameters::RayParameters,
+    polygon::Polygon,
     position::Position,
     surface_type::SurfaceType,
     util::{self, round},
@@ -57,22 +58,22 @@ impl Ray {
     }
 
     pub fn turn_x(&mut self, angle: f64) {
-        self.vector.p2.turn_x_around(angle, &self.vector.p1);
+        self.vector.p1.turn_x_around(angle, &self.vector.p0);
         self.update_vector();
     }
 
     pub fn turn_y(&mut self, angle: f64) {
-        self.vector.p2.turn_y_around(angle, &self.vector.p1);
+        self.vector.p1.turn_y_around(angle, &self.vector.p0);
         self.update_vector();
     }
 
     pub fn turn_z(&mut self, angle: f64) {
-        self.vector.p2.turn_z_around(angle, &self.vector.p1);
+        self.vector.p1.turn_z_around(angle, &self.vector.p0);
         self.update_vector();
     }
 
     pub fn get_position_from_factor(&self, factor: f64) -> Position {
-        return self.vector.p1 + (self.vector.as_position()).scaled(factor);
+        return self.vector.p0 + (self.vector.as_position()).scaled(factor);
     }
 
     pub fn factor_distance_from_object(
@@ -84,22 +85,22 @@ impl Ray {
             Object::Sphere(s) => {
                 // These are the parts of a quadratic equation given by substituting
                 // the values of the line (ray) into the equation for the given sphere
-                let a: f64 = squared(self.vector.p2.x - self.vector.p1.x)
-                    + squared(self.vector.p2.y - self.vector.p1.y)
-                    + squared(self.vector.p2.z - self.vector.p1.z);
+                let a: f64 = squared(self.vector.p1.x - self.vector.p0.x)
+                    + squared(self.vector.p1.y - self.vector.p0.y)
+                    + squared(self.vector.p1.z - self.vector.p0.z);
                 let b: f64 = 2.
-                    * ((self.vector.p2.x - self.vector.p1.x) * (self.vector.p1.x - s.pos.x)
-                        + (self.vector.p2.y - self.vector.p1.y) * (self.vector.p1.y - s.pos.y)
-                        + (self.vector.p2.z - self.vector.p1.z) * (self.vector.p1.z - s.pos.z));
+                    * ((self.vector.p1.x - self.vector.p0.x) * (self.vector.p0.x - s.pos.x)
+                        + (self.vector.p1.y - self.vector.p0.y) * (self.vector.p0.y - s.pos.y)
+                        + (self.vector.p1.z - self.vector.p0.z) * (self.vector.p0.z - s.pos.z));
                 let c: f64 = squared(s.pos.x)
                     + squared(s.pos.y)
                     + squared(s.pos.z)
-                    + squared(self.vector.p1.x)
-                    + squared(self.vector.p1.y)
-                    + squared(self.vector.p1.z)
-                    - 2. * (s.pos.x * self.vector.p1.x
-                        + s.pos.y * self.vector.p1.y
-                        + s.pos.z * self.vector.p1.z)
+                    + squared(self.vector.p0.x)
+                    + squared(self.vector.p0.y)
+                    + squared(self.vector.p0.z)
+                    - 2. * (s.pos.x * self.vector.p0.x
+                        + s.pos.y * self.vector.p0.y
+                        + s.pos.z * self.vector.p0.z)
                     - squared(s.radius);
 
                 let d = squared(b) - 4. * a * c;
@@ -130,10 +131,10 @@ impl Ray {
                 let p0: Position = p.pos;
                 let p1: Position = p.v1;
                 let p2: Position = p.v2;
-                let r0: Position = self.vector.p1;
-                let r1: Position = self.vector.p2;
+                let r0: Position = self.vector.p0;
+                let r1: Position = self.vector.p1;
 
-                let n: Position = p1.cross(&p2);
+                let n: Position = p.get_normal();
                 let det = n * r1;
                 if det == 0. {
                     return (f64::NAN, false);
@@ -147,11 +148,12 @@ impl Ray {
                 let i = r0 + r1 * r;
 
                 let f2 = (i.y * p1.x - i.x * p1.y + p0.x * p1.y - p0.y * p1.x)
-                    / (p1.y * p2.x + p1.x * p2.y);
+                    / (p1.x * p2.y + p1.y * p2.x);
                 let f1 = (i.x - p0.x - f2 * p2.x) / p1.x;
-                if 0. <= f1 && 0. <= f2 && f1 + f2 <= 1. {
-                    return (r, false);
+                if 0. < f1 && 0. < f2 && f1 + f2 < 1. {
+                    return (r, n * r1 > 0.);
                 }
+
                 return (f64::NAN, false);
             }
         }
@@ -198,7 +200,9 @@ impl Ray {
     ) -> Ray {
         return self.apply_smoothness(
             match object.type_() {
-                SurfaceType::Reflexive => self.get_reflection(intersection_factor, object),
+                SurfaceType::Reflexive => {
+                    self.get_reflection(intersection_factor, is_entering, object)
+                }
                 SurfaceType::Refractive => {
                     self.get_refraction(intersection_factor, is_entering, object)
                 }
@@ -237,27 +241,38 @@ impl Ray {
         return ray;
     }
 
-    fn get_reflection(&self, intersection_factor: f64, object: &Object) -> Ray {
+    fn get_normal(intersection: &Position, is_entering: bool, object: &Object) -> Position {
         match object {
             Object::Sphere(sphere) => {
-                let intersection = self.get_position_from_factor(intersection_factor);
-                let u = intersection - sphere.pos;
-                let v = intersection - self.vector.p1;
-                let w = u.scaled(-(v.dot(&u) / u.dot(&u)));
-                let direction = (intersection + w).scaled(2.) - self.vector.p1;
-
-                return Ray::new(
-                    intersection,
-                    direction,
-                    self.refraction_factor,
-                    self.x_value,
-                    self.y_value,
-                );
+                return *intersection - sphere.pos;
             }
             Object::Polygon(polygon) => {
-                return *self;
+                if is_entering {
+                    return -polygon.get_normal();
+                } else {
+                    return polygon.get_normal();
+                }
             }
         }
+    }
+
+    fn get_reflection(&self, intersection_factor: f64, is_entering: bool, object: &Object) -> Ray {
+        let intersection = self.get_position_from_factor(intersection_factor);
+        let u = Ray::get_normal(&intersection, is_entering, object);
+        let v = intersection - self.vector.p0;
+        let w = u * -((v * u) / (u * u));
+        let direction = (intersection + w) * 2. - self.vector.p0;
+
+        // if let Object::Polygon(_) = object {
+        //     println!("ok");
+        // }
+        return Ray::new(
+            intersection,
+            direction,
+            self.refraction_factor,
+            self.x_value,
+            self.y_value,
+        );
     }
 
     // I hope I never have to debug this...
@@ -285,7 +300,7 @@ impl Ray {
                 let angle_incident = incident.angle(&normal);
 
                 if angle_incident.sin() > n2 / n1 {
-                    return self.get_reflection(intersection_factor, object);
+                    return self.get_reflection(intersection_factor, is_entering, object);
                 }
 
                 let angle_exit: f64 = f64::asin((n1 * f64::sin(angle_incident)) / n2);

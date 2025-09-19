@@ -8,7 +8,6 @@ pub struct Polygon {
     pub v1: Position,
     pub v2: Position,
     pub speed: Speed,
-    pub radius: f64,
     pub color: Color,
     pub light_factor: f64,
     pub type_: SurfaceType,
@@ -22,30 +21,29 @@ impl Polygon {
         let mut v: Vec<Polygon> = vec![];
 
         let light_factor: f64 = 1.;
-        let size: f64 = 1.;
+        let size: f64 = 10.;
         // Gold
         v.push(Polygon {
             pos: Position {
                 x: 0.,
                 y: 0.,
-                z: 0.,
+                z: size,
             },
             v1: Position {
-                x: 1.,
+                x: size,
                 y: 0.,
-                z: 1.,
+                z: -size,
             },
             v2: Position {
                 x: 0.,
-                y: 1.,
-                z: 1.,
+                y: size,
+                z: -size,
             },
             speed: Speed {
                 x: 0.,
                 y: 0.,
                 z: 0.,
             },
-            radius: size,
             color: Color::RGB(255, 200, 0),
             light_factor: light_factor,
             type_: SurfaceType::Reflexive,
@@ -65,5 +63,9 @@ impl Polygon {
         // for sphere_parameters in sphere_parameters_vec {
         Polygon::fill_vector(object_vector);
         // }
+    }
+
+    pub fn get_normal(&self) -> Position {
+        return self.v1.cross(&self.v2);
     }
 }

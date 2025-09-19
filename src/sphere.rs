@@ -23,7 +23,7 @@ impl Sphere {
         let mut v: Vec<Sphere> = vec![];
 
         let light_factor: f64 = 1.;
-        let size: f64 = 1.;
+        let size: f64 = 2.;
         // While
         v.push(Sphere {
             pos: Position {
@@ -36,7 +36,7 @@ impl Sphere {
                 y: 0.,
                 z: 0.,
             },
-            radius: size / 10.,
+            radius: size,
             color: Color::RGB(255, 255, 255),
             light_factor: light_factor,
             type_: SurfaceType::Reflexive,

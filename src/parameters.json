@@ -46,8 +46,8 @@
         }
     },
     "ray_parameters": {
-        "min_hor_value": -128,
-        "max_hor_value": 128,
+        "min_hor_value": -64,
+        "max_hor_value": 64,
         "min_ver_value": -64,
         "max_ver_value": 64,
         "min_pixel_factor": 0.1,
@@ -60,7 +60,7 @@
         },
         "background_light_factor": 1.0,
         "reflect_background": false,
-        "bounce_count": 2,
+        "bounce_count": 5,
         "bounce_color_reflection_factor": 1,
         "min_random_bounce_angle_change": -1.57075,
         "max_random_bounce_angle_change": 1.57075,

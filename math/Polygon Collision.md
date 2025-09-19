@@ -16,9 +16,15 @@ $$Iy = P_0y + \frac{Ix - P_0x - p_2 P_2x}{P_1x} P_1y + p_2 P_2y$$
 $$\frac{p_2 P_2x}{P_1x} P_1y + p_2 P_2y = Iy - P_0y - \frac{Ix - P_0x}{P_1x} P_1y$$
 $$p_2 \left( \frac{P_2x P_1y}{P_1x} + P_2y \right) = Iy - P_0y + \frac{P_0x P_1y - Ix P_1y}{P_1x}$$
 $$p_2 \frac{P_2x P_1y + P_1x P_2y}{P_1x} = \frac{Iy P_1x - P_0y P_1x + P_0x P_1y - Ix P_1y}{P_1x}$$
-$$p_2 = \frac{Iy P_1x - P_0y P_1x + P_0x P_1y - Ix P_1y}{P_1x \frac{P_2x P_1y + P_1x P_2y}{P_1x}}$$
 $$p_2 = \frac{Iy P_1x - P_0y P_1x + P_0x P_1y - Ix P_1y}{P_1y P_2x + P_1x P_2y}$$
+
+We can optionally solve $p_1$:
+$$p_1 = \frac{Ix - P_0x - p_2 P_2x}{P_1x} = \frac{Ix - P_0x - \left( \frac{Iy P_1x - P_0y P_1x + P_0x P_1y - Ix P_1y}{P_1y P_2x + P_1x P_2y} \right) P_2x}{P_1x}$$
+$$p_1 = \frac{Ix - P_0x + \left( \frac{-P_2x Iy P_1x + P_2x P_0y P_1x - P_2x P_0x P_1y + P_2x Ix P_1y}{P_1y P_2x + P_1x P_2y} \right)}{P_1x}$$
+$$p_1 = \frac{Ix - P_0x}{P_1x} + \frac{P_2x P_0y P_1x - P_2x Iy P_1x + P_2x Ix P_1y - P_2x P_0x P_1y}{P_1y P_1x P_2x + P_1x P_1x P_2y}$$
+$$p_1 = \frac{Ix - P_0x}{P_1x} + (P_2x P_1x) \frac{P_0y - Iy}{P_1y P_1x P_2x + P_1x P_1x P_2y} + (P_1y P_2x) \frac{Ix - P_0x}{P_1y P_1x P_2x + P_1x P_1x P_2y}$$
+$$p_1 = \frac{Ix - P_0x}{P_1x} + P_2x \frac{P_0y - Iy}{P_1y P_2x + P_1x P_2y} + \frac{P_1y P_2x}{P_1x} \frac{Ix - P_0x}{P_1y P_2x + P_1x P_2y}$$
 
 So we have:
 $$p_2 = \frac{Iy P_1x - Ix P_1y + P_0x P_1y - P_0y P_1x}{P_1y P_2x + P_1x P_2y}$$
-$$p_1 = \frac{Ix - P_0x - p_2 P_2x}{P_1x} = \frac{Ix - P_0x - \left( \frac{Iy P_1x - P_0y P_1x + P_0x P_1y - Ix P_1y}{P_1y P_2x + P_1x P_2y} \right) P_2x}{P_1x}$$
+$$p_1 = \frac{Ix - P_0x - p_2 P_2x}{P_1x} = \frac{Ix - P_0x}{P_1x} + P_2x \frac{P_0y - Iy}{P_1y P_2x + P_1x P_2y} + \frac{P_1y P_2x}{P_1x} \frac{Ix - P_0x}{P_1y P_1x P_2x + P_1x P_1x P_2y}$$
