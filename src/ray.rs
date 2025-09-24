@@ -129,15 +129,23 @@ impl Ray {
                 }
 
                 let r: f64 = (n * (p0 - r0)) / det;
-                if r <= 0. {
+                if round(r, 8) < 0. {
                     return (f64::NAN, false);
                 }
 
                 let i = r0 + r1 * r;
 
-                let f2 = (i.y * p1.x - i.x * p1.y + p0.x * p1.y - p0.y * p1.x)
-                    / (p1.x * p2.y + p1.y * p2.x);
-                let f1 = (i.x - p0.x - f2 * p2.x) / p1.x;
+                // let f2 = (i.y * p1.x - i.x * p1.y + p0.x * p1.y - p0.y * p1.x)
+                //     / (p1.x * p2.y + p1.y * p2.x);
+                // let f1 = (i.x - p0.x - f2 * p2.x) / p1.x;
+                let a = p1 * p1;
+                let b = p1 * p2;
+                let c = p2 * p2;
+                let x1 = (i - p0) * p1;
+                let x2 = (i - p0) * p2;
+                let det = a * c - squared(b);
+                let f1 = (c * x1 - b * x2) / det;
+                let f2 = (a * x2 - b * x1) / det;
                 if 0. < f1 && 0. < f2 && f1 + f2 < 1. {
                     return (r, n * r1 > 0.);
                 }
@@ -227,21 +235,6 @@ impl Ray {
                 ray_parameters.max_random_bounce_angle_change * smoothness_factor,
             ),
         });
-        // ray.turn_x(util::rand_range(
-        //     rng,
-        //     ray_parameters.min_random_bounce_angle_change * smoothness_factor,
-        //     ray_parameters.max_random_bounce_angle_change * smoothness_factor,
-        // ));
-        // ray.turn_y(util::rand_range(
-        //     rng,
-        //     ray_parameters.min_random_bounce_angle_change * smoothness_factor,
-        //     ray_parameters.max_random_bounce_angle_change * smoothness_factor,
-        // ));
-        // ray.turn_z(util::rand_range(
-        //     rng,
-        //     ray_parameters.min_random_bounce_angle_change * smoothness_factor,
-        //     ray_parameters.max_random_bounce_angle_change * smoothness_factor,
-        // ));
 
         return ray;
     }
@@ -265,9 +258,6 @@ impl Ray {
         let intersection = self.get_position_from_factor(intersection_factor);
         let n = Ray::get_normal(&intersection, is_entering, object);
         let d = self.vector.direction;
-        // let v = intersection - self.vector.origin;
-        // let w = u * -((v * u) / (u * u));
-        // let direction = (intersection + w) * 2. - self.vector.origin;
         let direction = d - n * (2. * (d * n));
 
         return Ray::new(

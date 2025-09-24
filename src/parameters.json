@@ -4,7 +4,7 @@
     "display_height": 720.0,
     "h_rays": 100,
     "v_rays": 100,
-    "fov": 1.2,
+    "fov": 0.7,
     "observer_parameters": {
         "look_up_angle": -0.05,
         "look_down_angle": 0.05,
@@ -16,12 +16,12 @@
         "min_ver_angle": -1.57075,
         "max_ver_angle": 1.57075,
         "ver_angle_loop": false,
-        "move_forward_distance": 0.5,
-        "move_backward_distance": -0.5,
-        "move_right_distance": 0.5,
-        "move_left_distance": -0.5,
-        "move_up_distance": 0.5,
-        "move_down_distance": -0.5,
+        "move_forward_distance": -0.5,
+        "move_backward_distance": 0.5,
+        "move_right_distance": -0.5,
+        "move_left_distance": 0.5,
+        "move_up_distance": -0.5,
+        "move_down_distance": 0.5,
         "slow_mode_factor": 0.1,
         "default_body": {
             "pos": {

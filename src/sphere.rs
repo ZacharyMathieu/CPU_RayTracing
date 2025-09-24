@@ -28,28 +28,28 @@ impl Sphere {
         let mut v: Vec<Sphere> = vec![];
 
         let light_factor: f64 = 1.;
-        let size: f64 = 4.;
+        let size: f64 = 2.5;
 
-        // While
-        v.push(Sphere {
-            pos: Position {
-                x: 2.,
-                y: 0.,
-                z: 0.,
-            },
-            speed: Speed {
-                x: 0.,
-                y: 0.,
-                z: 0.,
-            },
-            radius: 1.,
-            color: Color::RGB(255, 255, 255),
-            light_factor: light_factor,
-            type_: SurfaceType::Reflexive,
-            smoothness: 1.,
-            refractivity_index: 1.,
-            is_visible: true,
-        });
+        // // While
+        // v.push(Sphere {
+        //     pos: Position {
+        //         x: 0.,
+        //         y: 0.,
+        //         z: 0.,
+        //     },
+        //     speed: Speed {
+        //         x: 0.,
+        //         y: 0.,
+        //         z: 0.,
+        //     },
+        //     radius: 1.,
+        //     color: Color::RGB(255, 255, 255),
+        //     light_factor: light_factor,
+        //     type_: SurfaceType::Reflexive,
+        //     smoothness: 1.,
+        //     refractivity_index: 1.,
+        //     is_visible: true,
+        // });
         // Red
         v.push(Sphere {
             pos: Position {

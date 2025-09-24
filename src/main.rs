@@ -41,6 +41,7 @@ fn reload_params(
     match default_observer {
         Some(obs) => {
             observer.body.pos = obs.body.pos;
+            observer.body.is_visible = obs.body.is_visible;
             observer.hor_angle = obs.hor_angle;
             observer.ver_angle = obs.ver_angle;
         }

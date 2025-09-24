@@ -21,30 +21,59 @@ impl Polygon {
         let mut v: Vec<Polygon> = vec![];
 
         let light_factor: f64 = 1.;
-        let size: f64 = 1.;
+        let size: f64 = 10.;
         // Gold
+        v.push(Polygon {
+            pos: Position {
+                x: -size,
+                y: 0.,
+                z: 0.,
+            },
+            v1: Position {
+                x: 0.,
+                y: size,
+                z: 0.,
+            },
+            v2: Position {
+                x: 0.,
+                y: 0.,
+                z: size,
+            },
+            speed: Speed {
+                x: 0.,
+                y: 0.,
+                z: 0.,
+            },
+            color: Color::RGB(255, 200, 0),
+            light_factor: light_factor,
+            type_: SurfaceType::Reflexive,
+            smoothness: 1.,
+            refractivity_index: 1.,
+            is_visible: true,
+        });
+        // // Pink
         // v.push(Polygon {
         //     pos: Position {
-        //         x: 0.,
+        //         x: -2.,
         //         y: 0.,
-        //         z: size,
+        //         z: 0.,
         //     },
         //     v1: Position {
-        //         x: size,
-        //         y: 0.,
-        //         z: -size,
+        //         x: -2.,
+        //         y: size * 2.,
+        //         z: 0.,
         //     },
         //     v2: Position {
-        //         x: 0.,
-        //         y: size,
-        //         z: -size,
+        //         x: -2.,
+        //         y: 0.,
+        //         z: size * 2.,
         //     },
         //     speed: Speed {
         //         x: 0.,
         //         y: 0.,
         //         z: 0.,
         //     },
-        //     color: Color::RGB(255, 200, 0),
+        //     color: Color::RGB(255, 125, 255),
         //     light_factor: light_factor,
         //     type_: SurfaceType::Reflexive,
         //     smoothness: 1.,

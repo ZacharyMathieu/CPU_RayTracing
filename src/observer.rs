@@ -45,7 +45,7 @@ impl Observer {
                 let r: Ray = Ray::new_turned(
                     self.body.pos.clone(),
                     Position {
-                        x: 1.,
+                        x: -1.,
                         y: 0.,
                         z: 0.,
                     },
