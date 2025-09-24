@@ -5,30 +5,27 @@ use crate::position::Position;
 #[derive(Clone, Copy)]
 
 pub struct Vector {
-    pub p0: Position,
-    pub p1: Position,
-    v: Position,
+    pub origin: Position,
+    pub direction: Position,
     pub length: f64,
 }
 
 impl Vector {
-    pub fn new(p0: Position, p1: Position) -> Vector {
-        let l = p0.dist(&p1);
+    pub fn new(origin: Position, direction: Position) -> Vector {
+        let length = direction.len();
         return Vector {
-            p0,
-            p1,
-            v: p1 - p0,
-            length: l,
+            origin,
+            direction,
+            length,
         };
     }
 
     pub fn update(&mut self) {
-        self.length = self.p0.dist(&self.p1);
-        self.v = self.p1 - self.p0;
+        self.length = self.direction.len();
     }
 
     pub fn as_position(&self) -> Position {
-        return self.v;
+        return self.direction;
     }
 }
 
@@ -36,7 +33,7 @@ impl Add for Vector {
     type Output = Vector;
 
     fn add(self, p: Vector) -> Self::Output {
-        return Vector::new(self.p0 + p.p0, self.p1 + p.p1);
+        return Vector::new(self.origin + p.origin, self.direction + p.direction);
     }
 }
 
@@ -44,7 +41,7 @@ impl Sub for Vector {
     type Output = Vector;
 
     fn sub(self, p: Vector) -> Self::Output {
-        return Vector::new(self.p0 - p.p0, self.p1 - p.p1);
+        return Vector::new(self.origin - p.origin, self.direction - p.direction);
     }
 }
 
@@ -53,9 +50,8 @@ impl Neg for Vector {
 
     fn neg(self) -> Self::Output {
         return Vector {
-            p0: -self.p0,
-            p1: -self.p1,
-            v: -self.v,
+            origin: self.origin,
+            direction: -self.direction,
             length: self.length,
         };
     }

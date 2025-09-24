@@ -1,5 +1,12 @@
 use crate::{
-    frame::Frame, object::Object, parameters::{ObserverParameters, Parameters, RayParameters}, position::Position, ray::Ray, ray_trace::RayTrace, speed::Speed, sphere::Sphere
+    frame::Frame,
+    object::Object,
+    parameters::{ObserverParameters, Parameters, RayParameters},
+    position::Position,
+    ray::Ray,
+    ray_trace::RayTrace,
+    speed::Speed,
+    sphere::Sphere,
 };
 use rayon::prelude::*;
 
@@ -15,7 +22,7 @@ pub struct Observer {
 
 impl Observer {
     pub fn default(parameters: &Parameters) -> Observer {
-        let mut obs = Observer {
+        let obs = Observer {
             hor_angle: 0.,
             ver_angle: 0.,
             rays: Vec::new(),
@@ -24,36 +31,50 @@ impl Observer {
             slow_speed_mode: false,
             body: parameters.observer_parameters.default_body.clone(),
         };
-        obs.generate_rays(&parameters.ray_parameters, &parameters.observer_parameters);
         return obs;
     }
 
-    fn generate_rays(
-        &mut self,
-        ray_parameters: &RayParameters,
-        observer_parameters: &ObserverParameters,
-    ) {
+    pub fn generate_rays(&mut self, parameters: &Parameters) {
         self.rays.clear();
 
-        for x in ray_parameters.min_hor_value..ray_parameters.max_hor_value {
-            for y in ray_parameters.min_ver_value..ray_parameters.max_ver_value {
-                let r = Ray::new_turned(
+        let min_angle = -parameters.fov / 2.;
+        for x in 0..parameters.h_rays {
+            let x_f = (x + 1) as f64 / parameters.h_rays as f64;
+            for y in 0..parameters.v_rays {
+                let y_f = (y + 1) as f64 / parameters.v_rays as f64;
+                let r: Ray = Ray::new_turned(
                     self.body.pos.clone(),
                     Position {
-                        x: observer_parameters.look_vector_distance,
-                        y: x as f64,
-                        z: y as f64,
+                        x: 1.,
+                        y: 0.,
+                        z: 0.,
                     },
                     1.,
-                    x - ray_parameters.min_hor_value,
-                    y - ray_parameters.min_ver_value,
+                    x,
+                    y,
+                    self.hor_angle + min_angle + x_f * parameters.fov,
+                    self.ver_angle + min_angle + y_f * parameters.fov,
                     0.,
-                    self.ver_angle,
-                    self.hor_angle,
                 );
+
+                // println!(
+                //     "({}, {})",
+                //     r.vector.direction.z,
+                //     r.vector.direction.y
+                // );
+                // println!(
+                //     "r: ({}, {}) : ({}, {}) to ({}, {})",
+                //     r.x_value,
+                //     r.y_value,
+                //     r.vector.origin.z,
+                //     r.vector.origin.y,
+                //     r.vector.direction.z,
+                //     r.vector.direction.y
+                // );
                 self.rays.push(r);
             }
         }
+        // println!("----------")
     }
 
     fn generate_ray_traces(&self, ray_parameters: &RayParameters) -> Vec<RayTrace> {
@@ -127,94 +148,69 @@ impl Observer {
         };
     }
 
-    pub fn turn_hor(
-        &mut self,
-        angle: f64,
-        observer_parameters: &ObserverParameters,
-        ray_parameters: &RayParameters,
-    ) {
-        self.hor_angle += self.apply_slow_mode(angle, observer_parameters);
+    pub fn turn_hor(&mut self, angle: f64, parameters: &Parameters) {
+        self.hor_angle += angle;
 
         self.hor_angle = Self::limit_angle(
             self.hor_angle,
-            observer_parameters.min_hor_angle,
-            observer_parameters.max_hor_angle,
-            observer_parameters.hor_angle_loop,
+            parameters.observer_parameters.min_hor_angle,
+            parameters.observer_parameters.max_hor_angle,
+            parameters.observer_parameters.hor_angle_loop,
         );
 
-        self.generate_rays(ray_parameters, observer_parameters);
+        self.generate_rays(parameters);
     }
 
-    pub fn turn_ver(
-        &mut self,
-        angle: f64,
-        observer_parameters: &ObserverParameters,
-        ray_parameters: &RayParameters,
-    ) {
-        self.ver_angle += self.apply_slow_mode(angle, observer_parameters);
+    pub fn turn_ver(&mut self, angle: f64, parameters: &Parameters) {
+        self.ver_angle += angle;
 
         self.ver_angle = Self::limit_angle(
             self.ver_angle,
-            observer_parameters.min_ver_angle,
-            observer_parameters.max_ver_angle,
-            observer_parameters.ver_angle_loop,
+            parameters.observer_parameters.min_ver_angle,
+            parameters.observer_parameters.max_ver_angle,
+            parameters.observer_parameters.ver_angle_loop,
         );
 
-        self.generate_rays(ray_parameters, observer_parameters);
+        self.generate_rays(parameters);
     }
 
-    pub fn move_forward(
-        &mut self,
-        dist: f64,
-        observer_parameters: &ObserverParameters,
-        ray_parameters: &RayParameters,
-    ) {
+    pub fn move_forward(&mut self, dist: f64, parameters: &Parameters) {
         self.move_(
             Speed {
                 x: self.hor_angle.cos() * self.ver_angle.cos() * dist,
                 y: self.hor_angle.sin() * dist,
                 z: self.ver_angle.sin() * dist,
             },
-            observer_parameters,
+            &parameters.observer_parameters,
         );
 
-        self.generate_rays(ray_parameters, observer_parameters);
+        self.generate_rays(parameters);
     }
 
-    pub fn move_hor(
-        &mut self,
-        dist: f64,
-        observer_parameters: &ObserverParameters,
-        ray_parameters: &RayParameters,
-    ) {
+    pub fn move_hor(&mut self, dist: f64, parameters: &Parameters) {
         self.move_(
             Speed {
                 x: -self.hor_angle.sin() * dist,
                 y: self.hor_angle.cos() * dist,
                 z: 0.,
             },
-            observer_parameters,
+            &parameters.observer_parameters,
         );
 
-        self.generate_rays(ray_parameters, observer_parameters);
+        self.generate_rays(parameters);
     }
 
-    pub fn move_ver(
-        &mut self,
-        dist: f64,
-        observer_parameters: &ObserverParameters,
-        ray_parameters: &RayParameters,
-    ) {
+    pub fn move_ver(&mut self, dist: f64, parameters: &Parameters) {
         self.move_(
             Speed {
                 x: 0.,
                 y: 0.,
                 z: dist,
             },
-            observer_parameters,
+            &parameters.observer_parameters,
         );
 
-        self.generate_rays(ray_parameters, observer_parameters);
+        self.generate_rays(parameters);
     }
 
     fn move_(&mut self, speed: Speed, observer_parameters: &ObserverParameters) {
@@ -223,15 +219,11 @@ impl Observer {
         self.body.pos.z += self.apply_slow_mode(speed.z, observer_parameters);
     }
 
-    pub fn reset_position(
-        &mut self,
-        observer_parameters: &ObserverParameters,
-        ray_parameters: &RayParameters,
-    ) {
-        self.body.pos = observer_parameters.default_body.pos.clone();
-        self.body.is_visible = observer_parameters.default_body.is_visible;
+    pub fn reset_position(&mut self, parameters: &Parameters) {
+        self.body.pos = parameters.observer_parameters.default_body.pos.clone();
+        self.body.is_visible = parameters.observer_parameters.default_body.is_visible;
 
-        self.generate_rays(ray_parameters, observer_parameters);
+        self.generate_rays(parameters);
     }
 
     pub fn switch_accumulation_mode(&mut self) {

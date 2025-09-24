@@ -1,12 +1,15 @@
 {
-    "frame_period_ms": 0,
-    "display_scale": 5.0,
+    "frame_period_ms": 25,
+    "display_width": 720.0,
+    "display_height": 720.0,
+    "h_rays": 100,
+    "v_rays": 100,
+    "fov": 1.2,
     "observer_parameters": {
-        "look_vector_distance": 64.0,
-        "look_up_angle": -0.08,
-        "look_down_angle": 0.08,
-        "look_left_angle": -0.1,
-        "look_right_angle": 0.1,
+        "look_up_angle": -0.05,
+        "look_down_angle": 0.05,
+        "look_left_angle": -0.05,
+        "look_right_angle": 0.05,
         "min_hor_angle": 0.0,
         "max_hor_angle": 6.283,
         "hor_angle_loop": true,
@@ -17,8 +20,8 @@
         "move_backward_distance": -0.5,
         "move_right_distance": 0.5,
         "move_left_distance": -0.5,
-        "move_up_distance": -0.5,
-        "move_down_distance": 0.5,
+        "move_up_distance": 0.5,
+        "move_down_distance": -0.5,
         "slow_mode_factor": 0.1,
         "default_body": {
             "pos": {
@@ -46,10 +49,6 @@
         }
     },
     "ray_parameters": {
-        "min_hor_value": -64,
-        "max_hor_value": 64,
-        "min_ver_value": -64,
-        "max_ver_value": 64,
         "min_pixel_factor": 0.1,
         "fog_factor": 0.0,
         "background_color": {

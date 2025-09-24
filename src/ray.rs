@@ -22,23 +22,23 @@ pub struct Ray {
 
 impl Ray {
     pub fn new(
-        p1: Position,
-        p2: Position,
+        origin: Position,
+        direction: Position,
         refraction_factor: f64,
         x_value: i64,
         y_value: i64,
     ) -> Ray {
         return Ray {
-            vector: Vector::new(p1, p2),
-            refraction_factor: refraction_factor,
-            x_value: x_value,
-            y_value: y_value,
+            vector: Vector::new(origin, direction),
+            refraction_factor,
+            x_value,
+            y_value,
         };
     }
 
     pub fn new_turned(
-        p: Position,
-        d: Position,
+        origin: Position,
+        direction: Position,
         refraction_factor: f64,
         x_value: i64,
         y_value: i64,
@@ -46,10 +46,12 @@ impl Ray {
         y_angle: f64,
         z_angle: f64,
     ) -> Ray {
-        let mut r = Ray::new(p, d, refraction_factor, x_value, y_value);
-        r.turn_x(x_angle);
-        r.turn_y(y_angle);
-        r.turn_z(z_angle);
+        let mut r = Ray::new(origin, direction, refraction_factor, x_value, y_value);
+        r.turn(Position {
+            x: x_angle,
+            y: y_angle,
+            z: z_angle,
+        });
         return r;
     }
 
@@ -57,23 +59,13 @@ impl Ray {
         self.vector.update();
     }
 
-    pub fn turn_x(&mut self, angle: f64) {
-        self.vector.p1.turn_x_around(angle, &self.vector.p0);
-        self.update_vector();
-    }
-
-    pub fn turn_y(&mut self, angle: f64) {
-        self.vector.p1.turn_y_around(angle, &self.vector.p0);
-        self.update_vector();
-    }
-
-    pub fn turn_z(&mut self, angle: f64) {
-        self.vector.p1.turn_z_around(angle, &self.vector.p0);
+    pub fn turn(&mut self, angle: Position) {
+        self.vector.direction.turn(angle);
         self.update_vector();
     }
 
     pub fn get_position_from_factor(&self, factor: f64) -> Position {
-        return self.vector.p0 + (self.vector.as_position()).scaled(factor);
+        return self.vector.origin + (self.vector.as_position()).scaled(factor);
     }
 
     pub fn factor_distance_from_object(
@@ -83,25 +75,21 @@ impl Ray {
     ) -> (f64, bool) {
         match o {
             Object::Sphere(s) => {
-                // These are the parts of a quadratic equation given by substituting
-                // the values of the line (ray) into the equation for the given sphere
-                let a: f64 = squared(self.vector.p1.x - self.vector.p0.x)
-                    + squared(self.vector.p1.y - self.vector.p0.y)
-                    + squared(self.vector.p1.z - self.vector.p0.z);
-                let b: f64 = 2.
-                    * ((self.vector.p1.x - self.vector.p0.x) * (self.vector.p0.x - s.pos.x)
-                        + (self.vector.p1.y - self.vector.p0.y) * (self.vector.p0.y - s.pos.y)
-                        + (self.vector.p1.z - self.vector.p0.z) * (self.vector.p0.z - s.pos.z));
-                let c: f64 = squared(s.pos.x)
-                    + squared(s.pos.y)
-                    + squared(s.pos.z)
-                    + squared(self.vector.p0.x)
-                    + squared(self.vector.p0.y)
-                    + squared(self.vector.p0.z)
-                    - 2. * (s.pos.x * self.vector.p0.x
-                        + s.pos.y * self.vector.p0.y
-                        + s.pos.z * self.vector.p0.z)
-                    - squared(s.radius);
+                let c0 = s.pos;
+                let cr = s.radius;
+                let r0 = self.vector.origin;
+                let r1 = self.vector.direction;
+                let a = squared(r1.x) + squared(r1.y) + squared(r1.z);
+                let b = 2. * r1.x * r0.x - 2. * r1.x * c0.x + 2. * r1.y * r0.y - 2. * r1.y * c0.y
+                    + 2. * r1.z * r0.z
+                    - 2. * r1.z * c0.z;
+                let c = squared(r0.x) - 2. * r0.x * c0.x + squared(c0.x) + squared(r0.y)
+                    - 2. * r0.y * c0.y
+                    + squared(c0.y)
+                    + squared(r0.z)
+                    - 2. * r0.z * c0.z
+                    + squared(c0.z)
+                    - squared(cr);
 
                 let d = squared(b) - 4. * a * c;
                 if d < 0. {
@@ -131,8 +119,8 @@ impl Ray {
                 let p0: Position = p.pos;
                 let p1: Position = p.v1;
                 let p2: Position = p.v2;
-                let r0: Position = self.vector.p0;
-                let r1: Position = self.vector.p1;
+                let r0: Position = self.vector.origin;
+                let r1: Position = self.vector.direction;
 
                 let n: Position = p.get_normal();
                 let det = n * r1;
@@ -222,21 +210,38 @@ impl Ray {
     ) -> Ray {
         let smoothness_factor: f64 = 1. - sphere.smoothness();
 
-        ray.turn_x(util::rand_range(
-            rng,
-            ray_parameters.min_random_bounce_angle_change * smoothness_factor,
-            ray_parameters.max_random_bounce_angle_change * smoothness_factor,
-        ));
-        ray.turn_y(util::rand_range(
-            rng,
-            ray_parameters.min_random_bounce_angle_change * smoothness_factor,
-            ray_parameters.max_random_bounce_angle_change * smoothness_factor,
-        ));
-        ray.turn_z(util::rand_range(
-            rng,
-            ray_parameters.min_random_bounce_angle_change * smoothness_factor,
-            ray_parameters.max_random_bounce_angle_change * smoothness_factor,
-        ));
+        ray.turn(Position {
+            x: util::rand_range(
+                rng,
+                ray_parameters.min_random_bounce_angle_change * smoothness_factor,
+                ray_parameters.max_random_bounce_angle_change * smoothness_factor,
+            ),
+            y: util::rand_range(
+                rng,
+                ray_parameters.min_random_bounce_angle_change * smoothness_factor,
+                ray_parameters.max_random_bounce_angle_change * smoothness_factor,
+            ),
+            z: util::rand_range(
+                rng,
+                ray_parameters.min_random_bounce_angle_change * smoothness_factor,
+                ray_parameters.max_random_bounce_angle_change * smoothness_factor,
+            ),
+        });
+        // ray.turn_x(util::rand_range(
+        //     rng,
+        //     ray_parameters.min_random_bounce_angle_change * smoothness_factor,
+        //     ray_parameters.max_random_bounce_angle_change * smoothness_factor,
+        // ));
+        // ray.turn_y(util::rand_range(
+        //     rng,
+        //     ray_parameters.min_random_bounce_angle_change * smoothness_factor,
+        //     ray_parameters.max_random_bounce_angle_change * smoothness_factor,
+        // ));
+        // ray.turn_z(util::rand_range(
+        //     rng,
+        //     ray_parameters.min_random_bounce_angle_change * smoothness_factor,
+        //     ray_parameters.max_random_bounce_angle_change * smoothness_factor,
+        // ));
 
         return ray;
     }
@@ -258,14 +263,13 @@ impl Ray {
 
     fn get_reflection(&self, intersection_factor: f64, is_entering: bool, object: &Object) -> Ray {
         let intersection = self.get_position_from_factor(intersection_factor);
-        let u = Ray::get_normal(&intersection, is_entering, object);
-        let v = intersection - self.vector.p0;
-        let w = u * -((v * u) / (u * u));
-        let direction = (intersection + w) * 2. - self.vector.p0;
+        let n = Ray::get_normal(&intersection, is_entering, object);
+        let d = self.vector.direction;
+        // let v = intersection - self.vector.origin;
+        // let w = u * -((v * u) / (u * u));
+        // let direction = (intersection + w) * 2. - self.vector.origin;
+        let direction = d - n * (2. * (d * n));
 
-        // if let Object::Polygon(_) = object {
-        //     println!("ok");
-        // }
         return Ray::new(
             intersection,
             direction,

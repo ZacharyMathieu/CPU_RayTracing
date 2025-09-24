@@ -2,7 +2,12 @@ use rand::{rngs::ThreadRng, Rng};
 use sdl2::pixels::Color;
 
 use crate::{
-    object::Object, parameters::{PhysicsParameters, SphereGenerationMode, SphereParameters}, position::Position, speed::Speed, surface_type::SurfaceType, util::{at_ratio, float_to_color, rand_color, rand_range}
+    object::Object,
+    parameters::{PhysicsParameters, SphereGenerationMode, SphereParameters},
+    position::Position,
+    speed::Speed,
+    surface_type::SurfaceType,
+    util::{at_ratio, float_to_color, rand_color, rand_range},
 };
 
 #[derive(Clone, Copy)]
@@ -23,11 +28,12 @@ impl Sphere {
         let mut v: Vec<Sphere> = vec![];
 
         let light_factor: f64 = 1.;
-        let size: f64 = 2.;
+        let size: f64 = 4.;
+
         // While
         v.push(Sphere {
             pos: Position {
-                x: 0.,
+                x: 2.,
                 y: 0.,
                 z: 0.,
             },
@@ -36,7 +42,7 @@ impl Sphere {
                 y: 0.,
                 z: 0.,
             },
-            radius: size,
+            radius: 1.,
             color: Color::RGB(255, 255, 255),
             light_factor: light_factor,
             type_: SurfaceType::Reflexive,
@@ -263,7 +269,7 @@ impl Sphere {
     }
 
     pub fn physics(&mut self, physics_parameters: &PhysicsParameters) {
-        self.speed.z += physics_parameters.g;
+        self.speed.z -= physics_parameters.g;
 
         (self.pos.x, self.speed.x) = self.move_(
             self.pos.x,

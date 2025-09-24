@@ -96,7 +96,6 @@ impl SphereGenerationMode {
 }
 
 pub struct ObserverParameters {
-    pub look_vector_distance: f64,
     pub look_up_angle: f64,
     pub look_down_angle: f64,
     pub look_left_angle: f64,
@@ -120,9 +119,6 @@ pub struct ObserverParameters {
 impl ObserverParameters {
     fn get_from_json(data: &Value, default: &Self) -> Self {
         return ObserverParameters {
-            look_vector_distance: *data["look_vector_distance"]
-                .as_f64()
-                .get_or_insert(default.look_vector_distance),
             look_up_angle: *data["look_up_angle"]
                 .as_f64()
                 .get_or_insert(default.look_up_angle),
@@ -180,10 +176,6 @@ impl ObserverParameters {
 }
 
 pub struct RayParameters {
-    pub min_hor_value: i64,
-    pub max_hor_value: i64,
-    pub min_ver_value: i64,
-    pub max_ver_value: i64,
     pub min_pixel_factor: f64,
     pub fog_factor: f64,
     pub background_color: Color,
@@ -199,18 +191,6 @@ pub struct RayParameters {
 impl RayParameters {
     fn get_from_json(data: &Value, default: &Self) -> Self {
         return RayParameters {
-            min_hor_value: *data["min_hor_value"]
-                .as_i64()
-                .get_or_insert(default.min_hor_value),
-            max_hor_value: *data["max_hor_value"]
-                .as_i64()
-                .get_or_insert(default.max_hor_value),
-            min_ver_value: *data["min_ver_value"]
-                .as_i64()
-                .get_or_insert(default.min_ver_value),
-            max_ver_value: *data["max_ver_value"]
-                .as_i64()
-                .get_or_insert(default.max_ver_value),
             min_pixel_factor: *data["min_pixel_factor"]
                 .as_f64()
                 .get_or_insert(default.min_pixel_factor),
@@ -349,7 +329,11 @@ impl PhysicsParameters {
 
 pub struct Parameters {
     pub frame_period_ms: u64,
-    pub display_scale: f64,
+    pub display_width: f64,
+    pub display_height: f64,
+    pub h_rays: i64,
+    pub v_rays: i64,
+    pub fov: f64,
     pub observer_parameters: ObserverParameters,
     pub ray_parameters: RayParameters,
     pub sphere_parameters: Vec<SphereParameters>,
@@ -358,8 +342,6 @@ pub struct Parameters {
 
 impl Parameters {
     pub fn default() -> Parameters {
-        let width: i64 = 128;
-        let height: i64 = 128;
         let look_angle = 0.1;
         let move_distance = 0.5;
         let physics_bounds_value = 20.;
@@ -368,9 +350,12 @@ impl Parameters {
 
         return Parameters {
             frame_period_ms: 0,
-            display_scale: 5.,
+            display_width: 720.,
+            display_height: 720.,
+            h_rays: 256,
+            v_rays: 256,
+            fov: 1.5,
             observer_parameters: ObserverParameters {
-                look_vector_distance: (height / 2) as f64,
                 look_up_angle: -look_angle,
                 look_down_angle: look_angle,
                 look_left_angle: -look_angle,
@@ -414,10 +399,6 @@ impl Parameters {
                 },
             },
             ray_parameters: RayParameters {
-                min_hor_value: -width / 2,
-                max_hor_value: width / 2,
-                min_ver_value: -height / 2,
-                max_ver_value: height / 2,
                 min_pixel_factor: 0.1,
                 fog_factor: 0.,
                 background_color: Color::RGB(0, 0, 0),
@@ -492,9 +473,21 @@ impl Parameters {
             frame_period_ms: *data["frame_period_ms"]
                 .as_u64()
                 .get_or_insert(default_params.frame_period_ms),
-            display_scale: *data["display_scale"]
+            display_width: *data["display_width"]
                 .as_f64()
-                .get_or_insert(default_params.display_scale),
+                .get_or_insert(default_params.display_width),
+            display_height: *data["display_height"]
+                .as_f64()
+                .get_or_insert(default_params.display_height),
+            h_rays: *data["h_rays"]
+                .as_i64()
+                .get_or_insert(default_params.h_rays),
+            v_rays: *data["v_rays"]
+                .as_i64()
+                .get_or_insert(default_params.v_rays),
+            fov: *data["fov"]
+                .as_f64()
+                .get_or_insert(default_params.fov),
             observer_parameters: ObserverParameters::get_from_json(
                 &data["observer_parameters"],
                 &default_params.observer_parameters,

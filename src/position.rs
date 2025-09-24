@@ -17,6 +17,41 @@ impl Position {
         return self.dist_squared(p).sqrt();
     }
 
+    pub fn len(&self) -> f64 {
+        return self.x.powf(2.) + self.y.powf(2.) + self.z.powf(2.);
+    }
+
+    fn sin(&self) -> Position {
+        return Position {
+            x: self.x.sin(),
+            y: self.y.sin(),
+            z: self.z.sin(),
+        };
+    }
+
+    fn cos(&self) -> Position {
+        return Position {
+            x: self.x.cos(),
+            y: self.y.cos(),
+            z: self.z.cos(),
+        };
+    }
+
+    pub fn turn(&mut self, angle: Position) {
+        let sin = angle.sin();
+        let cos = angle.cos();
+        let new_x = self.x * cos.x * cos.y
+            + self.y * (cos.x * sin.y * sin.z - sin.x * cos.z)
+            + self.z * (cos.x * sin.y * cos.z + sin.x * sin.z);
+        let new_y = self.x * sin.x * cos.y
+            + self.y * (sin.x * sin.y * sin.z + cos.x * cos.z)
+            + self.z * (sin.x * sin.y * cos.z - cos.x * sin.z);
+        let new_z = self.x * (-sin.y) + self.y * cos.y * sin.z + self.z * cos.y * cos.z;
+        self.x = new_x;
+        self.y = new_y;
+        self.z = new_z;
+    }
+
     pub fn turn_x_around(&mut self, angle: f64, center: &Position) {
         let dy = self.y - center.y;
         let dz = self.z - center.z;
@@ -27,6 +62,15 @@ impl Position {
         self.z = (dy * sin) + (dz * cos) + center.z;
     }
 
+    pub fn turn_y(&mut self, angle: f64) {
+        let sin = angle.sin();
+        let cos = angle.cos();
+        let new_x = (self.x * cos) + (self.z * sin);
+        let new_z = -(self.x * sin) + (self.z * cos);
+        self.x = new_x;
+        self.z = new_z;
+    }
+
     pub fn turn_y_around(&mut self, angle: f64, center: &Position) {
         let dx = self.x - center.x;
         let dz = self.z - center.z;
@@ -35,6 +79,15 @@ impl Position {
 
         self.x = (dx * cos) - (dz * sin) + center.x;
         self.z = (dx * sin) + (dz * cos) + center.z;
+    }
+
+    pub fn turn_z(&mut self, angle: f64) {
+        let sin = angle.sin();
+        let cos = angle.cos();
+        let new_x = (self.x * cos) - (self.y * sin);
+        let new_y = (self.x * sin) + (self.y * cos);
+        self.x = new_x;
+        self.y = new_y;
     }
 
     pub fn turn_z_around(&mut self, angle: f64, center: &Position) {

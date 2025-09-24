@@ -21,36 +21,36 @@ impl Polygon {
         let mut v: Vec<Polygon> = vec![];
 
         let light_factor: f64 = 1.;
-        let size: f64 = 10.;
+        let size: f64 = 1.;
         // Gold
-        v.push(Polygon {
-            pos: Position {
-                x: 0.,
-                y: 0.,
-                z: size,
-            },
-            v1: Position {
-                x: size,
-                y: 0.,
-                z: -size,
-            },
-            v2: Position {
-                x: 0.,
-                y: size,
-                z: -size,
-            },
-            speed: Speed {
-                x: 0.,
-                y: 0.,
-                z: 0.,
-            },
-            color: Color::RGB(255, 200, 0),
-            light_factor: light_factor,
-            type_: SurfaceType::Reflexive,
-            smoothness: 1.,
-            refractivity_index: 1.,
-            is_visible: true,
-        });
+        // v.push(Polygon {
+        //     pos: Position {
+        //         x: 0.,
+        //         y: 0.,
+        //         z: size,
+        //     },
+        //     v1: Position {
+        //         x: size,
+        //         y: 0.,
+        //         z: -size,
+        //     },
+        //     v2: Position {
+        //         x: 0.,
+        //         y: size,
+        //         z: -size,
+        //     },
+        //     speed: Speed {
+        //         x: 0.,
+        //         y: 0.,
+        //         z: 0.,
+        //     },
+        //     color: Color::RGB(255, 200, 0),
+        //     light_factor: light_factor,
+        //     type_: SurfaceType::Reflexive,
+        //     smoothness: 1.,
+        //     refractivity_index: 1.,
+        //     is_visible: true,
+        // });
 
         return v.iter().map(|p| Object::Polygon(*p)).collect();
     }
